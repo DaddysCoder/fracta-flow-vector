@@ -30,6 +30,50 @@ export function Field({ field, value, onChange, required }: FieldProps) {
   );
 }
 
+export interface ReadOnlyFieldProps {
+  field: FieldDef;
+  /** The resolved value, or `undefined` if nothing has been recorded yet. */
+  value: unknown;
+}
+
+/**
+ * Displays a value quoted from another document (registry `rendersIn`) —
+ * read-only, dispatched by `field.type` like `Field`'s own controls, so no
+ * per-field markup is needed here either. Never blank: a missing value
+ * says so explicitly rather than rendering empty.
+ */
+export function ReadOnlyField({ field, value }: ReadOnlyFieldProps) {
+  return (
+    <div className="field field-readonly">
+      <p className="field-label">{field.label}</p>
+      <p className="field-readonly-value">{formatReadOnlyValue(field, value)}</p>
+    </div>
+  );
+}
+
+const NOT_YET_AVAILABLE = "Not yet available";
+
+function formatReadOnlyValue(field: FieldDef, value: unknown): string {
+  if (value === undefined || value === null || value === "") return NOT_YET_AVAILABLE;
+
+  switch (field.type) {
+    case "select": {
+      const match = (FIELD_OPTIONS[field.id] ?? []).find((opt) => opt.value === value);
+      return match?.label ?? String(value);
+    }
+    case "multiselect": {
+      const values = value as string[];
+      if (values.length === 0) return NOT_YET_AVAILABLE;
+      const options = FIELD_OPTIONS[field.id] ?? [];
+      return values.map((v) => options.find((opt) => opt.value === v)?.label ?? v).join(", ");
+    }
+    case "tristate":
+      return value === "unanswered" ? "Not answered" : String(value);
+    default:
+      return typeof value === "object" ? JSON.stringify(value) : String(value);
+  }
+}
+
 function FieldControl({ field, value, onChange, required }: FieldProps) {
   const id = field.id;
   switch (field.type) {

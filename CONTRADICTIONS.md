@@ -57,6 +57,26 @@ correctly withhold documents 06 and 07 pending resolution, distinct from the pat
 value itself). No change to the `Pathway` type was needed. See the doc comment on
 `resolvePathway` for the full reasoning.
 
+## 3. `health.triage_screen`'s own note names a condition with no field behind it (open — not blocking)
+
+**Found:** 2026-08-17, during Stage 9 (Form 02 Practitioner Triage).
+
+The registry field `health.triage_screen` (02.F) carries this note: "Conditional. Shown
+only when RRP is identified or immediate danger is flagged." `triage.rrp_status`
+provides the RRP-identified half. There is no other field anywhere in the registry
+representing "immediate danger" as its own captured signal — the only numeric risk
+figure that exists, `risk.matrix_rating`, is explicitly marked "DERIVED, read-only...
+it must not gate, rank or set the pathway" (MD-019), so using it to gate this field's
+visibility would violate that rule directly.
+
+**Not resolved here because:** this is a missing registry field, not an implementation
+choice — inventing a synthetic "immediate danger" flag to satisfy the note would be
+exactly the kind of guess this log exists to avoid. `packages/ui/src/triage.ts`
+currently implements only the RRP-identified half of the condition (visible when
+`triage.rrp_status` is `possible_unclear` or `confirmed`); the "immediate danger" half
+is unimplemented pending either a new registry field or a decision that the RRP half
+alone is sufficient.
+
 ## Docs that were missing entirely as of session start (context, not a contradiction)
 
 `README.md`, `docs/pbs-canonical-reconciliation.md`,

@@ -33,6 +33,17 @@ export function isFieldVisible(
   return !visibleFieldIds(rules, values).has(fieldId);
 }
 
+/** A repeatable group renders only while at least one of its fields is
+ * visible — otherwise its "add row" control would offer fields that
+ * immediately hide themselves. */
+export function isGroupVisible(
+  groupFieldIds: string[],
+  rules: VisibilityRule[],
+  values: Record<string, unknown>,
+): boolean {
+  return groupFieldIds.some((id) => isFieldVisible(id, rules, values));
+}
+
 export function requiredFieldIds(
   rules: VisibilityRule[],
   values: Record<string, unknown>,
