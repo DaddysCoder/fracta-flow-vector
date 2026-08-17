@@ -1,7 +1,7 @@
 export { Field, ReadOnlyField } from "./fields/Field.js";
 export { RepeatableGroup } from "./fields/RepeatableGroup.js";
 export type { RepeatableRow } from "./fields/RepeatableGroup.js";
-export { FormRenderer } from "./FormRenderer.js";
+export { flattenValuesForExport, FormRenderer } from "./FormRenderer.js";
 export type { FormValues } from "./FormRenderer.js";
 export { FIELD_OPTIONS } from "./fieldOptions.js";
 export type { FieldOption } from "./fieldOptions.js";
@@ -26,4 +26,11 @@ export {
 } from "./triage.js";
 export { TriageForm } from "./TriageForm.js";
 export type { TriageResult } from "./TriageForm.js";
+export {
+  SOURCE_ALWAYS_REQUIRED_FIELD_IDS,
+  SOURCE_DOCUMENT_ID,
+  SOURCE_VISIBILITY_RULES,
+} from "./source.js";
+export { SourceForm } from "./SourceForm.js";
+export type { SourceResult } from "./SourceForm.js";
 export { toFieldSchema, toPathwayPermissions, toTargetDocument, ALL_FIELD_SCHEMAS } from "./registryAdapter.js";

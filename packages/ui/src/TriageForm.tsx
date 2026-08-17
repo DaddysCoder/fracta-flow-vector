@@ -11,7 +11,7 @@ import {
 import { FRACTA_FLOW_BRAND, renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
-import { FormRenderer, type FormValues } from "./FormRenderer.js";
+import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
 import { toPathwayPermissions, toTargetDocument } from "./registryAdapter.js";
 import { TRIAGE_ALWAYS_REQUIRED_FIELD_IDS, TRIAGE_DOCUMENT_ID, TRIAGE_VISIBILITY_RULES } from "./triage.js";
 import { requiredFieldIds } from "./visibility.js";
@@ -121,7 +121,7 @@ export function TriageForm({ task, onSubmitted, now = () => new Date() }: Triage
       TRIAGE_DOCUMENT_ID,
       TRIAGE_FIELDS,
       FRACTA_FLOW_BRAND,
-      values.scalar,
+      flattenValuesForExport(values),
     ).then((blob) => download(blob, "fracta-flow-practitioner-triage-completed.docx"));
   }
 

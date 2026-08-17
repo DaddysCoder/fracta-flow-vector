@@ -13,6 +13,28 @@ export interface FormValues {
   groups: Record<string, RepeatableRow[]>;
 }
 
+/**
+ * Flattens form values into the shape @pbs/export's docx renderer takes:
+ * scalar fields keyed by id, repeatable fields keyed by id to an array of
+ * one value per row (row order, empty values dropped). Row ids are not
+ * carried — the docx layout is organized by field, never by row, so
+ * nothing downstream needs them.
+ */
+export function flattenValuesForExport(values: FormValues): Record<string, unknown> {
+  const flat: Record<string, unknown> = { ...values.scalar };
+  for (const rows of Object.values(values.groups)) {
+    for (const row of rows) {
+      for (const [fieldId, value] of Object.entries(row.values)) {
+        if (value === undefined || value === null || value === "") continue;
+        const bucket = (flat[fieldId] as unknown[] | undefined) ?? [];
+        bucket.push(value);
+        flat[fieldId] = bucket;
+      }
+    }
+  }
+  return flat;
+}
+
 export interface FormRendererProps {
   document: DocumentDef;
   /** Fields askedIn one of this document's own sections. */
