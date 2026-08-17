@@ -1,4 +1,5 @@
 import { InvalidRowIdError, MissingProvenanceError } from "./errors.js";
+import { isAuthoredHere, isRenderedHere } from "./scope.js";
 import type {
   CaseRecord,
   Capabilities,
@@ -74,20 +75,6 @@ function latestByRowId(entries: FieldEntry[]): Map<string, FieldEntry> {
 
 function daysBetween(now: Date, sourceDate: string): number {
   return (now.getTime() - Date.parse(sourceDate)) / MS_PER_DAY;
-}
-
-function intersects(a: string[], b: string[]): boolean {
-  return a.some((x) => b.includes(x));
-}
-
-/** Field is asked directly within this document's own sections. */
-function isAuthoredHere(schema: FieldSchema, doc: TargetDocument): boolean {
-  return doc.sections.includes(schema.section);
-}
-
-/** Field's value is reused/quoted within this document, via cross-reference. */
-function isRenderedHere(schema: FieldSchema, doc: TargetDocument): boolean {
-  return intersects(schema.rendersIn, doc.sections);
 }
 
 /**

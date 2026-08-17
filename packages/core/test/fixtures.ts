@@ -26,6 +26,7 @@ export function toFieldSchema(fieldId: string): FieldSchema {
     rendersIn: def.rendersIn,
     informs: def.informs,
     ...(registerSectionIds.has(def.askedIn) ? { isCaseRegister: true } : {}),
+    ...(def.group === "strategy_instance" ? { isStrategyInstance: true } : {}),
   };
 }
 

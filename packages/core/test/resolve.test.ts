@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CAPABILITIES } from "../src/capabilities.js";
 import { InvalidRowIdError, MissingProvenanceError } from "../src/errors.js";
 import { resolve } from "../src/resolve.js";
 import type { CaseRecord, ResolvedDocument } from "../src/types.js";
@@ -12,7 +13,7 @@ function byFieldId<T extends { fieldId: string }>(entries: T[]) {
 
 describe("resolve — tier0 (identity, and anything already local)", () => {
   const record = buildRecord();
-  const result = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+  const result = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
   const tier0 = byFieldId(result.tier0);
 
   it("carries an identity fact from wherever it was captured, unconditionally", () => {
@@ -49,7 +50,7 @@ describe("resolve — tier1 (perishable fact, batched confirm)", () => {
   const record = buildRecord();
 
   it("surfaces a value recorded in an earlier cycle of the same document type", () => {
-    const result = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+    const result = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
     const health = byFieldId(result.tier1)["health.record"];
     expect(health).toBeDefined();
     expect(health!.value).toBe("No known allergies; asthma, reliever as needed.");
@@ -62,13 +63,13 @@ describe("resolve — tier1 (perishable fact, batched confirm)", () => {
   ])(
     "computes stale = (now - sourceDate) > stalenessDays for health.record ($label)",
     ({ now, expectedStale }) => {
-      const result = resolve(record, BSA_2026, { crossDocumentPrefill: true }, now);
+      const result = resolve(record, BSA_2026, CAPABILITIES.connected, now);
       expect(byFieldId(result.tier1)["health.record"]!.stale).toBe(expectedStale);
     },
   );
 
   it("resurfaces a perishable fact from referral when compiling the final BSP", () => {
-    const result = resolve(record, BSP_2026, { crossDocumentPrefill: true }, NOW);
+    const result = resolve(record, BSP_2026, CAPABILITIES.connected, NOW);
     const accommodation = byFieldId(result.tier1)["accommodation"];
     expect(accommodation).toEqual({
       fieldId: "accommodation",
@@ -83,7 +84,7 @@ describe("resolve — tier2 (observation, pre-ticked bulk-accept)", () => {
   const record = buildRecord();
 
   it("proposes a carry for a repeatable row that only exists on an earlier document", () => {
-    const result = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+    const result = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
     const rows = result.tier2.filter((t) => t.fieldId === "behaviour.definition");
     expect(rows).toEqual([
       {
@@ -97,7 +98,7 @@ describe("resolve — tier2 (observation, pre-ticked bulk-accept)", () => {
   });
 
   it("carries the case's source register forward into a document that only renders it", () => {
-    const result = resolve(record, BSP_2026, { crossDocumentPrefill: true }, NOW);
+    const result = resolve(record, BSP_2026, CAPABILITIES.connected, NOW);
     const rows = result.tier2.filter((t) => t.fieldId === "source.entry");
     expect(rows.map((r) => r.rowId).sort()).toEqual(["src-1", "src-2"]);
     expect(rows.every((r) => r.proposed === "carry" && r.sourceDocument === "source-register-1")).toBe(
@@ -120,7 +121,7 @@ describe("resolve — tier3 (interpretation, always blank + evidence)", () => {
       },
     ],
   };
-  const result = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+  const result = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
   const conclusion = byFieldId(result.tier3)["analysis.conclusion"];
 
   it("is always null, even though a prior value exists elsewhere", () => {
@@ -170,7 +171,7 @@ describe("resolve — tier3 (interpretation, always blank + evidence)", () => {
 
 describe("resolve — an interpretation quoted (not authored) elsewhere renders instead of blanking", () => {
   const record = buildRecord();
-  const result = resolve(record, BSP_2026, { crossDocumentPrefill: true }, NOW);
+  const result = resolve(record, BSP_2026, CAPABILITIES.connected, NOW);
   const tier0 = byFieldId(result.tier0);
 
   it("treats a tier3 field only reached via rendersIn as a render, not a fresh interpretation", () => {
@@ -191,7 +192,7 @@ describe("resolve — an interpretation quoted (not authored) elsewhere renders 
 
 describe("resolve — standalone mode (caps.crossDocumentPrefill = false)", () => {
   const record = buildRecord();
-  const result = resolve(record, BSA_2026, { crossDocumentPrefill: false }, NOW);
+  const result = resolve(record, BSA_2026, CAPABILITIES.standalone, NOW);
 
   it("returns empty tier1, tier2, and tier3 — correct, not degraded", () => {
     expect(result.tier1).toEqual([]);
@@ -224,7 +225,7 @@ describe("resolve — provenance is mandatory", () => {
     const record: CaseRecord = {
       fields: [{ fieldId: "participant.preferred_name", value: "X", sourceDocument: "", sourceDate: "2026-01-01" }],
     };
-    expect(() => resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW)).toThrow(
+    expect(() => resolve(record, BSA_2026, CAPABILITIES.connected, NOW)).toThrow(
       MissingProvenanceError,
     );
   });
@@ -233,7 +234,7 @@ describe("resolve — provenance is mandatory", () => {
     const record: CaseRecord = {
       fields: [{ fieldId: "participant.preferred_name", value: "X", sourceDocument: REFERRAL_1, sourceDate: "" }],
     };
-    expect(() => resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW)).toThrow(
+    expect(() => resolve(record, BSA_2026, CAPABILITIES.connected, NOW)).toThrow(
       MissingProvenanceError,
     );
   });
@@ -251,7 +252,7 @@ describe("resolve — repeatable groups must be keyed by rowId", () => {
         },
       ],
     };
-    expect(() => resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW)).toThrow(
+    expect(() => resolve(record, BSA_2026, CAPABILITIES.connected, NOW)).toThrow(
       InvalidRowIdError,
     );
   });
@@ -268,7 +269,7 @@ describe("resolve — repeatable groups must be keyed by rowId", () => {
         },
       ],
     };
-    expect(() => resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW)).toThrow(
+    expect(() => resolve(record, BSA_2026, CAPABILITIES.connected, NOW)).toThrow(
       InvalidRowIdError,
     );
   });
@@ -277,22 +278,22 @@ describe("resolve — repeatable groups must be keyed by rowId", () => {
 describe("resolve — purity", () => {
   it("produces identical output for identical input", () => {
     const record = buildRecord();
-    const a = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
-    const b = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+    const a = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
+    const b = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
     expect(a).toEqual(b);
   });
 
   it("does not mutate its inputs", () => {
     const record = buildRecord();
     const snapshot = JSON.parse(JSON.stringify(record));
-    resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+    resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
     expect(record).toEqual(snapshot);
   });
 });
 
 describe("resolve — table-driven tier assignment for the BSA/FBA (bsa-2026)", () => {
   const record = buildRecord();
-  const result: ResolvedDocument = resolve(record, BSA_2026, { crossDocumentPrefill: true }, NOW);
+  const result: ResolvedDocument = resolve(record, BSA_2026, CAPABILITIES.connected, NOW);
   const location = new Map<string, "tier0" | "tier1" | "tier2" | "tier3">();
   for (const e of result.tier0) location.set(e.fieldId, "tier0");
   for (const e of result.tier1) location.set(e.fieldId, "tier1");

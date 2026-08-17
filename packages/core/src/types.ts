@@ -1,3 +1,6 @@
+/** How a clinical field's value moved from one document to the next. */
+export type Transition = "carry" | "confirm" | "update" | "revise" | "new" | "retire";
+
 /**
  * `@pbs/core` never imports `@pbs/registry` — resolve() is pure, so all
  * schema knowledge flows in through `TargetDocument.fields`. Callers
@@ -29,6 +32,9 @@ export interface FieldSchema {
    * in scope, regardless of `informs`.
    */
   isCaseRegister?: boolean;
+  /** True for fields belonging to the "strategy_instance" group — gated
+   * by the fba.approved gate and forbidden in the Interim BSP. */
+  isStrategyInstance?: boolean;
 }
 
 /** The document being resolved: its identity, the sections it owns, and
@@ -62,16 +68,16 @@ export interface CaseRecord {
   fields: FieldEntry[];
 }
 
-export interface Capabilities {
-  /**
-   * When false, resolution is standalone: only values already authored
-   * in the target document are surfaced (tier0). No cross-document
-   * prefill, confirmation, carry, or evidence gathering is attempted —
-   * tier1/2/3 come back empty. This is a correct, first-class mode, not
-   * a degraded fallback.
-   */
-  crossDocumentPrefill: boolean;
-}
+// `Capabilities` (crossDocumentPrefill / transitionLedger / identityVault /
+// providerBrandProfile) lives in ./capabilities.ts — that module, and its
+// standalone/connected/embedded presets, is the source of truth for what
+// a deployment mode turns on. resolve() only reads crossDocumentPrefill:
+// when false, resolution is standalone — only values already authored in
+// the target document are surfaced (tier0); no cross-document prefill,
+// confirmation, carry, or evidence gathering is attempted, so tier1/2/3
+// come back empty. This is a correct, first-class mode, not a degraded
+// fallback.
+export type { Capabilities } from "./capabilities.js";
 
 export interface Tier0Entry {
   fieldId: string;
