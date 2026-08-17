@@ -1,5 +1,6 @@
 import { registry } from "@pbs/registry";
 import type { FieldEntry, FieldSchema, TargetDocument } from "../src/types.js";
+import type { PathwayPermissions, RrpClassification } from "../src/pathway.js";
 
 /**
  * Documents whose title marks them as the case's source/consultation
@@ -43,6 +44,12 @@ export function toTargetDocument(documentId: string, instanceId: string): Target
     sections: doc.sections.map((s) => s.id),
     fields: ALL_FIELDS,
   };
+}
+
+export function toPathwayPermissions(classification: RrpClassification): PathwayPermissions {
+  const state = registry.pathways.states[classification];
+  if (!state) throw new Error(`Unknown RRP classification "${classification}"`);
+  return { permits: state.permits, forbids: state.forbids, blocks: state.blocks };
 }
 
 export const BSA_2025 = "bsa-2025"; // an earlier Combined BSA/FBA cycle
