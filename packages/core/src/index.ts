@@ -6,8 +6,6 @@ export type {
   EvidenceRef,
   FieldEntry,
   FieldSchema,
-  RegisterEntry,
-  RepeatableRow,
   ResolvedDocument,
   TargetDocument,
   Tier0Entry,

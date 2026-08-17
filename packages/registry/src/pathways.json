@@ -1,0 +1,43 @@
+{
+  "states": {
+    "none": {
+      "label": "No restrictive practice identified",
+      "permits": ["01", "02", "03", "04", "05", "06", "07"],
+      "forbids": ["08", "09"],
+      "notes": "A no-RP case has no Interim BSP and no empty RRP scaffolding (MD-012)."
+    },
+    "possible_unclear": {
+      "label": "Possible or unclear restrictive practice",
+      "permits": ["01", "02", "03", "04", "05"],
+      "forbids": ["08"],
+      "blocks": ["06", "07"],
+      "notes": "Classification review required. No-RP BSP is blocked until resolved."
+    },
+    "confirmed": {
+      "label": "Confirmed restrictive practice",
+      "permits": ["01", "02", "03", "04", "05", "06", "08", "09"],
+      "forbids": ["07"],
+      "notes": "Interim may open immediately; BSA/FBA continues in parallel."
+    }
+  },
+  "gates": {
+    "fba.approved": {
+      "setBy": "04.9",
+      "unlocks": ["06", "07", "09"],
+      "notes": "MD-013. Strategy Instance authoring is locked until the applicable FBA conclusion is approved. Interim safeguards are not Strategy Instances and are not gated by this."
+    },
+    "interim.dispositions_complete": {
+      "blocksReleaseOf": ["09"],
+      "requires": "every interim safeguard has a disposition of replace | retain_with_new_justification | revise | retire",
+      "default": null,
+      "notes": "No default. Blocking. Nothing carries quietly."
+    }
+  },
+  "rrpRecordIndependentFlags": [
+    "authorisation",
+    "consent_consultation",
+    "commission_lodgement",
+    "monthly_reporting",
+    "practice_to_cease"
+  ]
+}

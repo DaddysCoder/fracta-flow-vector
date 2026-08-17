@@ -9,6 +9,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "validate": "node src/validate.mjs",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

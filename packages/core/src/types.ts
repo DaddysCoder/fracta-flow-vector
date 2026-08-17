@@ -1,33 +1,43 @@
 /**
- * Schema for a single field, scoped to one resolution. `@pbs/core` never
- * imports a registry itself — resolve() is pure, so all schema knowledge
- * (repeatability, staleness policy, informs relationships) flows in
- * through `TargetDocument.fields`. Callers typically build this array by
- * adapting a real registry (see @pbs/registry) for the document type
- * being resolved.
+ * `@pbs/core` never imports `@pbs/registry` — resolve() is pure, so all
+ * schema knowledge flows in through `TargetDocument.fields`. Callers
+ * adapt a real field registry (see `@pbs/registry`) into this shape.
+ *
+ * Field tier is intrinsic to the field (a registry fact, not something
+ * resolve() infers): 0 identity, 1 perishable fact, 2 observation,
+ * 3 interpretation. `section` is the field's own authoring location
+ * (registry's `askedIn`); `rendersIn`/`informs` are the section ids
+ * where its value is reused, or merely evidenced, elsewhere.
  */
 export interface FieldSchema {
   fieldId: string;
-  /**
-   * True when the field belongs to a repeatable group (e.g. a schedule
-   * of assets) and must be resolved per row, keyed by `rowId`.
-   */
+  tier: 0 | 1 | 2 | 3;
   repeatable: boolean;
-  /** Days after which a cross-document value is considered stale. */
-  stalenessDays: number;
-  /**
-   * Field ids that a populated value of *this* field counts as evidence
-   * towards, when those fields can't be resolved directly.
-   */
+  /** Days after which a cross-document value is considered stale. Only
+   * meaningful for tier1 fields. */
+  stalenessDays: number | null;
+  /** Section id where this field is authored (registry's `askedIn`). */
+  section: string;
+  /** Section ids where this field's value is reused/displayed as-is. */
+  rendersIn: string[];
+  /** Section ids this field feeds as evidence, without being rendered there. */
   informs: string[];
+  /**
+   * True for the field(s) constituting the case's source/consultation
+   * register (registry's `source.entry`). Every recorded row of a
+   * register field is always attached as evidence to every tier3 field
+   * in scope, regardless of `informs`.
+   */
+  isCaseRegister?: boolean;
 }
 
-/** The document being resolved: its identity, type, and field schema. */
+/** The document being resolved: its identity, the sections it owns, and
+ * the complete field schema the case is authored against. */
 export interface TargetDocument {
   /** Document instance id. Values authored under this id are "local". */
   id: string;
-  /** Document type id, purely informational. */
-  type: string;
+  /** Section ids that belong to this document. */
+  sections: string[];
   fields: FieldSchema[];
 }
 
@@ -47,22 +57,9 @@ export interface FieldEntry {
   sourceDate: string;
 }
 
-/**
- * A document known to be on file for the case, and which fields it is
- * expected to carry — regardless of whether those fields have been
- * transcribed into `FieldEntry` values yet. Backs tier3 evidence.
- */
-export interface RegisterEntry {
-  id: string;
-  documentId: string;
-  label: string;
-  fieldIds: string[];
-}
-
 /** Everything known about the case so far, across all its documents. */
 export interface CaseRecord {
   fields: FieldEntry[];
-  registerEntries: RegisterEntry[];
 }
 
 export interface Capabilities {
@@ -99,19 +96,13 @@ export interface Tier2Entry {
   proposed: "carry";
 }
 
-export type EvidenceRef =
-  | {
-      kind: "field";
-      fieldId: string;
-      sourceDocument: string;
-      sourceDate: string;
-    }
-  | {
-      kind: "register";
-      registerEntryId: string;
-      documentId: string;
-      label: string;
-    };
+export interface EvidenceRef {
+  fieldId: string;
+  rowId?: string;
+  value: unknown;
+  sourceDocument: string;
+  sourceDate: string;
+}
 
 export interface Tier3Entry {
   fieldId: string;
@@ -124,9 +115,4 @@ export interface ResolvedDocument {
   tier1: Tier1Entry[];
   tier2: Tier2Entry[];
   tier3: Tier3Entry[];
-}
-
-export interface RepeatableRow {
-  rowId: string;
-  value: unknown;
 }
