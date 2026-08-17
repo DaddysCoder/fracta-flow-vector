@@ -77,6 +77,37 @@ currently implements only the RRP-identified half of the condition (visible when
 is unimplemented pending either a new registry field or a decision that the RRP half
 alone is sufficient.
 
+## 4. Source register/Consultation narrative spec is far richer than the one field the registry actually defines (open — not blocking)
+
+**Found:** 2026-08-17, during Stage 10 (Form 03 Source and Consultation Register).
+
+`docs/bsp-schema-interface-and-strategy-approval-pack-v2.1.md` §2.3 describes two
+separate clinical record modules with many sub-attributes each:
+
+- **Consultation** — one object per participant/stakeholder account, with role,
+  relationship, setting/shift observed, mode, access support, consent/authority,
+  exact report, examples, disagreements, follow-up.
+- **Source register** — document/interview/observation/data source, author, date,
+  location, relevance, reliability, currency, facts extracted, confirmation status.
+
+The actual registry (`packages/registry/src/fields.json`) has exactly one field
+askedIn `03.1` (the Source and Consultation Register's only section): `source.entry`,
+a single repeatable `long_text` field with no sub-structure at all — one free-text
+box per row, repeated. There is no field for author, date, reliability, consent, or
+any of the other ~19 sub-attributes the doc pack names.
+
+**Not resolved here because:** the doc pack is a narrative description of what the
+module should conceptually hold, not a field-by-field schema — it gives no field
+ids, tiers, types, or transition rules to implement against, unlike the concrete
+per-field specs earlier stages built from. Inventing ~19 new fields (with tiers,
+staleness, pathway, and transition metadata all guessed) to match the prose would
+be exactly the kind of guess this log exists to avoid. Form 03 (`packages/ui/src/SourceForm.tsx`)
+is built on the registry exactly as it stands today: one repeatable free-text entry
+field, with the practitioner's identity and the document date quoted in read-only
+alongside it. Flagging so Pol can decide whether `source.entry` should be split into
+structured sub-fields (and if so, supply the concrete field list/schema) or whether
+free-text entries are the intended design and the doc pack's breakdown is aspirational/future.
+
 ## Docs that were missing entirely as of session start (context, not a contradiction)
 
 `README.md`, `docs/pbs-canonical-reconciliation.md`,
