@@ -2730,5 +2730,436 @@
     ],
     "phraseBank": false,
     "note": "DERIVED, read-only: likelihood x consequence. Display only. MD-019 - it must not gate, rank or set the pathway. triage.rrp_status and triage.outcome stay practitioner-authored regardless of this number."
+  },
+  {
+    "id": "referrer.is_participant",
+    "label": "Is the referrer the participant themselves?",
+    "tier": 0,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "01.B",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Options: yes | no. \"no\" reveals the relationship and awareness questions below."
+  },
+  {
+    "id": "referrer.relationship_to_participant",
+    "label": "Referrer's relationship to the participant",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "01.B",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Shown only when referrer.is_participant is \"no\"."
+  },
+  {
+    "id": "referrer.awareness_of_referral",
+    "label": "Does the participant know this referral is being made?",
+    "tier": 0,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "01.B",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Options: yes | no | unsure. Shown only when referrer.is_participant is \"no\"."
+  },
+  {
+    "id": "guardian.contact",
+    "label": "Guardian/nominee contact details",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "01.A",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Shown only when guardian.name_role has been entered."
+  },
+  {
+    "id": "referral.reason",
+    "label": "Reason for referral",
+    "tier": 0,
+    "clinical": false,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "01.D",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "referral.urgent",
+    "label": "Is this referral urgent?",
+    "tier": 0,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "01.E",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Options: yes | no. Flags for human priority review only — never determines acceptance or clinical pathway."
+  },
+  {
+    "id": "referral.urgent_explanation",
+    "label": "Briefly explain the urgency",
+    "tier": 0,
+    "clinical": false,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "01.E",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Required only when referral.urgent is \"yes\"."
+  },
+  {
+    "id": "referral.funding_status",
+    "label": "NDIS funding status for this support",
+    "tier": 0,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "01.C",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Options: confirmed | unknown | not_applicable. \"unknown\" never blocks submission — funding uncertainty must never block clinical triage."
+  },
+  {
+    "id": "existing.plan_type",
+    "label": "Type of existing plan",
+    "tier": 0,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "01.F",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Options: no_rp | interim | comprehensive | unknown. Shown only when existing.bsp is \"yes\"."
+  },
+  {
+    "id": "existing.plan_date",
+    "label": "Date of existing plan",
+    "tier": 0,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "01.F",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Shown only when existing.bsp is \"yes\"."
+  },
+  {
+    "id": "existing.practitioner",
+    "label": "Existing plan's practitioner",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "01.F",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Shown only when existing.bsp is \"yes\"."
+  },
+  {
+    "id": "existing.request_document",
+    "label": "Request a copy of the existing plan",
+    "tier": 0,
+    "clinical": false,
+    "type": "file",
+    "repeatable": false,
+    "askedIn": "01.F",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Shown only when existing.bsp is \"yes\"."
+  },
+  {
+    "id": "referral.suggested_practitioner",
+    "label": "Suggested practitioner for triage",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "01.G",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "referral.allocation_notes",
+    "label": "Allocation considerations",
+    "tier": 0,
+    "clinical": false,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "01.H",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
   }
 ]

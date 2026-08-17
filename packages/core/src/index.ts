@@ -29,3 +29,5 @@ export { RRP_INDEPENDENT_FLAGS, createRrpRecord, setRrpFlag } from "./rrp.js";
 export type { RrpRecord } from "./rrp.js";
 export { approve, correctDocument, createDraftVersion, release } from "./versions.js";
 export type { Approval, DocumentVersion } from "./versions.js";
+export { createTriageTask } from "./triage.js";
+export type { CreateTriageTaskInput, TriagePriority, TriageTask } from "./triage.js";

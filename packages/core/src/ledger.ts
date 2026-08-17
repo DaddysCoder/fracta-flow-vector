@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import type { Transition } from "./types.js";
 
 export type { Transition };
@@ -30,9 +29,21 @@ export type Ledger = readonly LedgerRecord[];
 
 export const EMPTY_LEDGER: Ledger = Object.freeze([]);
 
-/** Deterministic, local, dependency-free — no network call, no clock read. */
+/**
+ * Deterministic, local, dependency-free — no network call, no clock
+ * read, no Node-only built-in. This isn't a security boundary, only a
+ * cheap fingerprint for change detection, so a non-cryptographic hash
+ * (FNV-1a) is enough and keeps @pbs/core usable unmodified from a
+ * browser bundle, not just from Node.
+ */
 export function hashValue(value: unknown): string {
-  return createHash("sha256").update(JSON.stringify(value ?? null)).digest("hex");
+  const text = JSON.stringify(value ?? null);
+  let hash = 0x811c9dc5; // FNV offset basis
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193); // FNV prime
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
 /**

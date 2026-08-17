@@ -1,0 +1,45 @@
+/**
+ * Print mode. Legible in greyscale — nothing here depends on colour to
+ * be understood, since --ink/--paper already are black-on-white and
+ * --purple's only job on screen (required marks, focus rings) already
+ * has a text/word equivalent that survives printing unchanged.
+ */
+@media print {
+  body {
+    font-size: 12pt;
+  }
+
+  /* Force every ink colour to true black — a light greyscale printer
+   * must not wash the brand purple down to something unreadable. */
+  h1,
+  h2,
+  p,
+  label,
+  span {
+    color: #000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  button {
+    display: none !important;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    border: 1px solid #000;
+    color: #000;
+  }
+
+  section.form-section {
+    break-inside: avoid;
+    border-top: 1px solid #000;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}
