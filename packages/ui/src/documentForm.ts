@@ -122,6 +122,18 @@ export function documentGatesFor(documentId: string): string[] {
     .map(([name]) => name);
 }
 
+/**
+ * Gates this document itself sets (registry `gates[...].setBy`). A
+ * document is never gated on a gate it is the one to set: document 04
+ * sets `fba.approved` at 04.9, so telling the practitioner they must
+ * approve the FBA before they may author the FBA would be circular.
+ */
+export function gatesSetHere(documentId: string): string[] {
+  return Object.entries(registry.pathways.gates)
+    .filter(([, gate]) => (gate.setBy ?? "").split(".")[0] === documentId)
+    .map(([name]) => name);
+}
+
 export interface GateCheckInput {
   documentId: string;
   instanceId: string;
@@ -140,9 +152,13 @@ function gateContext(input: GateCheckInput) {
   };
 }
 
-/** Authoring-time gate check for any document, registry-driven. */
+/** Authoring-time gate check for any document, registry-driven. Gates the
+ * document itself sets are excluded — see `gatesSetHere`. */
 export function authoringGates(input: GateCheckInput): GateViolation[] {
-  return checkAuthoringGates(gateContext(input), input.caps ?? CAPABILITIES.standalone);
+  const setHere = new Set(gatesSetHere(input.documentId));
+  return checkAuthoringGates(gateContext(input), input.caps ?? CAPABILITIES.standalone).filter(
+    (v) => !setHere.has(v.gate),
+  );
 }
 
 /** Release-time gate check, including the interim-safeguard disposition
@@ -151,11 +167,12 @@ export function releaseGates(
   input: GateCheckInput,
   interimSafeguards: InterimSafeguard[] = [],
 ): GateViolation[] {
+  const setHere = new Set(gatesSetHere(input.documentId));
   return checkReleaseGates(
     gateContext(input),
     input.caps ?? CAPABILITIES.standalone,
     interimSafeguards,
-  );
+  ).filter((v) => !setHere.has(v.gate));
 }
 
 /** One line per distinct gate, so a document gated for two reasons on the

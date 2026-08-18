@@ -1,7 +1,7 @@
 import { CAPABILITIES, resolvePathway, type SafeguardDisposition } from "@pbs/core";
 import { registry } from "@pbs/registry";
 import { describe, expect, it } from "vitest";
-import { authoringGates, documentGatesFor, releaseGates } from "../src/documentForm.js";
+import { authoringGates, documentGatesFor, gatesSetHere, releaseGates } from "../src/documentForm.js";
 import { documentSteps, planDocumentId, reachableDocumentIds } from "../src/flow.js";
 import {
   COMPREHENSIVE_BSP_DOCUMENT_ID,
@@ -27,6 +27,28 @@ describe("documentGatesFor reads the registry rather than hardcoding", () => {
     for (const id of ["01", "02", "03", "04", "05", "08"]) {
       expect(documentGatesFor(id)).toEqual([]);
     }
+  });
+});
+
+describe("a document is never gated on a gate it sets itself", () => {
+  it("document 04 is where fba.approved is set (registry setBy 04.9)", () => {
+    expect(gatesSetHere("04")).toEqual(["fba.approved"]);
+    expect(registry.pathways.gates["fba.approved"]!.setBy).toBe("04.9");
+  });
+
+  it("does not tell the practitioner to approve the FBA before authoring the FBA", () => {
+    const violations = authoringGates({
+      documentId: "04",
+      instanceId: "assessment-draft",
+      pathway: "no_rp",
+      approvedGates: NO_GATES,
+      caps: CAPABILITIES.connected,
+    });
+    expect(violations.map((v) => v.gate)).not.toContain("fba.approved");
+  });
+
+  it("still gates every other document on it", () => {
+    for (const id of ["06", "07", "09"]) expect(gatesSetHere(id)).toEqual([]);
   });
 });
 

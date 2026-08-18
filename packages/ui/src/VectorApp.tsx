@@ -104,6 +104,14 @@ export function VectorApp() {
         </nav>
       )}
 
+      {open === "01" && task && (
+        <CompletedNote id="01" title="Referral" />
+      )}
+
+      {open === "02" && done.includes("02") && (
+        <CompletedNote id="02" title="Practitioner Triage" />
+      )}
+
       {open === "01" && !task && (
         <ReferralForm
           onSubmitted={(t) => {
@@ -115,7 +123,7 @@ export function VectorApp() {
         />
       )}
 
-      {open === "02" && task && (
+      {open === "02" && task && !done.includes("02") && (
         <TriageForm
           task={task}
           onSubmitted={(result) => {
@@ -206,6 +214,24 @@ export function VectorApp() {
         </p>
       )}
     </main>
+  );
+}
+
+/** Documents 01 and 02 are answered once per case in this session-scoped
+ * standalone build: re-opening one shows what it did rather than an
+ * empty second copy that would silently replace the first. */
+function CompletedNote({ id, title }: { id: string; title: string }) {
+  return (
+    <div role="status">
+      <h2 className="section-title">
+        {id} {title} — completed
+      </h2>
+      <p className="field-note">
+        Answered earlier in this session. In this standalone build each case answers {id} once;
+        changing it means starting a new case rather than overwriting the answers later documents
+        were built on.
+      </p>
+    </div>
   );
 }
 
