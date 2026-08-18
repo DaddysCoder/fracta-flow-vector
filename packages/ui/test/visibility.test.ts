@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { isFieldVisible, requiredFieldIds, visibleFieldIds, type VisibilityRule } from "../src/visibility.js";
+import {
+  isFieldVisible,
+  isGroupVisible,
+  requiredFieldIds,
+  visibleFieldIds,
+  type VisibilityRule,
+} from "../src/visibility.js";
 
 const RULES: VisibilityRule[] = [
   {
@@ -81,5 +87,21 @@ describe("visibility — urgency explanation is conditionally required, never ga
   it("never adds funding status to the required set — funding uncertainty must never block submission", () => {
     const required = requiredFieldIds(RULES, { "referral.urgent": "yes" }, ["referral.reason"]);
     expect(required.has("referral.funding_status")).toBe(false);
+  });
+});
+
+describe("visibility — a group is visible only while at least one of its fields is", () => {
+  it("is hidden when every field in the group is hidden", () => {
+    const groupFieldIds = ["existing.plan_type", "existing.plan_date"];
+    expect(isGroupVisible(groupFieldIds, RULES, { "existing.bsp": "no" })).toBe(false);
+  });
+
+  it("appears once any field in the group becomes visible", () => {
+    const groupFieldIds = ["existing.plan_type", "existing.plan_date"];
+    expect(isGroupVisible(groupFieldIds, RULES, { "existing.bsp": "yes" })).toBe(true);
+  });
+
+  it("appears when a field has no hiding rule at all", () => {
+    expect(isGroupVisible(["untouched.field"], RULES, {})).toBe(true);
   });
 });

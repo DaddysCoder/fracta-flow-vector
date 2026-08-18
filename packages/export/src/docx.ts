@@ -60,10 +60,22 @@ export function buildDocxDocument(input: RenderDocxInput): Document {
     );
 
     for (const field of sectionFields) {
-      children.push(
-        new Paragraph({ children: [new TextRun({ text: field.label, bold: true })] }),
-        new Paragraph({ text: formatValue(values?.[field.id]) }),
-      );
+      children.push(new Paragraph({ children: [new TextRun({ text: field.label, bold: true })] }));
+
+      // A repeatable field's value is one entry per row (see
+      // flattenValuesForExport in @pbs/ui) — each row gets its own
+      // paragraph rather than being joined onto one line, since rows are
+      // independent register/behaviour entries, not a short multi-select.
+      if (field.repeatable) {
+        const rows = (values?.[field.id] as unknown[] | undefined) ?? [];
+        if (rows.length === 0) {
+          children.push(new Paragraph({ text: BLANK_LINE }));
+        } else {
+          rows.forEach((row, i) => children.push(new Paragraph({ text: `${i + 1}. ${formatValue(row)}` })));
+        }
+      } else {
+        children.push(new Paragraph({ text: formatValue(values?.[field.id]) }));
+      }
     }
   }
 
