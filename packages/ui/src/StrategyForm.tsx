@@ -1,6 +1,6 @@
 import type { FieldEntry, Pathway } from "@pbs/core";
 import { useMemo, useState } from "react";
-import { DocumentShell, GateBanner } from "./DocumentShell.js";
+import { DocumentShell, GateBanner, SavedNotice } from "./DocumentShell.js";
 import { authoringGates, dedupeViolations, entriesFrom, quotedValuesFor } from "./documentForm.js";
 import type { FormValues } from "./FormRenderer.js";
 import {
@@ -82,13 +82,12 @@ export function StrategyForm({
 
   if (submitted) {
     return (
-      <div role="status">
-        <h1>Strategy instances saved</h1>
+      <SavedNotice title="Strategy instances saved" onResume={() => setSubmitted(false)}>
         <p>
           Each instance keeps the Strategy Library version it was pinned to. A later library update
           never changes it — re-pinning is a new instance, authored deliberately.
         </p>
-      </div>
+      </SavedNotice>
     );
   }
 

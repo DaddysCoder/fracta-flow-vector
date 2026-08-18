@@ -47,7 +47,14 @@ export function VectorApp() {
   const [approvedGates, setApprovedGates] = useState<ReadonlySet<string>>(new Set());
   const [safeguards, setSafeguards] = useState<InterimSafeguard[]>([]);
   const [classification, setClassification] = useState<RrpClassification | null>(null);
-  const [open, setOpen] = useState<string>("01");
+  const [open, setOpenDocument] = useState<string>("01");
+  const [visited, setVisited] = useState<string[]>(["01"]);
+
+  function setOpen(id: string) {
+    setVisited((v) => (v.includes(id) ? v : [...v, id]));
+    setOpenDocument(id);
+  }
+
   const [done, setDone] = useState<string[]>([]);
 
   const resolved: ResolvedPathway | null = useMemo(
@@ -104,107 +111,129 @@ export function VectorApp() {
         </nav>
       )}
 
-      {open === "01" && task && (
-        <CompletedNote id="01" title="Referral" />
+      {/* Every document the practitioner has opened stays mounted and is
+          hidden rather than unmounted when they move to another one:
+          navigating 08 -> 09 -> 08 must not silently discard rows that
+          were typed but not yet saved. Only documents actually visited
+          are mounted, so nothing renders work the practitioner has not
+          asked for. */}
+      <Panel show={open === "01"}>
+        {task ? (
+          <CompletedNote id="01" title="Referral" />
+        ) : (
+          <ReferralForm
+            onSubmitted={(t) => {
+              setTask(t);
+              setCaseFields(t.fields);
+              complete("01");
+              setOpen("02");
+            }}
+          />
+        )}
+      </Panel>
+
+      {task && (
+        <Panel show={open === "02"}>
+          {done.includes("02") ? (
+            <CompletedNote id="02" title="Practitioner Triage" />
+          ) : (
+            <TriageForm
+              task={task}
+              onSubmitted={(result) => {
+                setCaseFields(result.caseFields);
+                const value = result.caseFields.find((f) => f.fieldId === "triage.rrp_status")?.value;
+                setClassification((value as RrpClassification) ?? "none");
+                complete("02");
+                setOpen("03");
+              }}
+            />
+          )}
+        </Panel>
       )}
 
-      {open === "02" && done.includes("02") && (
-        <CompletedNote id="02" title="Practitioner Triage" />
+      {visited.includes("03") && (
+        <Panel show={open === "03"}>
+          <SourceForm
+            priorFields={caseFields}
+            onSubmitted={(result) => {
+              complete("03", result.caseFields);
+              setOpen("04");
+            }}
+          />
+        </Panel>
       )}
 
-      {open === "01" && !task && (
-        <ReferralForm
-          onSubmitted={(t) => {
-            setTask(t);
-            setCaseFields(t.fields);
-            complete("01");
-            setOpen("02");
-          }}
-        />
+      {visited.includes("04") && resolved && (
+        <Panel show={open === "04"}>
+          <AssessmentForm
+            priorFields={caseFields}
+            pathway={resolved.pathway}
+            approvedGates={approvedGates}
+            onSubmitted={(result) => {
+              setApprovedGates(result.approvedGates);
+              complete("04", result.caseFields);
+            }}
+          />
+        </Panel>
       )}
 
-      {open === "02" && task && !done.includes("02") && (
-        <TriageForm
-          task={task}
-          onSubmitted={(result) => {
-            setCaseFields(result.caseFields);
-            const value = result.caseFields.find((f) => f.fieldId === "triage.rrp_status")?.value;
-            setClassification((value as RrpClassification) ?? "none");
-            complete("02");
-            setOpen("03");
-          }}
-        />
+      {visited.includes("05") && (
+        <Panel show={open === "05"}>
+          <CaptureForm
+            onSubmitted={(result) => {
+              setCaptureFields(result.captureFields);
+              complete("05");
+            }}
+          />
+        </Panel>
       )}
 
-      {open === "03" && (
-        <SourceForm
-          priorFields={caseFields}
-          onSubmitted={(result) => {
-            complete("03", result.caseFields);
-            setOpen("04");
-          }}
-        />
+      {visited.includes("06") && resolved && (
+        <Panel show={open === "06"}>
+          <StrategyForm
+            priorFields={caseFields}
+            pathway={resolved.pathway}
+            approvedGates={approvedGates}
+            onSubmitted={(result) => complete("06", result.caseFields)}
+          />
+        </Panel>
       )}
 
-      {open === "04" && resolved && (
-        <AssessmentForm
-          priorFields={caseFields}
-          pathway={resolved.pathway}
-          approvedGates={approvedGates}
-          onSubmitted={(result) => {
-            setApprovedGates(result.approvedGates);
-            complete("04", result.caseFields);
-          }}
-        />
+      {visited.includes("07") && resolved && (
+        <Panel show={open === "07"}>
+          <NoRpBspForm
+            priorFields={caseFields}
+            pathway={resolved.pathway}
+            approvedGates={approvedGates}
+            onSubmitted={(result) => complete("07", result.caseFields)}
+          />
+        </Panel>
       )}
 
-      {open === "05" && (
-        <CaptureForm
-          onSubmitted={(result) => {
-            setCaptureFields(result.captureFields);
-            complete("05");
-          }}
-        />
+      {visited.includes("08") && resolved && (
+        <Panel show={open === "08"}>
+          <InterimBspForm
+            priorFields={caseFields}
+            pathway={resolved.pathway}
+            approvedGates={approvedGates}
+            onSubmitted={(result) => {
+              setSafeguards(result.safeguards);
+              complete("08", result.caseFields);
+            }}
+          />
+        </Panel>
       )}
 
-      {open === "06" && resolved && (
-        <StrategyForm
-          priorFields={caseFields}
-          pathway={resolved.pathway}
-          approvedGates={approvedGates}
-          onSubmitted={(result) => complete("06", result.caseFields)}
-        />
-      )}
-
-      {open === "07" && resolved && (
-        <NoRpBspForm
-          priorFields={caseFields}
-          pathway={resolved.pathway}
-          approvedGates={approvedGates}
-          onSubmitted={(result) => complete("07", result.caseFields)}
-        />
-      )}
-
-      {open === "08" && resolved && (
-        <InterimBspForm
-          priorFields={caseFields}
-          pathway={resolved.pathway}
-          approvedGates={approvedGates}
-          onSubmitted={(result) => {
-            setSafeguards(result.safeguards);
-            complete("08", result.caseFields);
-          }}
-        />
-      )}
-
-      {open === "09" && resolved && (
-        <ComprehensiveBspForm
-          priorFields={caseFields}
-          pathway={resolved.pathway}
-          approvedGates={approvedGates}
-          interimSafeguards={safeguards}
-          onSubmitted={(result) => complete("09", result.caseFields)}
-        />
+      {visited.includes("09") && resolved && (
+        <Panel show={open === "09"}>
+          <ComprehensiveBspForm
+            priorFields={caseFields}
+            pathway={resolved.pathway}
+            approvedGates={approvedGates}
+            interimSafeguards={safeguards}
+            onSubmitted={(result) => complete("09", result.caseFields)}
+          />
+        </Panel>
       )}
 
       {captureFields.length > 0 && (
@@ -215,6 +244,10 @@ export function VectorApp() {
       )}
     </main>
   );
+}
+
+function Panel({ show, children }: { show: boolean; children: React.ReactNode }) {
+  return <div style={show ? undefined : { display: "none" }}>{children}</div>;
 }
 
 /** Documents 01 and 02 are answered once per case in this session-scoped

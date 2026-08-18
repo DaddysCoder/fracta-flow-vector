@@ -60,6 +60,27 @@ export function GateBanner({ violations, unlockHint }: GateBannerProps) {
   );
 }
 
+export interface SavedNoticeProps {
+  title: string;
+  children: ReactNode;
+  /** Returns to the form. Saving is not a one-way door: a practitioner
+   * who saves and then spots something must be able to go back to the
+   * document rather than losing it for the session. */
+  onResume: () => void;
+}
+
+export function SavedNotice({ title, children, onResume }: SavedNoticeProps) {
+  return (
+    <div role="status">
+      <h2 className="section-title">{title}</h2>
+      {children}
+      <button type="button" className="no-print" onClick={onResume}>
+        Continue editing this document
+      </button>
+    </div>
+  );
+}
+
 export interface DocumentShellProps {
   documentId: string;
   /** Filename stem for DOCX downloads, e.g. "assessment-fba-record". */

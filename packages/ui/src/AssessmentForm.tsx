@@ -15,7 +15,7 @@ import {
   fbaApprovalBlockers,
   fbaGateUnlocks,
 } from "./assessment.js";
-import { DocumentShell, GateBanner } from "./DocumentShell.js";
+import { DocumentShell, GateBanner, SavedNotice } from "./DocumentShell.js";
 import {
   authoringGates,
   dedupeViolations,
@@ -174,14 +174,13 @@ export function AssessmentForm({
 
   if (submitted) {
     return (
-      <div role="status">
-        <h1>Assessment / FBA record saved</h1>
+      <SavedNotice title="Assessment / FBA record saved" onResume={() => setSubmitted(false)}>
         <p>
           {approved
             ? `The practitioner's conclusion is approved. ${FBA_GATE} is set, which unlocks documents ${fbaGateUnlocks().join(", ")}.`
             : `The conclusion is not approved, so ${FBA_GATE} is not set — documents ${fbaGateUnlocks().join(", ")} stay locked.`}
         </p>
-      </div>
+      </SavedNotice>
     );
   }
 

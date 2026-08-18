@@ -8,7 +8,7 @@ import {
   type SafeguardDisposition,
 } from "@pbs/core";
 import { useMemo, useState } from "react";
-import { DocumentShell, GateBanner, newRowId } from "./DocumentShell.js";
+import { DocumentShell, GateBanner, SavedNotice, newRowId } from "./DocumentShell.js";
 import {
   authoringGates,
   dedupeViolations,
@@ -103,15 +103,14 @@ export function InterimBspForm({
   if (submitted) {
     const undisposed = safeguards.filter((s) => s.disposition === null).length;
     return (
-      <div role="status">
-        <h1>Interim behaviour support plan saved</h1>
+      <SavedNotice title="Interim behaviour support plan saved" onResume={() => setSubmitted(false)}>
         <p>
           {safeguards.length} temporary safeguard(s) recorded, all flagged unassessed.{" "}
           {undisposed > 0
             ? `${undisposed} still have no disposition — a Comprehensive plan cannot release until every one is decided.`
             : "Every safeguard has a disposition."}
         </p>
-      </div>
+      </SavedNotice>
     );
   }
 

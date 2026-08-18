@@ -6,7 +6,7 @@ import {
   type Pathway,
 } from "@pbs/core";
 import { useMemo, useState } from "react";
-import { DocumentShell, GateBanner, newRowId } from "./DocumentShell.js";
+import { DocumentShell, GateBanner, SavedNotice, newRowId } from "./DocumentShell.js";
 import {
   authoringGates,
   dedupeViolations,
@@ -92,14 +92,13 @@ export function NoRpBspForm({
 
   if (submitted) {
     return (
-      <div role="status">
-        <h1>No-RP behaviour support plan saved</h1>
+      <SavedNotice title="No-RP behaviour support plan saved" onResume={() => setSubmitted(false)}>
         <p>
           {version.status === "released"
             ? `Released at ${version.releasedAt}. This version is immutable.`
             : "Saved as a draft. It has not been released."}
         </p>
-      </div>
+      </SavedNotice>
     );
   }
 

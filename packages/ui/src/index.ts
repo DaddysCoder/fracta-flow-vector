@@ -40,7 +40,7 @@ export type { AssessmentResult } from "./AssessmentForm.js";
 export { CAPTURE_ALWAYS_REQUIRED_FIELD_IDS, CAPTURE_DOCUMENT_ID, CAPTURE_INSTANCE_ID, CAPTURE_VISIBILITY_RULES, isCaptureOnly, withoutCaptureEntries } from "./capture.js";
 export { CaptureForm } from "./CaptureForm.js";
 export type { CaptureResult } from "./CaptureForm.js";
-export { DocumentShell, GateBanner, newRowId } from "./DocumentShell.js";
+export { DocumentShell, GateBanner, SavedNotice, newRowId } from "./DocumentShell.js";
 export { authoringGates, dedupeViolations, documentDef, documentFields, documentGatesFor, entriesFrom, flattenGroups, gatesSetHere, quotedFields, quotedValuesFor, reachability, releaseGates } from "./documentForm.js";
 export type { DocumentReachability, GateCheckInput } from "./documentForm.js";
 export { DOCUMENT_ORDER, documentSteps, planDocumentId, reachableDocumentIds } from "./flow.js";

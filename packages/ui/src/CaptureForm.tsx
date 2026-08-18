@@ -6,7 +6,7 @@ import {
   CAPTURE_INSTANCE_ID,
   CAPTURE_VISIBILITY_RULES,
 } from "./capture.js";
-import { DocumentShell } from "./DocumentShell.js";
+import { DocumentShell, SavedNotice } from "./DocumentShell.js";
 import { entriesFrom, quotedValuesFor } from "./documentForm.js";
 import type { FormValues } from "./FormRenderer.js";
 
@@ -55,13 +55,12 @@ export function CaptureForm({ onSubmitted, now = () => new Date() }: CaptureForm
 
   if (submitted) {
     return (
-      <div role="status">
-        <h1>Behaviour data capture saved</h1>
+      <SavedNotice title="Behaviour data capture saved" onResume={() => setSubmitted(false)}>
         <p>
           These rows stay in this log. They do not change the Assessment / FBA Record, and no
           assessment conclusion has been altered by recording them.
         </p>
-      </div>
+      </SavedNotice>
     );
   }
 
