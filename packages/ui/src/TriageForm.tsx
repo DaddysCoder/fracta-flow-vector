@@ -94,14 +94,16 @@ export function TriageForm({ task, onSubmitted, now = () => new Date() }: Triage
 
   const triageId = "triage-draft"; // one draft per session in this standalone build
 
-  // Cross-document prefill is required for 02.A/02.G to show anything at
-  // all — this form is inherently the second step of one governed case,
-  // never a standalone tool, so it runs under "connected" capabilities
-  // regardless of what mode document 01 was completed under.
+  // Standalone (MD-005/MD-006): this form must open and complete on its
+  // own, with no other tool's data assumed present. Cross-document
+  // prefill is locked off, so 02.A/02.G quote nothing across documents;
+  // `ReadOnlyField` renders "Not yet available" for any quoted field
+  // with no locally-recorded value, which is the correct standalone
+  // answer, not a bug. See CONTRADICTIONS.md #5.
   const quotedValues = useMemo(() => {
     const caseRecord: CaseRecord = { fields: task.fields };
     const targetDocument = toTargetDocument(TRIAGE_DOCUMENT_ID, triageId);
-    const resolved = resolve(caseRecord, targetDocument, CAPABILITIES.connected, now());
+    const resolved = resolve(caseRecord, targetDocument, CAPABILITIES.standalone, now());
     const merged: Record<string, unknown> = {};
     for (const entry of [...resolved.tier0, ...resolved.tier1, ...resolved.tier2]) {
       merged[entry.fieldId] = entry.value;

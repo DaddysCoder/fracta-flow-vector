@@ -108,6 +108,34 @@ alongside it. Flagging so Pol can decide whether `source.entry` should be split 
 structured sub-fields (and if so, supply the concrete field list/schema) or whether
 free-text entries are the intended design and the doc pack's breakdown is aspirational/future.
 
+## 5. `TriageForm`/`SourceForm` hardcoded `CAPABILITIES.connected`, contradicting the standalone-first build order (resolved — reversed)
+
+**Found:** 2026-08-17/18, carried over from the handover written at the end of Stage 9.
+
+Forms 02 (`TriageForm`) and 03 (`SourceForm`), as built by the other session, called
+`resolve()` for their quoted (`rendersIn`-only) fields against `CAPABILITIES.connected`
+unconditionally, with an inline comment arguing these forms are "inherently the second
+step of one governed case, never a standalone tool." That is a real design position —
+but it directly contradicts the staged build order in this same handover: clone the
+shell standalone for all nine documents, QA all nine standalone (Stage 10), and only
+then turn connected-mode cross-document prefill on uniformly as a deployment-mode
+switch (Stage 11), not per-form. Hardcoding `CAPABILITIES.connected` into two specific
+forms bakes a mode choice into component code, which is exactly the kind of thing that
+has to be unwound later instead of just flipped.
+
+**Not silently redone:** flagged to Pol before touching either form.
+
+**Resolution (Pol, 2026-08-17/18): standalone is correct**, matching the original
+staged spec. Both forms now call `resolve()` against `CAPABILITIES.standalone`, same
+as `ReferralForm`. Consequence, confirmed as intended rather than a regression: with
+`crossDocumentPrefill: false`, every quoted (`rendersIn`-only) field on these two forms
+resolves to no value, since none of their quoted fields are ever authored locally
+(`askedIn` never matches this document for a quoted field, by definition) — so
+`ReadOnlyField` renders "Not yet available" for all of them until Stage 11 turns
+connected mode on. This was already `ReadOnlyField`'s designed fallback for a missing
+quoted value (see its own doc comment), not new behaviour needed for this fix — it was
+verified, not built, as part of this reversal.
+
 ## Docs that were missing entirely as of session start (context, not a contradiction)
 
 `README.md`, `docs/pbs-canonical-reconciliation.md`,
