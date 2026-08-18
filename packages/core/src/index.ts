@@ -27,6 +27,8 @@ export { checkAuthoringGates, checkReleaseGates } from "./gates.js";
 export type { GateContext, GateViolation, InterimSafeguard, Pathway, SafeguardDisposition } from "./gates.js";
 export { RRP_INDEPENDENT_FLAGS, createRrpRecord, setRrpFlag } from "./rrp.js";
 export type { RrpRecord } from "./rrp.js";
+export { resolvePathway } from "./pathway.js";
+export type { PathwayPermissions, ResolvedPathway, RrpClassification } from "./pathway.js";
 export { approve, correctDocument, createDraftVersion, release } from "./versions.js";
 export type { Approval, DocumentVersion } from "./versions.js";
 export { createTriageTask } from "./triage.js";

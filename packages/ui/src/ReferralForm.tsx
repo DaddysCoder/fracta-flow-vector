@@ -2,7 +2,7 @@ import { createTriageTask, type FieldEntry, type TriageTask } from "@pbs/core";
 import { FRACTA_FLOW_BRAND, renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
-import { FormRenderer, type FormValues } from "./FormRenderer.js";
+import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
 import {
   REFERRAL_ALWAYS_REQUIRED_FIELD_IDS,
   REFERRAL_DOCUMENT_ID,
@@ -65,7 +65,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
       REFERRAL_DOCUMENT_ID,
       REFERRAL_FIELDS,
       FRACTA_FLOW_BRAND,
-      values.scalar,
+      flattenValuesForExport(values),
     ).then((blob) => download(blob, "fracta-flow-referral-completed.docx"));
   }
 

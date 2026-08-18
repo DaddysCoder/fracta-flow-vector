@@ -1,11 +1,23 @@
 import { registry } from "@pbs/registry";
+import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
 import { FRACTA_FLOW_BRAND } from "../src/brand.js";
 import { renderBlankDocx, renderCompletedDocx } from "../src/docx.js";
 
+async function documentXml(buffer: Buffer): Promise<string> {
+  const zip = await JSZip.loadAsync(buffer);
+  const entry = zip.file("word/document.xml");
+  if (!entry) throw new Error("docx zip is missing word/document.xml");
+  return entry.async("text");
+}
+
 const REFERRAL = registry.documents["01"];
 if (!REFERRAL) throw new Error('registry is missing document "01"');
 const REFERRAL_FIELDS = registry.fields.filter((f) => REFERRAL.sections.some((s) => s.id === f.askedIn));
+
+const SOURCE_REGISTER = registry.documents["03"];
+if (!SOURCE_REGISTER) throw new Error('registry is missing document "03"');
+const SOURCE_FIELDS = registry.fields.filter((f) => SOURCE_REGISTER.sections.some((s) => s.id === f.askedIn));
 
 function isDocxZip(buffer: Buffer): boolean {
   // DOCX is a zip archive — "PK\x03\x04" is the local file header signature.
@@ -29,5 +41,20 @@ describe("renderCompletedDocx", () => {
     });
     expect(isDocxZip(completed)).toBe(true);
     expect(completed.equals(blank)).toBe(false);
+  });
+
+  it("renders a repeatable field's rows as separate entries, not joined onto one line", async () => {
+    const buffer = await renderCompletedDocx(SOURCE_REGISTER, "03", SOURCE_FIELDS, FRACTA_FLOW_BRAND, {
+      "source.entry": ["Interview with case worker, 2 Aug 2026.", "Prior BSP document review, 5 Aug 2026."],
+    });
+    const xml = await documentXml(buffer);
+    expect(xml).toContain("Interview with case worker, 2 Aug 2026.");
+    expect(xml).toContain("Prior BSP document review, 5 Aug 2026.");
+  });
+
+  it("renders a blank line for a repeatable field with no rows, same as an empty scalar", async () => {
+    const buffer = await renderCompletedDocx(SOURCE_REGISTER, "03", SOURCE_FIELDS, FRACTA_FLOW_BRAND, {});
+    const xml = await documentXml(buffer);
+    expect(xml).toContain("_".repeat(28));
   });
 });

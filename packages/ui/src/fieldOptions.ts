@@ -38,4 +38,29 @@ export const FIELD_OPTIONS: Record<string, FieldOption[]> = {
     { value: "comprehensive", label: "Comprehensive RRP BSP" },
     { value: "unknown", label: "Not sure" },
   ],
+  "triage.rrp_status": [
+    { value: "none", label: "None identified" },
+    { value: "possible_unclear", label: "Possible or unclear — needs classification review" },
+    { value: "confirmed", label: "Confirmed" },
+  ],
+  "triage.outcome": [
+    { value: "accept", label: "Accept" },
+    { value: "request_information", label: "Request more information" },
+    { value: "waitlist", label: "Waitlist" },
+    { value: "decline", label: "Decline" },
+  ],
+  "risk.matrix_likelihood": [
+    { value: "1", label: "1 — Rare" },
+    { value: "2", label: "2 — Unlikely" },
+    { value: "3", label: "3 — Possible" },
+    { value: "4", label: "4 — Likely" },
+    { value: "5", label: "5 — Almost certain" },
+  ],
+  "risk.matrix_consequence": [
+    { value: "1", label: "1 — Insignificant" },
+    { value: "2", label: "2 — Minor" },
+    { value: "3", label: "3 — Moderate" },
+    { value: "4", label: "4 — Major" },
+    { value: "5", label: "5 — Severe" },
+  ],
 };
