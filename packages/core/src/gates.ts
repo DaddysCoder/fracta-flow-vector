@@ -24,6 +24,19 @@ export interface GateContext {
   /** Gate names already satisfied for this case, e.g. {"fba.approved"}. */
   approvedGates: ReadonlySet<string>;
   targetDocument: TargetDocument;
+  /**
+   * Gate names the registry says must be approved before this document
+   * may be authored at all, derived by the caller from the registry's own
+   * `gates[...].unlocks` lists (`@pbs/registry` `pathways.json`).
+   *
+   * Needed because some documents author no fields of their own — the
+   * No-RP BSP (07) and the Comprehensive BSP (09) are assembled almost
+   * entirely from values quoted out of other documents — so the
+   * field-schema-derived checks below see nothing to gate, even though
+   * the registry gates the document itself. Optional and defaulting to
+   * none, so existing callers are unaffected.
+   */
+  documentGates?: readonly string[];
 }
 
 export interface GateViolation {
@@ -63,6 +76,15 @@ function withSeverity(
 export function checkAuthoringGates(context: GateContext, caps: Capabilities): GateViolation[] {
   const violations: { gate: string; message: string }[] = [];
   const { documentId, pathway, approvedGates, targetDocument } = context;
+
+  for (const gate of context.documentGates ?? []) {
+    if (!approvedGates.has(gate)) {
+      violations.push({
+        gate,
+        message: `Document ${documentId} is gated on "${gate}", which is not approved yet.`,
+      });
+    }
+  }
 
   const requiresFbaApproval =
     (pathway === "no_rp" || pathway === "comprehensive") && authorsTier3(targetDocument);
