@@ -106,7 +106,7 @@ export function DocumentShell({
   const quoted = quotedFields(documentId);
 
   function handleDownloadBlank() {
-    renderBlankDocxBlob(doc, documentId, fields, FRACTA_FLOW_BRAND).then((blob) =>
+    renderBlankDocxBlob(doc, documentId, fields, FRACTA_FLOW_BRAND, quoted).then((blob) =>
       download(blob, `fracta-flow-${slug}-blank.docx`),
     );
   }
@@ -118,6 +118,8 @@ export function DocumentShell({
       fields,
       FRACTA_FLOW_BRAND,
       flattenValuesForExport(values),
+      quoted,
+      quotedValues,
     ).then((blob) => download(blob, `fracta-flow-${slug}-completed.docx`));
   }
 

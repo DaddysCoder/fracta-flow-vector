@@ -3,6 +3,7 @@ import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } fro
 import type { Brand } from "./brand.js";
 
 const BLANK_LINE = "_".repeat(28);
+const NOT_YET_AVAILABLE = "Not yet available";
 
 function formatValue(value: unknown): string {
   if (value === undefined || value === null || value === "") return BLANK_LINE;
@@ -19,6 +20,19 @@ export interface RenderDocxInput {
   brand: Brand;
   /** Omit for a blank template; pass answers for a completed export. */
   values?: Record<string, unknown>;
+  /**
+   * Fields quoted into this document from elsewhere (registry `rendersIn`
+   * only — not asked here). Rendered read-only, in section order, the
+   * same way `FormRenderer` shows them on screen.
+   *
+   * Without these, an assembly document — the No-RP BSP (07) and the
+   * Comprehensive BSP (09) ask almost nothing of their own — would export
+   * as a title page and nothing else.
+   */
+  quotedFields?: FieldDef[];
+  /** Resolved values for `quotedFields`, keyed by field id. A field with
+   * no value prints "Not yet available", never a blank. */
+  quotedValues?: Record<string, unknown>;
 }
 
 /**
@@ -31,6 +45,8 @@ export interface RenderDocxInput {
  */
 export function buildDocxDocument(input: RenderDocxInput): Document {
   const { document, documentId, fields, brand, values } = input;
+  const quoted = input.quotedFields ?? [];
+  const quotedValues = input.quotedValues ?? {};
 
   const children: Paragraph[] = [
     new Paragraph({
@@ -50,7 +66,8 @@ export function buildDocxDocument(input: RenderDocxInput): Document {
 
   for (const section of document.sections) {
     const sectionFields = fields.filter((f) => f.askedIn === section.id);
-    if (sectionFields.length === 0) continue;
+    const sectionQuoted = quoted.filter((f) => f.rendersIn.includes(section.id));
+    if (sectionFields.length === 0 && sectionQuoted.length === 0) continue;
 
     children.push(
       new Paragraph({
@@ -58,6 +75,23 @@ export function buildDocxDocument(input: RenderDocxInput): Document {
         heading: HeadingLevel.HEADING_1,
       }),
     );
+
+    for (const field of sectionQuoted) {
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: `${field.label} (from elsewhere)`, bold: true })],
+        }),
+      );
+      const value = quotedValues[field.id];
+      children.push(
+        new Paragraph({
+          text:
+            value === undefined || value === null || value === ""
+              ? NOT_YET_AVAILABLE
+              : formatValue(value),
+        }),
+      );
+    }
 
     for (const field of sectionFields) {
       children.push(new Paragraph({ children: [new TextRun({ text: field.label, bold: true })] }));
@@ -92,8 +126,9 @@ export function renderBlankDocx(
   documentId: string,
   fields: FieldDef[],
   brand: Brand,
+  quotedFields: FieldDef[] = [],
 ): Promise<Buffer> {
-  return renderDocumentDocx({ document, documentId, fields, brand });
+  return renderDocumentDocx({ document, documentId, fields, brand, quotedFields });
 }
 
 export function renderCompletedDocx(
@@ -102,8 +137,10 @@ export function renderCompletedDocx(
   fields: FieldDef[],
   brand: Brand,
   values: Record<string, unknown>,
+  quotedFields: FieldDef[] = [],
+  quotedValues: Record<string, unknown> = {},
 ): Promise<Buffer> {
-  return renderDocumentDocx({ document, documentId, fields, brand, values });
+  return renderDocumentDocx({ document, documentId, fields, brand, values, quotedFields, quotedValues });
 }
 
 /** Browser-side rendering — no Node Buffer involved, safe inside a
@@ -117,8 +154,9 @@ export function renderBlankDocxBlob(
   documentId: string,
   fields: FieldDef[],
   brand: Brand,
+  quotedFields: FieldDef[] = [],
 ): Promise<Blob> {
-  return renderDocumentDocxBlob({ document, documentId, fields, brand });
+  return renderDocumentDocxBlob({ document, documentId, fields, brand, quotedFields });
 }
 
 export function renderCompletedDocxBlob(
@@ -127,6 +165,16 @@ export function renderCompletedDocxBlob(
   fields: FieldDef[],
   brand: Brand,
   values: Record<string, unknown>,
+  quotedFields: FieldDef[] = [],
+  quotedValues: Record<string, unknown> = {},
 ): Promise<Blob> {
-  return renderDocumentDocxBlob({ document, documentId, fields, brand, values });
+  return renderDocumentDocxBlob({
+    document,
+    documentId,
+    fields,
+    brand,
+    values,
+    quotedFields,
+    quotedValues,
+  });
 }
