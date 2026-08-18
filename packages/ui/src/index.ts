@@ -33,4 +33,7 @@ export {
 } from "./source.js";
 export { SourceForm } from "./SourceForm.js";
 export type { SourceResult } from "./SourceForm.js";
+export { BSA_ALWAYS_REQUIRED_FIELD_IDS, BSA_DOCUMENT_ID, BSA_VISIBILITY_RULES } from "./bsa.js";
+export { BsaForm } from "./BsaForm.js";
+export type { BsaResult } from "./BsaForm.js";
 export { toFieldSchema, toPathwayPermissions, toTargetDocument, ALL_FIELD_SCHEMAS } from "./registryAdapter.js";

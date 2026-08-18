@@ -148,6 +148,34 @@ turned on later. This was already `ReadOnlyField`'s designed fallback for a miss
 quoted value (see its own doc comment), not new behaviour needed for this fix — it was
 verified, not built, as part of this reversal.
 
+## 6. `checkAuthoringGates`' `fba.approved` gate is self-referential on document 04 itself (open — not blocking, guidance-only in standalone)
+
+**Found:** 2026-08-18, while building `BsaForm` (document 04, Combined BSA/FBA).
+
+`packages/core/src/gates.ts`'s `checkAuthoringGates` sets `requiresFbaApproval` whenever
+a document authors tier3 fields under a `no_rp` or `comprehensive` pathway
+(`authorsTier3(targetDocument)`), and blocks/flags until `approvedGates` contains
+`"fba.approved"`. Document 04 is the one document that *authors* `fba.approved`
+(`analysis.conclusion`'s own registry note: "Hard clinical gate. Approval here sets
+fba.approved") — its own tier3 fields (04.4, 04.6-04.9) satisfy `authorsTier3` for its
+own `TargetDocument` too, since `authorsTier3` checks the whole registry's fields
+against `doc.sections`, not "fields belonging to some other document." Under a `no_rp`
+pathway, this makes the violation permanently unsatisfiable: the BSA/FBA form would
+forever demand the very approval it alone can grant. (Under `interim` it does not fire,
+since `interim` is excluded from `requiresFbaApproval`'s OR condition — and
+`comprehensive` cannot occur yet at document 04's open time, since `resolvePathway()`
+only resolves to `comprehensive` once `fba.approved` is already set.) Reproduced in
+`packages/core/test/gates.test.ts`.
+
+**Not resolved here because:** whether to exclude a document from its own gate check
+(and how — by document id, by "does this field's approval set the very gate being
+checked," or some other rule) is a `@pbs/core` gating-logic decision, not a UI-layer
+one. `BsaForm` calls `checkAuthoringGates` anyway (per the existing "wire the banner"
+gap item) and displays whatever it returns as non-blocking guidance text (severity is
+always `"guidance"` in standalone, per `capabilities.ts`) — the confusing message is
+visible, not fixed or hidden. Flagging so Pol can decide whether `authorsTier3` should
+exclude fields whose own document is document 04, or whether `requiresFbaApproval`
+should only fire for documents *other than* the one authoring the conclusion.
 ## 6. Document 04's registry entry duplicates Frame's job description (open — not blocking, nothing built yet)
 
 **Found:** 2026-08-18, during the reconcile/cleanup pass.
