@@ -165,9 +165,19 @@ would have to be unwound later rather than just flipped.
    rather than assuming it. With `crossDocumentPrefill: false`, every
    quoted field on these two forms now resolves empty until Stage 11
    turns connected mode on; this is expected, not a regression.
-4. **Not started — next step.** Continue documents 04–09 the same
-   (standalone) way. See "Gaps identified for documents 04–09" below for
-   the specific per-document work items; none of that has changed.
+4. **Document 04 (Combined BSA/FBA) built 2026-08-18**, standalone from
+   the start (`packages/ui/src/bsa.ts`, `BsaForm.tsx`, wired into
+   `ReferralApp.tsx`). While wiring the `checkAuthoringGates` banner (per
+   the gap item below) discovered a new, separate contradiction — see
+   `CONTRADICTIONS.md` #6: the `fba.approved` gate is self-referential on
+   document 04 itself under a `no_rp` pathway. Not fixed (it's a
+   `@pbs/core` gating-logic decision); displayed as guidance text as-is,
+   reproduced in `packages/core/test/gates.test.ts`.
+   **Next step:** documents 05–09, same standalone way. See "Gaps
+   identified for documents 04–09" below for the remaining per-document
+   work items (04's own gaps — outcome branching doesn't apply to 04;
+   Strategy Instance pinning is 06; zero-RRP-content test is 07 — none of
+   that has changed).
 
 105 tests + typecheck + registry validate all still pass after this
 fix (same counts as before: no new tests were needed since no new
@@ -186,7 +196,7 @@ PR #1 both actually used.)
 | — | `resolve()` core algorithm | Done, 30 tests |
 | 5 | Transition ledger, gates, RRP flags, document versioning | Done |
 | 8 | 01 Referral reference form | Done, verified live in-browser, **signed off by the user** |
-| 9 | Clone shell to forms 02–09 | **In progress.** 02/03 built by another session, connected-vs-standalone issue above now fixed; 04–09 not started |
+| 9 | Clone shell to forms 02–09 | **In progress.** 01-04 built (02/03 by another session, connected-vs-standalone issue above now fixed; 04 built 2026-08-18, standalone from the start); 05–09 not started |
 | 10 | Standalone QA over all 9 forms | Not started |
 | 11 | Connected capability set live (crossDocumentPrefill, enforced ledger, identity vault, pathway state machine) | Not started |
 | 12 | Login, tenancy, persistent storage, encryption at rest | Not started |
