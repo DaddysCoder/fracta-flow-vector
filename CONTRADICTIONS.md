@@ -3,7 +3,7 @@
 Per the standing build rule: never silently resolve a contradiction between docs —
 log it here and surface it, rather than picking a side.
 
-## 1. Two incompatible "Stage N" numbering schemes (open — not yet reconciled)
+## 1. Two incompatible "Stage N" numbering schemes (partially resolved — see below)
 
 **Found:** 2026-08-17.
 
@@ -37,6 +37,18 @@ one onto the other) is an architecture/planning call, not an implementation one.
 Flagging so Pol can decide whether the repo's per-document stage numbering should be
 renamed (e.g. "steps") to stop colliding with the roadmap doc's product-level stages,
 or whether the roadmap doc's stages should be treated as non-binding narrative only.
+
+**Partial resolution (2026-08-18 cleanup pass):** going forward, this repo's own
+build tracking (`PROJECT_STATUS.md`, `ONBOARDING.md`) uses **Document 01–09** only —
+the per-document stage numbers ("Stage 8," "Stage 9," etc.) are retired from active
+use and kept only as historical narrative in old handover text, not as a numbering
+to build against. `docs/bsp-modular-product-architecture-proposal-v1.md`'s own
+Stage 1–6 product-level roadmap is left untouched — it is supplied external planning
+material, not something this cleanup rewrites — and still uses "Stage" for a
+different, coarser thing than "Document." Anyone reading both should treat the
+roadmap doc's stages as separate, non-binding narrative relative to the Document
+01–09 build-status numbering used everywhere else in this repo now. Mapping one onto
+the other, if ever wanted, remains an open architecture call, not decided here.
 
 ## 2. `Pathway` type had no representation for "RRP status not yet classified" (resolved)
 
@@ -131,10 +143,37 @@ as `ReferralForm`. Consequence, confirmed as intended rather than a regression: 
 `crossDocumentPrefill: false`, every quoted (`rendersIn`-only) field on these two forms
 resolves to no value, since none of their quoted fields are ever authored locally
 (`askedIn` never matches this document for a quoted field, by definition) — so
-`ReadOnlyField` renders "Not yet available" for all of them until Stage 11 turns
-connected mode on. This was already `ReadOnlyField`'s designed fallback for a missing
+`ReadOnlyField` renders "Not yet available" for all of them until connected mode is
+turned on later. This was already `ReadOnlyField`'s designed fallback for a missing
 quoted value (see its own doc comment), not new behaviour needed for this fix — it was
 verified, not built, as part of this reversal.
+
+## 6. Document 04's registry entry duplicates Frame's job description (open — not blocking, nothing built yet)
+
+**Found:** 2026-08-18, during the reconcile/cleanup pass.
+
+`packages/registry/src/documents.json` document `04` is titled "Combined BSA/FBA"
+with sections `04.4` "Behaviour objects," `04.5` "Observation scaffold," `04.6`
+"Evidence reconciliation," `04.7` "Pattern analysis," `04.8` "Competing hypotheses
+and formulation," `04.9` "Practitioner conclusion" — i.e. a full functional
+behaviour assessment/analysis workflow authored inside Vector.
+
+Per current product direction, **Frame** (a separate system) owns behaviour
+assessment, formulation, ABC data, hypothesis generation and FBA analysis.
+Vector's document 04 is meant to receive and review Frame's FBA outcome, not
+re-implement that analysis. As registered today, document 04's section list reads
+like a second, duplicate FBA engine built inside Vector, which directly conflicts
+with that boundary.
+
+**Not resolved here because:** no document-04 form has been built yet (see
+`PROJECT_STATUS.md` — 04–09 are registry-only), so there is no code to change, and
+reshaping the registry entry to be an "intake/review of Frame's output" rather than
+"author findings from scratch" is a schema/integration design decision (what does
+Frame hand off, in what shape, and which of the current `04.x` sections become
+read-only review of that handoff vs. disappear entirely) that needs an explicit
+answer, not a guess. Flagging so Pol/the team can decide how `04.x` should be
+reshaped, and what the Vector/Frame handoff contract looks like, before document 04
+is built.
 
 ## Docs that were missing entirely as of session start (context, not a contradiction)
 

@@ -19,6 +19,23 @@ other tool, no network — MD-005/MD-006, "correct, not degraded, its own
 product edition") and **connected** (one shared participant record,
 enforced gates). See "Open decision" below — this is not fully settled.
 
+**Numbering:** this repo now uses one scheme only — **Document 01–09**
+(the 9 PBS documents, per `packages/registry/src/documents.json`). Any
+"Stage N" reference below is historical session narrative, kept for
+context, not a numbering to build against. Current build status lives
+in `PROJECT_STATUS.md` — read that first for "what's built," come here
+for "why it's built this way."
+
+**Vector does not build a second FBA engine.** Frame owns behaviour
+assessment, formulation, ABC data, hypothesis generation and FBA
+analysis. Document 04 (currently registered as "Combined BSA/FBA," not
+yet built) is Vector's point of contact with that output: it should
+receive and review Frame's FBA outcome, not re-implement Frame's
+analysis inside Vector. See `PROJECT_STATUS.md` for this boundary and
+`CONTRADICTIONS.md` #1 for the still-open question of how document 04's
+registry entry should be reshaped to reflect it — not resolved here,
+left for an explicit decision rather than guessed.
+
 ## Multiple sessions — read this first
 
 This repo has had at least three Claude Code sessions active on it,
@@ -26,13 +43,13 @@ plus an unrelated `task-tracker` branch (a totally different Next.js/
 Prisma/Postgres app — ignore it, not part of this project). Concretely:
 
 - This session built: `resolve()`, the real registry pull-in, gates/
-  ledger/rrp/versions, and the Stage 8 Referral form (01).
-- A second session (PR #1, merged) built Forms 02 (Triage) and 03
+  ledger/rrp/versions, and the Document 01 Referral form.
+- A second session (PR #1, merged) built Documents 02 (Triage) and 03
   (Source Register), `resolvePathway()`, and started `CONTRADICTIONS.md`
   — a log file for exactly this kind of cross-session/cross-doc conflict,
   by house rule now: **never silently resolve a contradiction, log it
   and surface it.** Read `CONTRADICTIONS.md` in full before building
-  anything on documents 02+; it already has four entries, one of which
+  anything on documents 02+; it already has several entries, one of which
   (numbering-scheme collision) affects how you interpret any "Stage N"
   reference anywhere, including in this file.
 - A message appeared mid-conversation in THIS session that turned out to
@@ -140,8 +157,8 @@ Prisma/Postgres app — ignore it, not part of this project). Concretely:
 in-memory case record chained from document 01. This let cross-
 document prefill work, but meant those two forms couldn't function
 without another tool's data already present — which directly
-contradicted the (not-yet-built) Stage 10 QA requirement that every one
-of the 9 forms opens and completes standalone, "no other tool."
+contradicted the (not-yet-built) requirement that every one
+of the 9 documents opens and completes standalone, "no other tool."
 
 **Discussed with the user. Their steer: standalone is correct** — the
 staged spec sequences it that way on purpose (clone the shell standalone
@@ -163,8 +180,8 @@ would have to be unwound later rather than just flipped.
    available" for a missing quoted value (its designed fallback, see
    its own doc comment) — confirmed this is the right standalone answer
    rather than assuming it. With `crossDocumentPrefill: false`, every
-   quoted field on these two forms now resolves empty until Stage 11
-   turns connected mode on; this is expected, not a regression.
+   quoted field on these two forms now resolves empty until connected
+   mode is turned on later; this is expected, not a regression.
 4. **Not started — next step.** Continue documents 04–09 the same
    (standalone) way. See "Gaps identified for documents 04–09" below for
    the specific per-document work items; none of that has changed.
@@ -174,23 +191,11 @@ fix (same counts as before: no new tests were needed since no new
 observable behavior was added — `resolve()`'s standalone path already
 had coverage in `packages/core/test/resolve.test.ts`).
 
-## Status against the user's own staged spec
+## Current status
 
-(Per `CONTRADICTIONS.md` #1: this repo's per-document stage numbering
-and a separate roadmap doc's product-level stage numbering collide.
-This table uses the per-document numbering, i.e. what this session and
-PR #1 both actually used.)
-
-| Stage | What | Status |
-|---|---|---|
-| — | `resolve()` core algorithm | Done, 30 tests |
-| 5 | Transition ledger, gates, RRP flags, document versioning | Done |
-| 8 | 01 Referral reference form | Done, verified live in-browser, **signed off by the user** |
-| 9 | Clone shell to forms 02–09 | **In progress.** 02/03 built by another session, connected-vs-standalone issue above now fixed; 04–09 not started |
-| 10 | Standalone QA over all 9 forms | Not started |
-| 11 | Connected capability set live (crossDocumentPrefill, enforced ledger, identity vault, pathway state machine) | Not started |
-| 12 | Login, tenancy, persistent storage, encryption at rest | Not started |
-| 13 | Release review | Not started |
+See `PROJECT_STATUS.md` — that file is now the single source of truth
+for what's built vs. outstanding, using Document 01–09 numbering only.
+This handover keeps the narrative/decision history below for context.
 
 ## Gaps identified for documents 04–09, not yet built
 
@@ -223,7 +228,7 @@ PR #1 both actually used.)
 - **09 "full BSA/FBA not repeated"**: already true structurally — 04.x
   fields are never askedIn `09.x`. Nothing to build here beyond not
   accidentally duplicating the BSA/FBA question set into document 09
-  later, in Stage 11.
+  later.
 - **05 "standalone rows never alter the BSA/FBA"**: already true by
   construction (each document instance has its own `sourceDocument` id).
   Worth a short test asserting it rather than new code.
@@ -244,5 +249,6 @@ pnpm --filter @pbs/ui run dev   # http://localhost:5173, docs 01→02→03 chain
 
 ## Branches
 
-`main` and `claude/pbs-core-resolve-function-obclyo` are in sync as of
-this handover. Keep pushing feature work to the feature branch.
+As of this cleanup, `main` is canonical: `claude/pbs-core-resolve-function-obclyo`
+has been reconciled into `main` and both point at the same history. Do
+new feature work off `main`.

@@ -31,5 +31,7 @@ export { resolvePathway } from "./pathway.js";
 export type { PathwayPermissions, ResolvedPathway, RrpClassification } from "./pathway.js";
 export { approve, correctDocument, createDraftVersion, release } from "./versions.js";
 export type { Approval, DocumentVersion } from "./versions.js";
+export { isPinOutdated, pinStrategy } from "./strategyLibrary.js";
+export type { PinnedStrategyRef, StrategyLibraryEntry } from "./strategyLibrary.js";
 export { createTriageTask } from "./triage.js";
 export type { CreateTriageTaskInput, TriagePriority, TriageTask } from "./triage.js";

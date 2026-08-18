@@ -36,19 +36,19 @@
     "sections": [{ "id": "03.1", "title": "Source entries" }]
   },
   "04": {
-    "title": "Combined BSA/FBA",
+    "title": "Assessment / FBA Record",
     "st": "ST-04",
     "pathways": ["no_rp", "interim", "comprehensive"],
     "sections": [
       { "id": "04.1", "title": "Scope and participant voice" },
       { "id": "04.2", "title": "People and settings" },
-      { "id": "04.3", "title": "Sources and methods" },
-      { "id": "04.4", "title": "Behaviour objects" },
-      { "id": "04.5", "title": "Observation scaffold" },
+      { "id": "04.3", "title": "Sources, methods and assessment handoff" },
+      { "id": "04.4", "title": "Behaviour objects (received — reconcile)" },
+      { "id": "04.5", "title": "Observation scaffold (received — reconcile)" },
       { "id": "04.6", "title": "Evidence reconciliation" },
-      { "id": "04.7", "title": "Pattern analysis" },
-      { "id": "04.8", "title": "Competing hypotheses and formulation" },
-      { "id": "04.9", "title": "Practitioner conclusion" },
+      { "id": "04.7", "title": "Pattern analysis (received — reconcile)" },
+      { "id": "04.8", "title": "Hypotheses and formulation (received — reconcile)" },
+      { "id": "04.9", "title": "Practitioner conclusion and FBA approval" },
       { "id": "04.10", "title": "Downstream preview" }
     ]
   },

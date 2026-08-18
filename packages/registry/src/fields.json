@@ -587,6 +587,62 @@
     "note": "Conditional. Shown only when RRP is identified or immediate danger is flagged. Distinct from health.record."
   },
   {
+    "id": "fba.bundle_id",
+    "label": "Frame FBA outcome bundle reference",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "04.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Provenance only. Identifies which Frame FbaOutcomeBundle this record reconciles. Vector does not author FBA analysis - Frame does. Leave blank when no bundle has been received (standalone)."
+  },
+  {
+    "id": "fba.bundle_received_at",
+    "label": "Date the Frame bundle was received",
+    "tier": 0,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "04.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Provenance only. Recorded alongside fba.bundle_id so the approved conclusion can be traced to the assessment output it reviewed."
+  },
+  {
     "id": "health.record",
     "label": "Health conditions",
     "tier": 1,
@@ -2168,6 +2224,66 @@
       "comprehensive"
     ],
     "phraseBank": true
+  },
+  {
+    "id": "strategy.library_id",
+    "label": "Strategy Library entry id",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "group": "strategy_instance",
+    "repeatable": true,
+    "askedIn": "06.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [
+      "fba.approved"
+    ],
+    "pathways": [
+      "no_rp",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Identity of the Strategy Library entry this instance was created from. Pinned with strategy.library_version."
+  },
+  {
+    "id": "strategy.library_version",
+    "label": "Strategy Library entry version (pinned)",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "group": "strategy_instance",
+    "repeatable": true,
+    "askedIn": "06.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [
+      "fba.approved"
+    ],
+    "pathways": [
+      "no_rp",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Pinned at creation. A library update must never silently change an existing participant strategy - 'update' and 'revise' are deliberately not allowed transitions here; re-pinning is a new instance."
   },
   {
     "id": "strategy.rationale",

@@ -135,3 +135,57 @@ describe("gates — checkReleaseGates includes authoring gates too", () => {
     expect(violations.map((v) => v.gate)).toContain("fba.approved");
   });
 });
+
+describe("gates — documentGates (registry-declared, for assembly documents)", () => {
+  it("gates the No-RP BSP itself, which authors no tier3 fields of its own", () => {
+    const violations = checkAuthoringGates(
+      {
+        documentId: "07",
+        pathway: "no_rp",
+        approvedGates: new Set(),
+        targetDocument: NO_RP_BSP,
+        documentGates: ["fba.approved"],
+      },
+      CAPABILITIES.connected,
+    );
+    expect(violations.map((v) => v.gate)).toEqual(["fba.approved"]);
+    expect(violations[0]?.severity).toBe("blocking");
+  });
+
+  it("clears once the gate is approved", () => {
+    const violations = checkAuthoringGates(
+      {
+        documentId: "07",
+        pathway: "no_rp",
+        approvedGates: new Set(["fba.approved"]),
+        targetDocument: NO_RP_BSP,
+        documentGates: ["fba.approved"],
+      },
+      CAPABILITIES.connected,
+    );
+    expect(violations).toEqual([]);
+  });
+
+  it("downgrades to guidance in standalone mode rather than being dropped", () => {
+    const violations = checkAuthoringGates(
+      {
+        documentId: "09",
+        pathway: "comprehensive",
+        approvedGates: new Set(),
+        targetDocument: COMPREHENSIVE_BSP,
+        documentGates: ["fba.approved"],
+      },
+      CAPABILITIES.standalone,
+    );
+    expect(violations.map((v) => v.gate)).toContain("fba.approved");
+    expect(violations.every((v) => v.severity === "guidance")).toBe(true);
+  });
+
+  it("is absent by default, so existing callers are unaffected", () => {
+    const violations = checkAuthoringGates(
+      { documentId: "07", pathway: "no_rp", approvedGates: new Set(), targetDocument: NO_RP_BSP },
+      CAPABILITIES.connected,
+    );
+    expect(violations).toEqual([]);
+  });
+});
