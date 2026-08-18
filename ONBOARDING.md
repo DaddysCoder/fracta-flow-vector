@@ -28,13 +28,14 @@ for "why it's built this way."
 
 **Vector does not build a second FBA engine.** Frame owns behaviour
 assessment, formulation, ABC data, hypothesis generation and FBA
-analysis. Document 04 (currently registered as "Combined BSA/FBA," not
-yet built) is Vector's point of contact with that output: it should
-receive and review Frame's FBA outcome, not re-implement Frame's
-analysis inside Vector. See `PROJECT_STATUS.md` for this boundary and
-`CONTRADICTIONS.md` #1 for the still-open question of how document 04's
-registry entry should be reshaped to reflect it — not resolved here,
-left for an explicit decision rather than guessed.
+analysis. Document 04 — registered since 2026-08-18 as the **Assessment /
+FBA Record** — is Vector's point of contact with that output: it
+receives Frame's `FbaOutcomeBundle`, displays it, lets the practitioner
+reconcile it, and carries the approval that sets `fba.approved`. It does
+not re-implement Frame's analysis. That reshape was an explicit product
+decision, now implemented and written up in `CONTRADICTIONS.md` #6;
+`@fracta/contract` itself is still unpublished, so the bundle shape is a
+labelled local stub (#8).
 
 ## Multiple sessions — read this first
 
@@ -150,7 +151,7 @@ Prisma/Postgres app — ignore it, not part of this project). Concretely:
   no-RP) — see `CONTRADICTIONS.md` #2 for the full reasoning, confirmed
   by the user.
 
-## Open decision — RESOLVED as of 2026-08-18; docs 04-09 are the actual next step
+## Open decision — RESOLVED as of 2026-08-18; docs 04-09 have since been built
 
 `TriageForm` and `SourceForm` (docs 02/03) used to hardcode
 `CAPABILITIES.connected` and call `resolve()` against a shared
@@ -182,9 +183,14 @@ would have to be unwound later rather than just flipped.
    rather than assuming it. With `crossDocumentPrefill: false`, every
    quoted field on these two forms now resolves empty until connected
    mode is turned on later; this is expected, not a regression.
-4. **Not started — next step.** Continue documents 04–09 the same
-   (standalone) way. See "Gaps identified for documents 04–09" below for
-   the specific per-document work items; none of that has changed.
+4. **Done.** Documents 04–09 were built the same (standalone) way, with
+   the deployment mode passed in as a parameter rather than hardcoded in
+   any form (`quotedValuesFor` in `packages/ui/src/documentForm.ts`).
+   See `PROJECT_STATUS.md` for what each document does now. The gap list
+   further down is kept as the original session's notes; where a gap was
+   closed differently from what it predicted (the interim `unassessed`
+   flag, for instance, is not a registry field — see `CONTRADICTIONS.md`
+   #7), `PROJECT_STATUS.md` and `CONTRADICTIONS.md` are authoritative.
 
 105 tests + typecheck + registry validate all still pass after this
 fix (same counts as before: no new tests were needed since no new
@@ -241,10 +247,10 @@ This handover keeps the narrative/decision history below for context.
 
 ```
 pnpm install
-pnpm -r run test          # 105 tests as of this handover
+pnpm -r run test          # 189 tests as of documents 04-09
 pnpm -r run typecheck
 node packages/registry/src/validate.mjs
-pnpm --filter @pbs/ui run dev   # http://localhost:5173, docs 01→02→03 chained
+pnpm --filter @pbs/ui run dev   # http://localhost:5173, docs 01→09, pathway-driven
 ```
 
 ## Branches

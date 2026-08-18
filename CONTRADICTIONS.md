@@ -69,7 +69,7 @@ correctly withhold documents 06 and 07 pending resolution, distinct from the pat
 value itself). No change to the `Pathway` type was needed. See the doc comment on
 `resolvePathway` for the full reasoning.
 
-## 3. `health.triage_screen`'s own note names a condition with no field behind it (open — not blocking)
+## 3. `health.triage_screen`'s own note names a condition with no field behind it (STILL OPEN — blocker, needs a product decision)
 
 **Found:** 2026-08-17, during Stage 9 (Form 02 Practitioner Triage).
 
@@ -89,7 +89,19 @@ currently implements only the RRP-identified half of the condition (visible when
 is unimplemented pending either a new registry field or a decision that the RRP half
 alone is sufficient.
 
-## 4. Source register/Consultation narrative spec is far richer than the one field the registry actually defines (open — not blocking)
+**Re-examined 2026-08-18 while building documents 04-09, and deliberately left open.**
+The build brief asked for this gap to be closed "with a clearly factual field (not a
+clinical judgement call)". It is not one. "Immediate danger" decides whether a health
+and safeguarding screen is *required* of the practitioner, which makes it a clinical
+threshold, not a clerical fact — who may set it (referrer? triaging practitioner?),
+against what definition, and whether setting it also changes urgency or the pathway are
+all unanswered, and `risk.matrix_rating` (the only existing risk figure) is explicitly
+forbidden from gating anything (MD-019). A boolean invented here would be a clinical
+trigger with no definition behind it. **Blocked pending: the field's exact id, label,
+tier, who authors it, and what else (if anything) it should trigger.** Nothing in
+documents 04-09 depends on it, so the rest of the build was not held up.
+
+## 4. Source register/Consultation narrative spec is far richer than the one field the registry actually defines (STILL OPEN — blocker, needs a concrete field list)
 
 **Found:** 2026-08-17, during Stage 10 (Form 03 Source and Consultation Register).
 
@@ -120,6 +132,28 @@ alongside it. Flagging so Pol can decide whether `source.entry` should be split 
 structured sub-fields (and if so, supply the concrete field list/schema) or whether
 free-text entries are the intended design and the doc pack's breakdown is aspirational/future.
 
+**Re-examined 2026-08-18 while building documents 04-09. No sub-fields were added, and
+here is the reasoning, since the brief explicitly left the call open.** The brief allowed
+"a small number of clearly mechanical/factual sub-fields (e.g. source type, date, author
+role)" to be added without a product decision. On inspection that is not actually the
+low-risk option:
+
+- Choosing which 3 of the doc pack's ~19 attributes become columns *is* the product
+  decision — it fixes what every row must carry, and the ones left out (reliability,
+  currency, consent/authority, confirmation status) are exactly the ones that carry
+  governance weight downstream.
+- The pack describes **two different record types** (Consultation and Source register)
+  sharing one registry field today. Structuring one of them without deciding whether they
+  split into two documents/groups would bake the ambiguity into the schema.
+- Half-structuring means a migration later: existing free-text rows would have to be
+  re-keyed into columns by hand, per participant, in a clinical record.
+
+`source.entry` is therefore unchanged and document 03 still works exactly as before.
+**Blocked pending: the concrete field list — ids, labels, tiers, types, transitions,
+staleness, and whether Consultation and Source register are one record type or two.**
+Recommendation, for whoever makes that call: split them first, then specify the ~19
+attributes against the split, rather than adding columns to the current single field.
+
 ## 5. `TriageForm`/`SourceForm` hardcoded `CAPABILITIES.connected`, contradicting the standalone-first build order (resolved — reversed)
 
 **Found:** 2026-08-17/18, carried over from the handover written at the end of Stage 9.
@@ -148,7 +182,7 @@ turned on later. This was already `ReadOnlyField`'s designed fallback for a miss
 quoted value (see its own doc comment), not new behaviour needed for this fix — it was
 verified, not built, as part of this reversal.
 
-## 6. Document 04's registry entry duplicates Frame's job description (open — not blocking, nothing built yet)
+## 6. Document 04's registry entry duplicated Frame's job description (RESOLVED — 2026-08-18)
 
 **Found:** 2026-08-18, during the reconcile/cleanup pass.
 
@@ -165,15 +199,43 @@ re-implement that analysis. As registered today, document 04's section list read
 like a second, duplicate FBA engine built inside Vector, which directly conflicts
 with that boundary.
 
-**Not resolved here because:** no document-04 form has been built yet (see
-`PROJECT_STATUS.md` — 04–09 are registry-only), so there is no code to change, and
-reshaping the registry entry to be an "intake/review of Frame's output" rather than
-"author findings from scratch" is a schema/integration design decision (what does
-Frame hand off, in what shape, and which of the current `04.x` sections become
-read-only review of that handoff vs. disappear entirely) that needs an explicit
-answer, not a guess. Flagging so Pol/the team can decide how `04.x` should be
-reshaped, and what the Vector/Frame handoff contract looks like, before document 04
-is built.
+**Resolution (Pol, 2026-08-18 — explicit product decision, then implemented):**
+Document 04 becomes the **Assessment / FBA Record**: it receives Frame's
+`FbaOutcomeBundle`, displays its findings, lets the practitioner reconcile them into
+the record, and carries the approval that sets `fba.approved` for documents 06/07/09.
+Vector does not author FBA analysis.
+
+What was actually changed, and why each choice was made rather than guessed:
+
+- **`documents.json` — retitled, nothing removed.** Document 04 is now "Assessment /
+  FBA Record"; `04.3` is "Sources, methods and assessment handoff"; `04.4`, `04.5`,
+  `04.7` and `04.8` are marked "(received — reconcile)". No section was deleted and no
+  field was deleted, moved or re-tiered — documents 07/08/09 quote `behaviour.*` and
+  `analysis.*` through `rendersIn`, so removing them would have broken every plan
+  document. The sections change role, not existence.
+- **Two new tier-0 fields, both pure provenance:** `fba.bundle_id` and
+  `fba.bundle_received_at` (both askedIn `04.3`, `rendersIn: []`). They record *which*
+  assessment output an approved conclusion reviewed. Tier 0 because they are identity
+  facts, not interpretation; `rendersIn` deliberately empty because whether a plan
+  document should print the bundle reference is a separate decision nobody has made.
+- **No new clinical field was invented.** The "reconciliation" behaviour lives in the
+  UI, not the schema: `packages/ui/src/frameContractStub.ts` compares each bundle
+  finding against what Vector currently holds and reports `offered` /
+  `accepted_unchanged` / `differs` / `out_of_scope`; `acceptFinding` copies a finding
+  into the record only on an explicit click. Reconciliation is confined to `04.4`-`04.8`
+  (`FRAME_RECONCILED_SECTION_IDS`): a finding addressed anywhere else — triage, the
+  source register, a plan, or the practitioner's own conclusion at `04.9` — is refused
+  and shown as `out_of_scope`, so Frame can never write into Vector's judgement.
+- **`04.9` stays practitioner-authored and is the gate.** Approving it calls `approve()`
+  on the document version and sets `fba.approved`, which `pathways.json` says unlocks
+  06/07/09. Approval is refused while `analysis.function`,
+  `analysis.maintaining_variables` or `analysis.conclusion` is empty.
+
+Still open, and NOT decided here: whether the `04.4`-`04.8` fields should eventually
+become registry-level read-only (a `readOnly`/`receivedFrom` flag on `FieldDef`) rather
+than practitioner-editable fields displayed beside Frame's proposal. They were left
+editable on purpose — a reconciliation the practitioner cannot correct is worse than no
+reconciliation, and Vector must still work standalone with no bundle at all.
 
 ## Docs that were missing entirely as of session start (context, not a contradiction)
 
@@ -186,3 +248,84 @@ no other branches). Not fabricated or reconstructed. Three other planning docume
 supplied mid-session by Pol and saved to `docs/` — see their headers for scope and status —
 but they are not confirmed to be those missing files or the referenced "Master Decision
 Chart v1.0 (9 Aug 2026)" (which uses `MD-0xx` numbering not present in the supplied docs).
+
+## 7. Interim-safeguard *disposition* is not a registry field, deliberately (decided 2026-08-18)
+
+**Found:** 2026-08-18, building document 08.
+
+`pathways.json` names four dispositions (`replace | retain_with_new_justification |
+revise | retire`), `gates.ts` already models them on `InterimSafeguard`, and a
+Comprehensive release blocks while any safeguard has none. The obvious move was to add a
+registry select field for it. That was not done, for a structural reason worth recording:
+
+- A safeguard row is authored in the `interim_safeguard` group at `08.9`. The disposition
+  is decided later, when the Comprehensive plan (09) reviews it.
+- A field `askedIn 09.13` in that same group would split one repeatable group across two
+  documents. `FormRenderer` renders a group per section, so document 09 would render its
+  own, separate rows — row identity between "the safeguard" and "its disposition" would
+  be lost, and the gate keys off row identity.
+
+So disposition is modelled as case governance on the `InterimSafeguard` object
+(`safeguardsFromRows` in `packages/ui/src/plan.ts`), recorded in the document 08 UI
+alongside each row and carried to 09, where `checkReleaseGates` enforces it. `unassessed`
+is likewise **not** a field: it is always true for every row on the Interim BSP by
+definition, so offering it as a tick-box would imply a practitioner could turn it off.
+
+**Revisit if:** dispositions ever need to print in an exported plan, or to be resolvable
+across separately-stored documents in connected mode. Both would need a real registry
+representation and a decision about how row identity survives between documents.
+
+## 8. `@fracta/contract` does not exist yet — document 04 is built against a labelled stub (blocker)
+
+**Found:** 2026-08-18.
+
+Vector and Frame are to exchange `ParticipantContext` and `FbaOutcomeBundle` only through
+the shared `@fracta/contract` package. Verified as of 2026-08-18: no reference in any
+`package.json` or in `pnpm-lock.yaml`, and `npm view @fracta/contract` returns 404 on the
+public registry. Frame's repo was not inspected — the two repos never import each other's
+source, so its branch state cannot substitute for a published package.
+
+`packages/ui/src/frameContractStub.ts` therefore declares the shapes Vector expects,
+under a header saying exactly what it is and how to replace it. **Nothing in it talks to
+Frame**: a bundle is loaded by pasting JSON into document 04, which is also the honest
+standalone answer (no network call). No fake live integration was built.
+
+**Blocked pending:** `@fracta/contract` being published/installable, plus its real field
+names for `FbaOutcomeBundle.findings` — in particular whether findings address Vector
+registry field ids (as the stub assumes) or Frame's own vocabulary, which would need a
+mapping layer nobody has specified.
+
+## 9. WHATBIT branding assets do not exist in this repo (blocker)
+
+**Found:** 2026-08-18.
+
+The brief asks for DOCX exports "with WHATBIT branding". `packages/export/src/brand.ts`
+defines exactly two brand modes — `fracta_flow_product_brand` (the "Fracta Flow" product
+brand, MD-009) and `provider_brand_profile` (a provider's own, supplied at runtime).
+There is no WHATBIT name, colour, logo or asset anywhere in the repo or its history, and
+inventing a brand identity is not an implementation choice.
+
+All nine documents export blank and completed DOCX under `FRACTA_FLOW_BRAND`, which is
+what the code actually supports today. **Blocked pending:** whether WHATBIT is a third
+product brand or a `providerBrand()` profile, plus its name string, ink/paper/accent hex
+values, and any logo asset.
+
+## 10. Documents 01-09 do not write to the transition ledger (finding, not silently changed)
+
+**Found:** 2026-08-18, verifying point 9 of the build brief.
+
+`packages/core/src/ledger.ts` (append-only, `appendTransition`/`historyFor`) is fully
+implemented and tested, but **no form has ever called it** — not documents 01-03 as built
+by earlier sessions, and not 04-09. This was checked rather than assumed.
+
+It reads as intentional rather than as a bug: `CAPABILITIES.standalone` sets
+`transitionLedger: false`, and every document runs standalone today, so a ledger would be
+written and never read. Documents 04-09 therefore do not call it either, rather than
+inventing a half-connected behaviour — but they *do* use `versions.ts`
+(`createDraftVersion`, `approve`, `release`, `correctDocument`), which is not
+capability-gated and works standalone.
+
+**Flagged, not fixed:** wiring `appendTransition` is part of turning connected mode on
+uniformly, and doing it now would either bake a connected assumption into forms (exactly
+the mistake reversed in #5) or write a ledger nothing reads. Whoever builds connected mode
+should wire it once, in the shell, for all nine documents.
