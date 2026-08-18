@@ -7,6 +7,7 @@ const STRATEGY_WORKSHEET = toTargetDocument("06", "strategy-1");
 const NO_RP_BSP = toTargetDocument("07", "bsp-2026");
 const INTERIM_BSP = toTargetDocument("08", "interim-2026");
 const COMPREHENSIVE_BSP = toTargetDocument("09", "comprehensive-2026");
+const BSA_2026 = toTargetDocument("04", "bsa-2026");
 
 describe("gates — fba.approved", () => {
   it("blocks tier3 authoring in a No-RP plan until fba.approved", () => {
@@ -39,6 +40,28 @@ describe("gates — fba.approved", () => {
       CAPABILITIES.connected,
     );
     expect(violations).toEqual([]);
+  });
+
+  it("[documents CONTRADICTIONS.md #11, resolved one layer up] raw checkAuthoringGates is still self-referential for document 04's own tier3 authoring under a no_rp pathway", () => {
+    // Document 04 IS where fba.approved is earned (04.9 analysis.conclusion,
+    // "Hard clinical gate. Approval here sets fba.approved" per the
+    // registry note) — nothing can set it before 04 is authored. Yet
+    // `requiresFbaApproval` fires for any document authoring tier3 fields
+    // under a no_rp/comprehensive pathway, including 04 itself, which
+    // makes this violation permanently unsatisfiable for a no_rp case:
+    // the BSA/FBA form would forever demand the approval it alone grants.
+    // Not fixed here, deliberately: `@pbs/core` stays generic. The fix
+    // lives one layer up, in `packages/ui/src/documentForm.ts`'s
+    // `authoringGates()`, which filters out any gate a document itself
+    // sets (`gatesSetHere`) before the UI ever sees it — every real form,
+    // including AssessmentForm, calls that wrapper, not this function
+    // directly. This test intentionally exercises the raw, unfiltered
+    // core behaviour to keep that documented.
+    const violations = checkAuthoringGates(
+      { documentId: "04", pathway: "no_rp", approvedGates: new Set(), targetDocument: BSA_2026 },
+      CAPABILITIES.standalone,
+    );
+    expect(violations.map((v) => v.gate)).toContain("fba.approved");
   });
 
   it("does not require fba.approved for tier3 content authored on the Interim BSP", () => {

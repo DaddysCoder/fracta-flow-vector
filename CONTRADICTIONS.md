@@ -69,7 +69,7 @@ correctly withhold documents 06 and 07 pending resolution, distinct from the pat
 value itself). No change to the `Pathway` type was needed. See the doc comment on
 `resolvePathway` for the full reasoning.
 
-## 3. `health.triage_screen`'s own note names a condition with no field behind it (STILL OPEN — blocker, needs a product decision)
+## 3. `health.triage_screen`'s own note names a condition with no field behind it (RESOLVED — stale, closed 2026-08-18)
 
 **Found:** 2026-08-17, during Stage 9 (Form 02 Practitioner Triage).
 
@@ -89,17 +89,28 @@ currently implements only the RRP-identified half of the condition (visible when
 is unimplemented pending either a new registry field or a decision that the RRP half
 alone is sufficient.
 
-**Re-examined 2026-08-18 while building documents 04-09, and deliberately left open.**
-The build brief asked for this gap to be closed "with a clearly factual field (not a
-clinical judgement call)". It is not one. "Immediate danger" decides whether a health
-and safeguarding screen is *required* of the practitioner, which makes it a clinical
-threshold, not a clerical fact — who may set it (referrer? triaging practitioner?),
-against what definition, and whether setting it also changes urgency or the pathway are
-all unanswered, and `risk.matrix_rating` (the only existing risk figure) is explicitly
-forbidden from gating anything (MD-019). A boolean invented here would be a clinical
-trigger with no definition behind it. **Blocked pending: the field's exact id, label,
-tier, who authors it, and what else (if anything) it should trigger.** Nothing in
-documents 04-09 depends on it, so the rest of the build was not held up.
+**Re-examined 2026-08-18 while building documents 04-09, and (at that point) deliberately
+left open.** The build brief asked for this gap to be closed "with a clearly factual
+field (not a clinical judgement call)". It is not one. "Immediate danger" decides
+whether a health and safeguarding screen is *required* of the practitioner, which makes
+it a clinical threshold, not a clerical fact — who may set it (referrer? triaging
+practitioner?), against what definition, and whether setting it also changes urgency or
+the pathway are all unanswered, and `risk.matrix_rating` (the only existing risk figure)
+is explicitly forbidden from gating anything (MD-019). A boolean invented here would be
+a clinical trigger with no definition behind it. Nothing in documents 04-09 depends on
+it, so the rest of the build was not held up.
+
+**Actually resolved earlier, 2026-08-17 (Pol), before this entry was written:**
+"RESOLVED — immediate-danger flag: distributed across existing questions, no new
+field." The ground-truth review that found this (2026-08-18) confirms
+`packages/ui/src/triage.ts` already implements only the RRP-identified half of
+`health.triage_screen`'s note — which is exactly what that decision calls for, not a
+gap. No code change was needed; the implementation already matched the decision that
+predated this entry. Closing as stale rather than as still-blocking. The registry
+field's own `note` text ("Shown only when RRP is identified or immediate danger is
+flagged") still names a condition with no field behind it — that wording is now known
+to be intentional (no new field, by decision) and worth rewording for clarity in a
+future documentation pass, but it is not a blocker.
 
 ## 4. Source register/Consultation narrative spec is far richer than the one field the registry actually defines (STILL OPEN — blocker, needs a concrete field list)
 
@@ -329,3 +340,48 @@ capability-gated and works standalone.
 uniformly, and doing it now would either bake a connected assumption into forms (exactly
 the mistake reversed in #5) or write a ledger nothing reads. Whoever builds connected mode
 should wire it once, in the shell, for all nine documents.
+
+## 11. `checkAuthoringGates`' `fba.approved` gate is self-referential on document 04 itself (RESOLVED — fixed one layer up)
+
+**Found:** 2026-08-18, on `main`, while building `BsaForm` (document 04, then titled
+"Combined BSA/FBA").
+
+`packages/core/src/gates.ts`'s `checkAuthoringGates` sets `requiresFbaApproval` whenever
+a document authors tier3 fields under a `no_rp` or `comprehensive` pathway. Document 04
+is the one document that *authors* `fba.approved` (`analysis.conclusion`'s own registry
+note: "Hard clinical gate. Approval here sets fba.approved") — its own tier3 fields
+satisfy that same check for its own `TargetDocument`, since the check has no concept of
+"fields belonging to some other document." Under `no_rp`, this made the violation
+permanently unsatisfiable: the form would forever demand the approval it alone can grant.
+
+**Resolution:** fixed independently on this branch, one layer above `@pbs/core` rather
+than inside it — `packages/ui/src/documentForm.ts`'s `gatesSetHere(documentId)` reads
+`pathways.json`'s `gates[...].setBy` and `authoringGates()` filters out any violation for
+a gate the current document itself sets, with the doc comment: "A document is never
+gated on a gate it is the one to set." `packages/core/src/gates.ts` itself is unchanged —
+calling `checkAuthoringGates` directly (as `packages/core/test/gates.test.ts` still does,
+deliberately, to document the raw core behaviour) still returns the violation; the fix is
+that nothing in the actual UI calls `checkAuthoringGates` directly anymore — `AssessmentForm`
+and every other document form go through `authoringGates()`/`releaseGates()` instead.
+No change needed to close this.
+
+## 12. `BsaForm.tsx`/`bsa.ts` (main's "Combined BSA/FBA") preserved as non-canonical (decided 2026-08-18)
+
+**Decision (Pol, 2026-08-18):** Document 04's canonical implementation is
+`AssessmentForm.tsx` — the Assessment/FBA Record, receiving and reconciling Frame's
+`FbaOutcomeBundle` (see #6 above). `main`'s independent build, `BsaForm.tsx` +
+`bsa.ts` (full from-scratch practitioner authoring of the same registry fields, no
+Frame handoff), is **not** canonical but is preserved, unmodified except for a status
+header comment, as a possible future "Frame unavailable" manual-authoring fallback —
+a decision explicitly deferred, not made here.
+
+To avoid exposing two competing Document 04 routes: `BsaForm`/`BsaResult` remain
+exported from `packages/ui/src/index.ts` (so the component stays reachable as a library
+symbol), but nothing in the live app wires it in — `VectorApp` resolves document "04"
+to `AssessmentForm` only, and `ReferralApp.tsx` (itself unused by the live app, which
+mounts `VectorApp`) was deliberately **not** updated to wire `BsaForm` into its demo
+flow, unlike on `main`, specifically to avoid reintroducing a second navigable "document
+04" experience. Both forms read the same registry document/field definitions, which now
+reflect the Assessment/FBA Record's titles and sections — `BsaForm`'s own submitted-state
+copy ("Combined BSA/FBA submitted") predates that rename and was left as-is, matching
+"preserve unmodified."

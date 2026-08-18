@@ -181,8 +181,8 @@ would have to be unwound later rather than just flipped.
    available" for a missing quoted value (its designed fallback, see
    its own doc comment) — confirmed this is the right standalone answer
    rather than assuming it. With `crossDocumentPrefill: false`, every
-   quoted field on these two forms now resolves empty until connected
-   mode is turned on later; this is expected, not a regression.
+   quoted field on these two forms now resolves empty until Stage 11
+   turns connected mode on; this is expected, not a regression.
 4. **Done.** Documents 04–09 were built the same (standalone) way, with
    the deployment mode passed in as a parameter rather than hardcoded in
    any form (`quotedValuesFor` in `packages/ui/src/documentForm.ts`).

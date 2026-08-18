@@ -33,6 +33,9 @@ export {
 } from "./source.js";
 export { SourceForm } from "./SourceForm.js";
 export type { SourceResult } from "./SourceForm.js";
+export { BSA_ALWAYS_REQUIRED_FIELD_IDS, BSA_DOCUMENT_ID, BSA_VISIBILITY_RULES } from "./bsa.js";
+export { BsaForm } from "./BsaForm.js";
+export type { BsaResult } from "./BsaForm.js";
 export { toFieldSchema, toPathwayPermissions, toTargetDocument, ALL_FIELD_SCHEMAS } from "./registryAdapter.js";
 export { ASSESSMENT_DOCUMENT_ID, ASSESSMENT_VISIBILITY_RULES, ASSESSMENT_ALWAYS_REQUIRED_FIELD_IDS, canApproveFba, FBA_APPROVAL_REQUIRED_FIELD_IDS, FBA_GATE, fbaApprovalBlockers, fbaGateUnlocks, FRAME_RECONCILED_SECTION_IDS, VECTOR_AUTHORED_SECTION_IDS } from "./assessment.js";
 export { AssessmentForm } from "./AssessmentForm.js";

@@ -14,7 +14,7 @@ _Last updated: 2026-08-18._
 | 01 | Referral | **Built** — reference implementation, signed off |
 | 02 | Practitioner Triage | **Built** — standalone-mode fixed (was hardcoded connected). All four `triage.outcome` options present |
 | 03 | Source & Consultation Register | **Built** — standalone-mode fixed. Register schema still one free-text field (`CONTRADICTIONS.md` #4) |
-| 04 | Assessment / FBA Record | **Built** — receives Frame's `FbaOutcomeBundle`, reconciles it, approves `fba.approved` (`CONTRADICTIONS.md` #6, #8) |
+| 04 | Assessment / FBA Record | **Built and canonical** (decided 2026-08-18) — receives Frame's `FbaOutcomeBundle`, reconciles it, approves `fba.approved` (`CONTRADICTIONS.md` #6, #8, #12). `main`'s independent build of the same slot, `BsaForm.tsx`/`bsa.ts` (full from-scratch practitioner authoring, no Frame handoff), is preserved but non-canonical — not wired into `VectorApp` — pending a separate decision on whether Vector needs a "Frame unavailable" manual fallback. |
 | 05 | Behaviour Data Capture | **Built** — standalone fallback log only; structurally cannot feed document 04 |
 | 06 | Strategy Instance Worksheet | **Built** — `fba.approved` gate wired; Strategy Library id + version pinned per instance |
 | 07 | No-RP BSP | **Built** — assembly document; zero RRP content, enforced structurally and tested |
@@ -93,16 +93,21 @@ the session (which made disposing a safeguard after saving document 08 impossibl
 
 1. **`@fracta/contract` unpublished** (#8) — needs the package plus its real finding
    vocabulary.
-2. **"Immediate danger" field** (#3) — a clinical threshold, not a clerical fact; needs
-   id, tier, author and what else it triggers.
-3. **Source register schema** (#4) — needs the concrete field list, and a decision on
-   whether Consultation and Source register are one record type or two.
-4. **WHATBIT branding** (#9) — no such brand exists in this repo; exports use
-   `FRACTA_FLOW_BRAND`.
-5. **Triage outcome branch follow-ups** — the four `triage.outcome` options all exist
+2. **Source register schema** (#4) — needs the concrete field list, and a decision on
+   whether Consultation and Source register are one record type or two. Not expanded.
+3. **WHATBIT branding** (#9) — brand migration is a deliberately separate, controlled
+   pass; not part of this reconciliation.
+4. **Triage outcome branch follow-ups** — the four `triage.outcome` options all exist
    and render, but per-branch required follow-up fields (notably a
    practitioner-authored decline reason, never algorithmic) would be new registry
    fields nobody has specified.
+5. **`PBSR-TPL-024` (Plan Closure or Transition Summary)** — a fully-specified source
+   template (Drive, 16 sections, 14 fields) not yet mapped into Vector's nine-document
+   scope. Recorded as future scope, not a defect in what's built.
+
+**Closed, not still a blocker:** "Immediate danger" field (was #3) — already resolved by
+Pol on 2026-08-17 ("distributed across existing questions, no new field"); the
+implementation already matches. See `CONTRADICTIONS.md` #3.
 
 ## What's preserved, unchanged
 
@@ -111,3 +116,29 @@ untouched apart from the shell that now routes to them. All registry changes are
 additive (two Document 04 provenance fields, two Document 06 pinning fields) plus
 Document 04 section retitles; `@pbs/core`'s only signature change is one optional
 `GateContext` member, and `@pbs/export`'s wrappers gained optional trailing arguments.
+
+## `main` reconciliation (2026-08-18)
+
+`main` had independently built Document 04 as `BsaForm.tsx`/`bsa.ts` ("Combined
+BSA/FBA" — full from-scratch practitioner authoring, no Frame handoff) via PR #8, in
+parallel with this branch's `AssessmentForm.tsx`. Two implementations existed for one
+registry slot. **Decision (Pol, 2026-08-18): `AssessmentForm.tsx` is canonical.**
+`main` was merged into this branch:
+
+- `BsaForm.tsx`/`bsa.ts` kept, unmodified except for a status header comment marking
+  them non-canonical (`CONTRADICTIONS.md` #12) — preserved as a possible future "Frame
+  unavailable" manual-authoring fallback, not decided here.
+- Still exported from `packages/ui/src/index.ts` as library symbols, but **not** wired
+  into `VectorApp` — document "04" resolves to `AssessmentForm` only. `main`'s change to
+  `ReferralApp.tsx` (which wired `BsaForm` into a demo flow) was deliberately not
+  carried over, since `ReferralApp` is unused by the live app but still exported —
+  carrying that change would have reintroduced a second navigable "document 04" route.
+- `main`'s own additional finding — `checkAuthoringGates` is self-referential for
+  document 04's own tier3 fields under `no_rp` — is real and still true of the raw core
+  function, but was already fixed one layer up on this branch, in
+  `documentForm.ts`'s `authoringGates()`. Recorded as resolved, `CONTRADICTIONS.md` #11;
+  the core-level test documenting the raw behaviour was kept and its comment corrected
+  to point at the actual fix rather than reintroducing it as still-open.
+- `documents.json`/`fields.json`: no conflict — `main` never touched either file for
+  Document 04; this branch's schema (identical 34 shared fields, plus 2 new provenance
+  fields) applied cleanly.
