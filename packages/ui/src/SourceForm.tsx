@@ -83,14 +83,15 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
 
   const sourceId = "source-draft"; // one draft per session in this standalone build
 
-  // Cross-document prefill is required for 03's quoted fields to show
-  // anything at all — this form is inherently a later step of one
-  // governed case, never a standalone tool, so it runs under "connected"
-  // capabilities like document 02 before it.
+  // Standalone (MD-005/MD-006), matching document 02: cross-document
+  // prefill is locked off, so 03's quoted fields quote nothing across
+  // documents. `ReadOnlyField` renders "Not yet available" for any
+  // quoted field with no locally-recorded value, which is the correct
+  // standalone answer, not a bug. See CONTRADICTIONS.md #5.
   const quotedValues = useMemo(() => {
     const caseRecord: CaseRecord = { fields: priorFields };
     const targetDocument = toTargetDocument(SOURCE_DOCUMENT_ID, sourceId);
-    const resolved = resolve(caseRecord, targetDocument, CAPABILITIES.connected, now());
+    const resolved = resolve(caseRecord, targetDocument, CAPABILITIES.standalone, now());
     const merged: Record<string, unknown> = {};
     for (const entry of [...resolved.tier0, ...resolved.tier1, ...resolved.tier2]) {
       merged[entry.fieldId] = entry.value;

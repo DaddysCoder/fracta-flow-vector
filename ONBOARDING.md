@@ -110,8 +110,9 @@ Prisma/Postgres app — ignore it, not part of this project). Concretely:
 - **Standalone mode** (`caps.crossDocumentPrefill = false`) restricts
   tier0 to locally-authored values only and empties tier1/2/3 entirely.
   This is deliberate, not a bug — see `capabilities.ts`'s own doc
-  comment. **This is currently violated by `TriageForm`/`SourceForm`
-  hardcoding `CAPABILITIES.connected` — see "Open decision" below.**
+  comment. `TriageForm`/`SourceForm` previously violated this by
+  hardcoding `CAPABILITIES.connected`; **fixed** — see "Open decision"
+  below and `CONTRADICTIONS.md` #5.
 - **Gates always run.** `caps.transitionLedger = false` only downgrades
   a violation's `severity` from `"blocking"` to `"guidance"` — it is
   never silently dropped. See `gates.ts`.
@@ -132,14 +133,14 @@ Prisma/Postgres app — ignore it, not part of this project). Concretely:
   no-RP) — see `CONTRADICTIONS.md` #2 for the full reasoning, confirmed
   by the user.
 
-## Open decision — NOT YET IMPLEMENTED, this is the actual next step
+## Open decision — RESOLVED as of 2026-08-18; docs 04-09 are the actual next step
 
-`TriageForm` and `SourceForm` (docs 02/03) hardcode
+`TriageForm` and `SourceForm` (docs 02/03) used to hardcode
 `CAPABILITIES.connected` and call `resolve()` against a shared
-in-memory case record chained from document 01. This lets cross-
-document prefill work, but it means those two forms cannot function
+in-memory case record chained from document 01. This let cross-
+document prefill work, but meant those two forms couldn't function
 without another tool's data already present — which directly
-contradicts the (not-yet-built) Stage 10 QA requirement that every one
+contradicted the (not-yet-built) Stage 10 QA requirement that every one
 of the 9 forms opens and completes standalone, "no other tool."
 
 **Discussed with the user. Their steer: standalone is correct** — the
@@ -150,20 +151,28 @@ before that point bakes `CAPABILITIES.connected` into two specific forms
 as a hardcoded constant rather than a deployment-mode toggle, which
 would have to be unwound later rather than just flipped.
 
-**What's left to do, exactly:**
-1. Switch `TriageForm`/`SourceForm` off hardcoded `CAPABILITIES.connected`
-   back to standalone (matching `ReferralForm`'s pattern).
-2. Log the reversal in `CONTRADICTIONS.md` (the other session's own
-   house rule — don't silently redo their call, write down why).
-3. Decide what "quoted from an earlier document" fields should show in
-   standalone mode when there's no earlier document to quote from — the
-   other session's `ReadOnlyField` shows "Not yet available" for a
-   missing quoted value, which may already be the right answer; verify
-   it before assuming.
-4. Continue documents 04–09 the same (standalone) way.
+**What was done, exactly:**
+1. **Done.** Switched `TriageForm`/`SourceForm` off hardcoded
+   `CAPABILITIES.connected` back to `CAPABILITIES.standalone` (matching
+   `ReferralForm`'s pattern) — `packages/ui/src/TriageForm.tsx`,
+   `packages/ui/src/SourceForm.tsx`.
+2. **Done.** Logged the reversal in `CONTRADICTIONS.md` #5 (the other
+   session's own house rule — don't silently redo their call, write
+   down why).
+3. **Done, verified not built.** `ReadOnlyField` already showed "Not yet
+   available" for a missing quoted value (its designed fallback, see
+   its own doc comment) — confirmed this is the right standalone answer
+   rather than assuming it. With `crossDocumentPrefill: false`, every
+   quoted field on these two forms now resolves empty until Stage 11
+   turns connected mode on; this is expected, not a regression.
+4. **Not started — next step.** Continue documents 04–09 the same
+   (standalone) way. See "Gaps identified for documents 04–09" below for
+   the specific per-document work items; none of that has changed.
 
-**This was the live task when this handover was written — nothing
-above has been implemented yet.** Start here.
+105 tests + typecheck + registry validate all still pass after this
+fix (same counts as before: no new tests were needed since no new
+observable behavior was added — `resolve()`'s standalone path already
+had coverage in `packages/core/test/resolve.test.ts`).
 
 ## Status against the user's own staged spec
 
@@ -177,7 +186,7 @@ PR #1 both actually used.)
 | — | `resolve()` core algorithm | Done, 30 tests |
 | 5 | Transition ledger, gates, RRP flags, document versioning | Done |
 | 8 | 01 Referral reference form | Done, verified live in-browser, **signed off by the user** |
-| 9 | Clone shell to forms 02–09 | **In progress.** 02/03 built by another session but with the connected-vs-standalone issue above; 04–09 not started |
+| 9 | Clone shell to forms 02–09 | **In progress.** 02/03 built by another session, connected-vs-standalone issue above now fixed; 04–09 not started |
 | 10 | Standalone QA over all 9 forms | Not started |
 | 11 | Connected capability set live (crossDocumentPrefill, enforced ledger, identity vault, pathway state machine) | Not started |
 | 12 | Login, tenancy, persistent storage, encryption at rest | Not started |
