@@ -8,6 +8,7 @@ export interface ExportControlsProps {
   renderCompleted: (brand: Brand) => Promise<Blob>;
   blankFilename: string;
   completedFilename: string;
+  showBlank?: boolean;
 }
 
 function download(blob: Blob, filename: string) {
@@ -24,6 +25,7 @@ export function ExportControls({
   renderCompleted,
   blankFilename,
   completedFilename,
+  showBlank = true,
 }: ExportControlsProps) {
   const { entitlements, exportBrand, requestUpgrade } = useVectorCommercial();
   const canExport = canUseFeature(entitlements, "export");
@@ -58,18 +60,20 @@ export function ExportControls({
   const paidLabel = canExport ? "" : "Paid — ";
 
   return (
-    <div className="no-print" style={{ marginBottom: "1.5rem" }} data-vector-plan={entitlements.plan}>
+    <div className="vector-export-controls no-print" data-vector-plan={entitlements.plan}>
       {usesDocumentCredit ? (
-        <div style={{ marginBottom: "0.6rem", fontSize: "0.9rem" }}>
+        <div className="vector-export-credit">
           {entitlements.documentCredits} document export{entitlements.documentCredits === 1 ? "" : "s"} available
         </div>
       ) : null}
-      <button type="button" onClick={() => void runExport(renderBlank, blankFilename)}>
-        {paidLabel}Download blank DOCX
-      </button>{" "}
+      {showBlank ? (
+        <button type="button" onClick={() => void runExport(renderBlank, blankFilename)}>
+          {paidLabel}Download blank DOCX
+        </button>
+      ) : null}
       <button type="button" onClick={() => void runExport(renderCompleted, completedFilename)}>
         {paidLabel}Download completed DOCX
-      </button>{" "}
+      </button>
       <button type="button" onClick={() => void handlePrint()}>
         {paidLabel}Print / save PDF
       </button>
