@@ -7,7 +7,11 @@ describe("TriageForm standalone launch", () => {
     const source = readFileSync(resolve(import.meta.dirname, "../src/TriageForm.tsx"), "utf8");
     expect(source).toMatch(/task\?: TriageTask/);
     expect(source).toMatch(/task = EMPTY_TRIAGE_TASK/);
-    expect(source).toMatch(/CAPABILITIES\.standalone/);
+    // Fields Referral would normally quote in are cloned into Triage's own
+    // sections (TRIAGE_STANDALONE_FIELDS) instead of gating on a capability
+    // flag, so there's no read-only quoted-field rendering here.
+    expect(source).toMatch(/TRIAGE_STANDALONE_FIELDS/);
+    expect(source).not.toMatch(/ReadOnlyField/);
   });
 });
 
@@ -15,7 +19,11 @@ describe("SourceForm standalone launch", () => {
   it("accepts empty prior fields for standalone use", () => {
     const source = readFileSync(resolve(import.meta.dirname, "../src/SourceForm.tsx"), "utf8");
     expect(source).toMatch(/priorFields: FieldEntry\[\]/);
-    expect(source).toMatch(/CAPABILITIES\.standalone/);
+    // Context fields other documents would quote from are collected directly
+    // in Source's own section (SOURCE_CONTEXT_FIELDS) instead of gating on a
+    // capability flag, so there's no read-only quoted-field rendering here.
+    expect(source).toMatch(/SOURCE_CONTEXT_FIELDS/);
+    expect(source).not.toMatch(/ReadOnlyField/);
   });
 });
 
