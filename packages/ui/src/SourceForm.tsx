@@ -1,31 +1,36 @@
-import { CAPABILITIES, resolve, type CaseRecord, type FieldEntry } from "@pbs/core";
+import type { FieldEntry } from "@pbs/core";
 import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
-import { ReadOnlyField } from "./fields/Field.js";
+import { Field } from "./fields/Field.js";
 import type { RepeatableRow } from "./fields/RepeatableGroup.js";
 import { FIELD_OPTIONS } from "./fieldOptions.js";
 import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
-import { toTargetDocument } from "./registryAdapter.js";
 import { SOURCE_DOCUMENT_ID } from "./source.js";
 
 const maybeSourceDocument = registry.documents[SOURCE_DOCUMENT_ID];
 if (!maybeSourceDocument) throw new Error(`registry is missing document "${SOURCE_DOCUMENT_ID}"`);
 const SOURCE_DOCUMENT: DocumentDef = maybeSourceDocument;
 
+const SOURCE_SECTION_IDS = new Set(SOURCE_DOCUMENT.sections.map((section) => section.id));
+
 const SOURCE_FIELDS = registry.fields.filter((f) =>
-  SOURCE_DOCUMENT.sections.some((s) => s.id === f.askedIn),
+  SOURCE_SECTION_IDS.has(f.askedIn),
 );
 
-/** Fields quoted into this document from elsewhere (registry `rendersIn`
- * only — never authored here): the triaging practitioner's identity and
- * the document date. */
-const SOURCE_QUOTED_FIELDS = registry.fields.filter(
-  (f) =>
-    !SOURCE_DOCUMENT.sections.some((s) => s.id === f.askedIn) &&
-    f.rendersIn.some((section) => SOURCE_DOCUMENT.sections.some((s) => s.id === section)),
+/**
+ * A public Source & Consultation Register is standalone. Any fields that the
+ * connected workflow would normally carry into Document 03 are collected as
+ * fresh editable context here instead of rendering "Not yet available".
+ */
+const SOURCE_CONTEXT_FIELDS = registry.fields.filter(
+  (field) =>
+    !SOURCE_SECTION_IDS.has(field.askedIn) &&
+    field.rendersIn.some((sectionId) => SOURCE_SECTION_IDS.has(sectionId)),
 );
+
+const SOURCE_EXPORT_FIELDS = [...SOURCE_FIELDS, ...SOURCE_CONTEXT_FIELDS];
 
 const EMPTY_VALUES: FormValues = { scalar: {}, groups: {} };
 
@@ -33,8 +38,6 @@ function newRowId(): string {
   return crypto.randomUUID();
 }
 
-/** Flattens a repeatable group's rows into FieldEntry[], keyed by rowId —
- * never by array position. */
 function flattenGroups(groups: FormValues["groups"], sourceDocument: string, sourceDate: string): FieldEntry[] {
   const entries: FieldEntry[] = [];
   for (const rows of Object.values(groups)) {
@@ -48,30 +51,15 @@ function flattenGroups(groups: FormValues["groups"], sourceDocument: string, sou
 }
 
 export interface SourceResult {
-  /** Every field known about the case so far, plus this register's own
-   * entries — carried forward for document 04+. */
   caseFields: FieldEntry[];
 }
 
 export interface SourceFormProps {
-  /** Everything known about the case up to this point — document 02's
-   * fields plus everything document 01 answered before it, so this
-   * register can quote the practitioner's identity back. */
   priorFields: FieldEntry[];
-  /** Called once submission succeeds. This register never decides a
-   * pathway or classification — it only records sources consulted. */
   onSubmitted: (result: SourceResult) => void;
-  /** Injected for testability; defaults to real wall-clock time in the app. */
   now?: () => Date;
 }
 
-/**
- * Auto-detects a document type from its name, for the "Auto-detected: …"
- * badge the prototype shows while drafting an entry, and the type badge
- * shown on every saved row. Keyword matching only — this is presentation
- * help, never a clinical judgement, and the practitioner can always see
- * (and, before saving, is shown) exactly what was detected.
- */
 const TYPE_KEYWORD_PATTERNS: Array<[RegExp, string]> = [
   [/referral/i, "referral"],
   [/assess/i, "assessment"],
@@ -134,23 +122,7 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
   const [participantDraft, setParticipantDraft] = useState<ConsultationDraft>(EMPTY_CONSULTATION_DRAFT);
   const [otherDraft, setOtherDraft] = useState<ConsultationDraft>(EMPTY_CONSULTATION_DRAFT);
 
-  const sourceId = "source-draft"; // one draft per session in this standalone build
-
-  // Standalone (MD-005/MD-006), matching document 02: cross-document
-  // prefill is locked off, so 03's quoted fields quote nothing across
-  // documents. `ReadOnlyField` renders "Not yet available" for any
-  // quoted field with no locally-recorded value, which is the correct
-  // standalone answer, not a bug. See CONTRADICTIONS.md #5.
-  const quotedValues = useMemo(() => {
-    const caseRecord: CaseRecord = { fields: priorFields };
-    const targetDocument = toTargetDocument(SOURCE_DOCUMENT_ID, sourceId);
-    const resolved = resolve(caseRecord, targetDocument, CAPABILITIES.standalone, now());
-    const merged: Record<string, unknown> = {};
-    for (const entry of [...resolved.tier0, ...resolved.tier1, ...resolved.tier2]) {
-      merged[entry.fieldId] = entry.value;
-    }
-    return merged;
-  }, [priorFields]);
+  const sourceId = "source-draft";
 
   const documentRows = values.groups.source_document ?? [];
   const participantRows = values.groups.consultation_participant ?? [];
@@ -208,8 +180,14 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const timestamp = now().toISOString();
+    const scalarEntries: FieldEntry[] = Object.entries(values.scalar).map(([fieldId, value]) => ({
+      fieldId,
+      value,
+      sourceDocument: sourceId,
+      sourceDate: timestamp,
+    }));
     const groupEntries = flattenGroups(values.groups, sourceId, timestamp);
-    const caseFields = [...priorFields, ...groupEntries];
+    const caseFields = [...priorFields, ...scalarEntries, ...groupEntries];
 
     setSubmitted(true);
     onSubmitted({ caseFields });
@@ -230,12 +208,12 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
   return (
     <form onSubmit={handleSubmit}>
       <ExportControls
-        renderBlank={(brand) => renderBlankDocxBlob(SOURCE_DOCUMENT, SOURCE_DOCUMENT_ID, SOURCE_FIELDS, brand)}
+        renderBlank={(brand) => renderBlankDocxBlob(SOURCE_DOCUMENT, SOURCE_DOCUMENT_ID, SOURCE_EXPORT_FIELDS, brand)}
         renderCompleted={(brand) =>
           renderCompletedDocxBlob(
             SOURCE_DOCUMENT,
             SOURCE_DOCUMENT_ID,
-            SOURCE_FIELDS,
+            SOURCE_EXPORT_FIELDS,
             brand,
             flattenValuesForExport(values),
           )
@@ -253,15 +231,26 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
         — one entry per source, one entry per consultation.
       </p>
 
-      {SOURCE_QUOTED_FIELDS.length > 0 && (
+      {SOURCE_CONTEXT_FIELDS.length > 0 && (
         <div className="card" style={{ marginBottom: "1.25rem" }}>
-          {SOURCE_QUOTED_FIELDS.map((field) => (
-            <ReadOnlyField key={field.id} field={field} value={quotedValues[field.id]} />
+          <h2 className="section-title">Document details</h2>
+          {SOURCE_CONTEXT_FIELDS.map((field) => (
+            <Field
+              key={field.id}
+              field={field}
+              value={values.scalar[field.id]}
+              required={false}
+              onChange={(value) =>
+                setValues((current) => ({
+                  ...current,
+                  scalar: { ...current.scalar, [field.id]: value },
+                }))
+              }
+            />
           ))}
         </div>
       )}
 
-      {/* 03.A Document register */}
       <div className="card" style={{ marginBottom: "1.25rem" }}>
         <div className="register-header-row">
           <h2 className="section-title" style={{ margin: 0 }}>
@@ -365,7 +354,6 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
         </div>
       </div>
 
-      {/* 03.B Consultation log */}
       <div className="card" style={{ marginBottom: "1.25rem" }}>
         <div className="register-header-row">
           <h2 className="section-title" style={{ margin: 0 }}>
@@ -412,10 +400,6 @@ interface ConsultationListProps {
   onRemove: (rowId: string) => void;
 }
 
-/** One of the two consultation lists (participant / others) — same
- * saved-rows-plus-draft-box shape as the document register, just with a
- * shorter field set (no auto-detected type, no duplicate check: a person
- * consulted twice is expected, not a data-entry mistake). */
 function ConsultationList({ heading, rows, group, draft, setDraft, onAdd, onRemove }: ConsultationListProps) {
   return (
     <div style={{ marginBottom: "1.25rem" }}>
