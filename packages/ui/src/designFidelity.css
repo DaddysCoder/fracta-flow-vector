@@ -59,6 +59,19 @@ a {
   letter-spacing: -0.01em;
 }
 
+.vector-shell-whatbit-link {
+  flex: none;
+  color: #9b9b9b;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.vector-shell-whatbit-link:hover {
+  color: var(--purple);
+}
+
 .pill-nav {
   display: flex;
   align-items: center;
@@ -431,6 +444,10 @@ button.primary {
 
   .vector-shell-logo {
     font-size: 14px;
+  }
+
+  .vector-shell-whatbit-link {
+    display: none;
   }
 
   .vector-shell-menu-button {

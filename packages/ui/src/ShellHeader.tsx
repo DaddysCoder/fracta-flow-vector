@@ -3,6 +3,7 @@ import {
   BRAND_PROFILE_ROUTE,
   pathForPublicForm,
   SUPPORT_TEMPLATE_ROUTES,
+  WHATBIT_VECTOR_URL,
   type PublicForm,
 } from "./routing.js";
 
@@ -44,6 +45,14 @@ export function ShellHeader({ activeId }: ShellHeaderProps) {
           <div className="vector-shell-primary">
             <a href="#top" className="vector-shell-logo">
               VECTOR
+            </a>
+            <a
+              href={WHATBIT_VECTOR_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="vector-shell-whatbit-link"
+            >
+              by WHATBIT
             </a>
 
             <nav aria-label="Vector" className="pill-nav">
