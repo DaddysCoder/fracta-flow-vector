@@ -7,7 +7,8 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test && vitest run --config vitest.worker.config.ts",
     "typecheck": "pnpm -r run typecheck",
-    "deploy": "pnpm run build && wrangler deploy"
+    "migrate:remote": "wrangler d1 migrations apply vector-commercial --remote",
+    "deploy": "pnpm run build && pnpm run migrate:remote && wrangler deploy"
   },
   "devDependencies": {
     "dependency-cruiser": "^18.2.0",
