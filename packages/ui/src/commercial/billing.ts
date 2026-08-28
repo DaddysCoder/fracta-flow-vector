@@ -1,10 +1,13 @@
 import type { BrandProfileInput } from "./brandProfile.js";
 import type { PaidFeature, VectorEntitlements } from "./entitlements.js";
 
+export type VectorPurchase = "single_document" | "monthly" | "yearly";
+
 interface EntitlementResponse {
   entitlements: VectorEntitlements;
   subscription: {
     status: string;
+    priceId?: string | null;
     currentPeriodEnd: string | null;
     cancelAtPeriodEnd: boolean;
   } | null;
@@ -28,7 +31,10 @@ export async function fetchVectorEntitlements(): Promise<EntitlementResponse> {
   return readJson(response) as Promise<EntitlementResponse>;
 }
 
-export async function startVectorCheckout(feature?: PaidFeature): Promise<void> {
+export async function startVectorCheckout(
+  feature?: PaidFeature,
+  purchase: VectorPurchase = "monthly",
+): Promise<void> {
   const response = await fetch("/api/billing/checkout", {
     method: "POST",
     credentials: "same-origin",
@@ -36,11 +42,21 @@ export async function startVectorCheckout(feature?: PaidFeature): Promise<void> 
       accept: "application/json",
       "content-type": "application/json",
     },
-    body: JSON.stringify({ feature: feature ?? null }),
+    body: JSON.stringify({ feature: feature ?? null, purchase }),
   });
   const body = await readJson(response);
   if (typeof body?.url !== "string") throw new Error("checkout_url_missing");
   window.location.assign(body.url);
+}
+
+export async function consumeVectorDocumentCredit(): Promise<number | null> {
+  const response = await fetch("/api/document-credit/consume", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { accept: "application/json" },
+  });
+  const body = await readJson(response);
+  return typeof body?.remaining === "number" ? body.remaining : null;
 }
 
 export async function openVectorBillingPortal(): Promise<void> {
