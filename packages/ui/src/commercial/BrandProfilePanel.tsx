@@ -9,7 +9,7 @@ export function BrandProfilePanel() {
 
   if (!canBrand) {
     return (
-      <section className="no-print" style={{ marginBottom: "1.5rem", padding: "1rem", border: "1px solid var(--border)" }}>
+      <section className="card no-print" style={{ marginBottom: "1.5rem" }}>
         <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Organisation branding</h2>
         <p style={{ margin: "0 0 0.75rem" }}>
           Paid Vector unlocks saved organisation branding on exports.
@@ -22,7 +22,7 @@ export function BrandProfilePanel() {
   }
 
   return (
-    <section className="no-print" style={{ marginBottom: "1.5rem", padding: "1rem", border: "1px solid var(--border)" }}>
+    <section className="card no-print" style={{ marginBottom: "1.5rem" }}>
       <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Organisation branding</h2>
       <p style={{ margin: "0 0 0.75rem" }}>
         Applied to every exported DOCX and printed document — referral, triage, register and support

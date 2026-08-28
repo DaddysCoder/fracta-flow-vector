@@ -10,9 +10,23 @@
   --ink: #111111;
   --paper: #ffffff;
   --muted: #6b6b6b;
+  --muted-2: #9b9b9b;
   --purple: #7b2ff7;
   /** Paid Brand Profile heading font — Montserrat until a customer picks one. */
   --heading-font: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Brand-layer surface/shell tokens (design handoff). Sit on top of the
+   * accessibility tokens above — never replace --tap-target-min, focus
+   * rings or tri-state accessibility. */
+  --border-hairline: #eeeafa;
+  --border-input: #dad3ec;
+  --surface-page: #fdfcfe;
+  --surface-recessed: #faf9fc;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --shadow-resting: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-elevated: 0 8px 24px rgba(17, 17, 17, 0.08);
 
   --tap-target-min: 44px;
   --font-size-base: 17px;
@@ -25,12 +39,62 @@
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--surface-page);
   color: var(--ink);
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
+}
+
+/* Sticky shell header — 60px, translucent blur, hairline border, full
+ * width with its own centred, max-1180px inner row. */
+.vector-shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.vector-shell-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.vector-shell-logo {
+  font-family: var(--heading-font);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--purple);
+  text-decoration: none;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-resting);
+  padding: 20px 24px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-recessed {
+  background: var(--surface-recessed);
+}
+
+a.card:hover,
+button.card:hover {
+  box-shadow: var(--shadow-elevated);
+  border-color: var(--border-input);
 }
 
 input,
@@ -143,11 +207,12 @@ button {
   min-height: var(--tap-target-min);
   min-width: var(--tap-target-min);
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   border: 1.5px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 button.primary {
@@ -155,6 +220,10 @@ button.primary {
   border-color: var(--purple);
   color: var(--paper);
   font-weight: 600;
+}
+
+button:hover:not(:disabled) {
+  box-shadow: var(--shadow-resting);
 }
 
 button.primary::before {

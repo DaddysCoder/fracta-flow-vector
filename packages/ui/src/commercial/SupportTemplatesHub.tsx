@@ -152,8 +152,8 @@ export function SupportTemplatesHub() {
   return (
     <section
       aria-labelledby="support-templates-heading"
-      className="no-print"
-      style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid var(--border, #e5e5e5)" }}
+      className="card no-print"
+      style={{ marginBottom: "2rem" }}
     >
       <h2 id="support-templates-heading" style={{ marginTop: 0, fontSize: "1rem" }}>
         Support Templates
@@ -166,7 +166,8 @@ export function SupportTemplatesHub() {
         {SUPPORT_TEMPLATES.map((template) => (
           <li
             key={template.id}
-            style={{ padding: "0.75rem", border: "1px solid var(--border, #e5e5e5)", borderRadius: "8px" }}
+            className="card card-recessed"
+            style={{ padding: "0.75rem" }}
           >
             <strong style={{ display: "block" }}>{template.title}</strong>
             <span style={{ display: "block", fontSize: "0.875rem", marginTop: "0.25rem" }}>
