@@ -48,7 +48,7 @@ The Worker verifies `Stripe-Signature` against the exact raw request body and `S
 
 `POST /api/billing/portal`
 
-Creates a Stripe Billing Portal session for the Stripe customer stored against the current Vector account. The WhatBit live Stripe account already has an active default customer portal configuration.
+Vector requires its own Stripe Billing Portal configuration via `STRIPE_PORTAL_CONFIGURATION_ID`. Do not use the WhatBit account-wide default configuration for Vector, because the default configuration can allow subscription price changes and WhatBit has other products. The Vector portal should allow payment-method/customer-detail updates and cancellation at period end, but should not expose unrelated product/price switching.
 
 ## Cloudflare bindings and secrets
 
@@ -59,6 +59,7 @@ Required Worker values:
 - `STRIPE_SECRET_KEY` — secret
 - `STRIPE_WEBHOOK_SECRET` — secret
 - `STRIPE_PRICE_ID` — the live recurring Vector price ID
+- `STRIPE_PORTAL_CONFIGURATION_ID` — dedicated Vector portal configuration
 - `DB` — D1 binding
 - `ASSETS` — configured by Wrangler static assets
 
@@ -68,10 +69,11 @@ Do not commit Stripe secret keys or webhook secrets.
 
 1. Choose the recurring Vector price amount/cadence.
 2. Create that Stripe Price under `prod_V9bnI1AvbEr9nO` and set `STRIPE_PRICE_ID`.
-3. Create/bind the Cloudflare D1 database and run the migration.
-4. Set the Stripe secret key in the Worker.
-5. Deploy Vector to its final Cloudflare URL.
-6. Create the Stripe webhook endpoint against `<final-vector-url>/api/billing/webhook` and set its signing secret in the Worker.
-7. Run one live low-value checkout and cancellation test before public launch.
+3. Create the dedicated Vector Billing Portal configuration and set `STRIPE_PORTAL_CONFIGURATION_ID`.
+4. Create/bind the Cloudflare D1 database and run the migration.
+5. Set the Stripe secret key in the Worker.
+6. Deploy Vector to its final Cloudflare URL.
+7. Create the Stripe webhook endpoint against `<final-vector-url>/api/billing/webhook` and set its signing secret in the Worker.
+8. Run one live low-value checkout and cancellation test before public launch.
 
 The Arc support-template content can be added later without changing the billing model; `supportTemplates` is already a paid entitlement.
