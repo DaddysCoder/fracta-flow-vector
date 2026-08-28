@@ -1,5 +1,6 @@
 import { VECTOR_BRAND, type Brand } from "@pbs/export";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { resolveExportBrand } from "./brandProfile.js";
 import { fetchVectorEntitlements, startVectorCheckout } from "./billing.js";
 import {
   FREE_ENTITLEMENTS,
@@ -42,12 +43,13 @@ function sleep(ms: number) {
 export function VectorCommercialProvider({
   children,
   entitlements,
-  exportBrand = defaultCommercialState.exportBrand,
+  exportBrand: exportBrandOverride,
   requestUpgrade = defaultCommercialState.requestUpgrade,
 }: VectorCommercialProviderProps) {
   const [resolvedEntitlements, setResolvedEntitlements] = useState(
     entitlements ?? defaultCommercialState.entitlements,
   );
+  const [exportBrand, setExportBrand] = useState<Brand>(exportBrandOverride ?? VECTOR_BRAND);
 
   useEffect(() => {
     if (entitlements) {
@@ -77,6 +79,26 @@ export function VectorCommercialProvider({
       cancelled = true;
     };
   }, [entitlements]);
+
+  useEffect(() => {
+    if (exportBrandOverride) {
+      setExportBrand(exportBrandOverride);
+      return;
+    }
+
+    let cancelled = false;
+    async function refreshBrand() {
+      const brand = await resolveExportBrand(resolvedEntitlements);
+      if (!cancelled) setExportBrand(brand);
+    }
+
+    void refreshBrand();
+    window.addEventListener("vector:brand-profile-saved", refreshBrand);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("vector:brand-profile-saved", refreshBrand);
+    };
+  }, [exportBrandOverride, resolvedEntitlements]);
 
   return (
     <VectorCommercialContext.Provider

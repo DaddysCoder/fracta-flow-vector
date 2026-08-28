@@ -5,12 +5,14 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "build": "pnpm -r run build",
-    "test": "pnpm -r run test",
-    "typecheck": "pnpm -r run typecheck"
+    "test": "pnpm -r run test && vitest run --config vitest.worker.config.ts",
+    "typecheck": "pnpm -r run typecheck",
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "devDependencies": {
     "dependency-cruiser": "^18.2.0",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "wrangler": "^4.127.0"
   }
 }

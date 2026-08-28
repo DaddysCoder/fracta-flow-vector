@@ -1,3 +1,4 @@
+import type { BrandProfileInput } from "./brandProfile.js";
 import type { PaidFeature, VectorEntitlements } from "./entitlements.js";
 
 interface EntitlementResponse {
@@ -51,4 +52,29 @@ export async function openVectorBillingPortal(): Promise<void> {
   const body = await readJson(response);
   if (typeof body?.url !== "string") throw new Error("portal_url_missing");
   window.location.assign(body.url);
+}
+
+export async function fetchVectorBrandProfile(): Promise<BrandProfileInput | null> {
+  const response = await fetch("/api/brand-profile", {
+    method: "GET",
+    credentials: "same-origin",
+    headers: { accept: "application/json" },
+  });
+  const body = await readJson(response);
+  return body?.profile ?? null;
+}
+
+export async function saveVectorBrandProfile(profile: BrandProfileInput): Promise<BrandProfileInput> {
+  const response = await fetch("/api/brand-profile", {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(profile),
+  });
+  const body = await readJson(response);
+  if (!body?.profile) throw new Error("profile_save_failed");
+  return body.profile as BrandProfileInput;
 }

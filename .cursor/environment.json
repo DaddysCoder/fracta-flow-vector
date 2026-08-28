@@ -1,0 +1,11 @@
+{
+  "name": "Fracta Flow Vector",
+  "install": "corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile",
+  "terminals": [
+    {
+      "name": "ui-dev",
+      "command": "pnpm --filter @pbs/ui run dev"
+    }
+  ],
+  "ports": [43123]
+}

@@ -4,6 +4,7 @@ import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
+import { saveReferralHandoff } from "./localReferralHandoff.js";
 import {
   REFERRAL_ALWAYS_REQUIRED_FIELD_IDS,
   REFERRAL_DOCUMENT_ID,
@@ -74,16 +75,18 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
     });
 
     setSubmitted(true);
+    saveReferralHandoff(values.scalar);
     onSubmitted(task);
   }
 
   if (submitted) {
     return (
       <div role="status">
-        <h1>Referral submitted</h1>
+        <h1>Referral complete</h1>
         <p>
-          A triage task has been created for a practitioner to review. No acceptance or clinical
-          pathway decision has been made — that happens during triage.
+          Your referral answers remain in this browser session only. Nothing was uploaded,
+          transmitted, or stored on WHATBIT servers. Use export or print if you want a copy
+          outside this device.
         </p>
       </div>
     );
@@ -123,7 +126,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
       />
 
       <button type="submit" className="primary no-print">
-        Submit referral
+        Complete referral
       </button>
     </form>
   );

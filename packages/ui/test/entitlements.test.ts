@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { VECTOR_BRAND } from "@pbs/export";
 import {
   FREE_ENTITLEMENTS,
   PAID_ENTITLEMENTS,
@@ -22,5 +23,10 @@ describe("Vector commercial entitlements", () => {
   it("maps the one-tier launch model deterministically", () => {
     expect(entitlementsForPlan("free")).toBe(FREE_ENTITLEMENTS);
     expect(entitlementsForPlan("paid")).toBe(PAID_ENTITLEMENTS);
+  });
+
+  it("uses Vector as the default export brand", () => {
+    expect(VECTOR_BRAND.name).toBe("Vector");
+    expect(VECTOR_BRAND.mode).toBe("vector_product_brand");
   });
 });

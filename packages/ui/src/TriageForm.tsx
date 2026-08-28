@@ -63,10 +63,17 @@ export interface TriageResult {
   resolvedPathway: ResolvedPathway;
 }
 
+const EMPTY_TRIAGE_TASK: TriageTask = {
+  id: "vector-standalone-triage",
+  referralDocumentId: "vector-standalone-referral",
+  createdAt: "1970-01-01T00:00:00.000Z",
+  priority: "standard",
+  fields: [],
+};
+
 export interface TriageFormProps {
-  /** The referral's triage task — its `fields` become this case's starting
-   * record, so document 02 can quote what document 01 already answered. */
-  task: TriageTask;
+  /** Optional referral task for quoted fields. Omitted in the public standalone launch. */
+  task?: TriageTask;
   /** Called once submission succeeds. Practitioner triage is where the RRP
    * classification and pathway are decided — never inferred, never scored. */
   onSubmitted: (result: TriageResult) => void;
@@ -74,7 +81,7 @@ export interface TriageFormProps {
   now?: () => Date;
 }
 
-export function TriageForm({ task, onSubmitted, now = () => new Date() }: TriageFormProps) {
+export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => new Date() }: TriageFormProps) {
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -139,10 +146,11 @@ export function TriageForm({ task, onSubmitted, now = () => new Date() }: Triage
   if (submitted) {
     return (
       <div role="status">
-        <h1>Practitioner triage submitted</h1>
+        <h1>Practitioner triage complete</h1>
         <p>
-          The RRP classification and triage outcome recorded above are the practitioner's own judgement —
-          nothing here was inferred or scored automatically.
+          Your triage record remains in this browser session only. The RRP classification and
+          outcome above are your own judgement — nothing here was inferred or scored automatically.
+          Use export or print if you want a copy outside this device.
         </p>
       </div>
     );
@@ -184,7 +192,7 @@ export function TriageForm({ task, onSubmitted, now = () => new Date() }: Triage
       />
 
       <button type="submit" className="primary no-print">
-        Submit triage
+        Complete triage
       </button>
     </form>
   );

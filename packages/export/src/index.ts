@@ -9,4 +9,10 @@ export {
   renderDocumentDocx,
   renderDocumentDocxBlob,
 } from "./docx.js";
-export type { RenderDocxInput } from "./docx.js";
+export {
+  buildSupportTemplateDocx,
+  formatSupportTemplateLine,
+  renderSupportTemplateBlankDocxBlob,
+  renderSupportTemplateDocxBlob,
+} from "./supportTemplateDocx.js";
+export type { SupportTemplateDocxInput, SupportTemplateDocxSection } from "./supportTemplateDocx.js";
