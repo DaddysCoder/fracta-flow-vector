@@ -8,9 +8,10 @@ import {
   type RrpClassification,
   type TriageTask,
 } from "@pbs/core";
-import { FRACTA_FLOW_BRAND, renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
+import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
+import { ExportControls } from "./commercial/ExportControls.js";
 import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
 import { toPathwayPermissions, toTargetDocument } from "./registryAdapter.js";
 import { TRIAGE_ALWAYS_REQUIRED_FIELD_IDS, TRIAGE_DOCUMENT_ID, TRIAGE_VISIBILITY_RULES } from "./triage.js";
@@ -34,15 +35,6 @@ const TRIAGE_QUOTED_FIELDS = registry.fields.filter(
 );
 
 const EMPTY_VALUES: FormValues = { scalar: {}, groups: {} };
-
-function download(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 function newRowId(): string {
   return crypto.randomUUID();
@@ -111,22 +103,6 @@ export function TriageForm({ task, onSubmitted, now = () => new Date() }: Triage
     return merged;
   }, [task]);
 
-  function handleDownloadBlank() {
-    renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, FRACTA_FLOW_BRAND).then((blob) =>
-      download(blob, "fracta-flow-practitioner-triage-blank.docx"),
-    );
-  }
-
-  function handleDownloadCompleted() {
-    renderCompletedDocxBlob(
-      TRIAGE_DOCUMENT,
-      TRIAGE_DOCUMENT_ID,
-      TRIAGE_FIELDS,
-      FRACTA_FLOW_BRAND,
-      flattenValuesForExport(values),
-    ).then((blob) => download(blob, "fracta-flow-practitioner-triage-completed.docx"));
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const missing = [...required].filter((id) => {
@@ -174,17 +150,20 @@ export function TriageForm({ task, onSubmitted, now = () => new Date() }: Triage
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="no-print" style={{ marginBottom: "1.5rem" }}>
-        <button type="button" onClick={handleDownloadBlank}>
-          Download blank DOCX
-        </button>{" "}
-        <button type="button" onClick={handleDownloadCompleted}>
-          Download completed DOCX
-        </button>{" "}
-        <button type="button" onClick={() => window.print()}>
-          Print
-        </button>
-      </div>
+      <ExportControls
+        renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, brand)}
+        renderCompleted={(brand) =>
+          renderCompletedDocxBlob(
+            TRIAGE_DOCUMENT,
+            TRIAGE_DOCUMENT_ID,
+            TRIAGE_FIELDS,
+            brand,
+            flattenValuesForExport(values),
+          )
+        }
+        blankFilename="vector-practitioner-triage-blank.docx"
+        completedFilename="vector-practitioner-triage-completed.docx"
+      />
 
       {missingFields.length > 0 && (
         <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
