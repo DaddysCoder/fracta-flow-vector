@@ -252,7 +252,7 @@ export function SupportTemplatesHub() {
                 onClick={() => requestUpgrade("support_templates")}
                 style={{ minHeight: "auto", minWidth: "auto", padding: 0, border: "none", background: "none", color: "var(--muted)", fontSize: "0.8125rem", fontWeight: 700 }}
               >
-                Upgrade →
+                Unlock with Paid →
               </button>
             )}
           </li>
@@ -317,7 +317,7 @@ export function SupportTemplatesHub() {
                     fontWeight: 700,
                   }}
                 >
-                  {canUse ? "Start →" : "Upgrade →"}
+                  {canUse ? "Start →" : "Unlock with Paid →"}
                 </button>
               </li>
             );
