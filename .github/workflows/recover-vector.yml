@@ -35,3 +35,5 @@ jobs:
         run: |
           set -euo pipefail
           git push origin refs/remotes/bundle/vector-final:refs/heads/sol/vector-launch-final
+
+# rerun after correcting transfer chunk
