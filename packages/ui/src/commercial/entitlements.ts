@@ -7,6 +7,7 @@ export interface VectorEntitlements {
   exportDocuments: boolean;
   companyBranding: boolean;
   supportTemplates: boolean;
+  documentCredits: number;
 }
 
 export const FREE_ENTITLEMENTS: VectorEntitlements = Object.freeze({
@@ -14,6 +15,7 @@ export const FREE_ENTITLEMENTS: VectorEntitlements = Object.freeze({
   exportDocuments: false,
   companyBranding: false,
   supportTemplates: false,
+  documentCredits: 0,
 });
 
 export const PAID_ENTITLEMENTS: VectorEntitlements = Object.freeze({
@@ -21,6 +23,7 @@ export const PAID_ENTITLEMENTS: VectorEntitlements = Object.freeze({
   exportDocuments: true,
   companyBranding: true,
   supportTemplates: true,
+  documentCredits: 0,
 });
 
 export function entitlementsForPlan(plan: VectorPlan): VectorEntitlements {
