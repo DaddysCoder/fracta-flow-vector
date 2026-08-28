@@ -12,6 +12,7 @@ import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
+import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { FormWizard } from "./FormWizard.js";
 import { toPathwayPermissions, toTargetDocument } from "./registryAdapter.js";
@@ -84,6 +85,7 @@ export interface TriageFormProps {
 export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => new Date() }: TriageFormProps) {
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
+  const { entitlements } = useVectorCommercial();
 
   const triageId = "triage-draft"; // one draft per session in this standalone build
 
@@ -150,6 +152,7 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
       newRowId={newRowId}
       quotedFields={TRIAGE_QUOTED_FIELDS}
       quotedValues={quotedValues}
+      documentEyebrow={`Document ${TRIAGE_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
       onComplete={handleSubmit}
       completeLabel="Complete triage"
       header={

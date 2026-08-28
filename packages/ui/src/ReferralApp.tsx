@@ -15,6 +15,7 @@ import {
   pathForPublicForm,
   PUBLIC_FORM_ROUTES,
   resolveAppView,
+  SUPPORT_TEMPLATE_ROUTES,
   WHATBIT_VECTOR_URL,
   type AppView,
   type PublicForm,
@@ -72,6 +73,14 @@ export function ReferralApp() {
     setActiveView({ kind: "public", form });
   }
 
+  function navigateToHub() {
+    const nextPath = SUPPORT_TEMPLATE_ROUTES.hub;
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, "", nextPath);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
+  }
+
   if (activeView.kind === "support-hub") {
     return <SupportTemplatesHubPage />;
   }
@@ -88,10 +97,28 @@ export function ReferralApp() {
     <>
       <header className="vector-shell-header no-print">
         <div className="vector-shell-header-inner">
-          <a href="#top" className="vector-shell-logo">
-            VECTOR
-          </a>
-          <a href={WHATBIT_VECTOR_URL} style={{ fontSize: "0.8125rem", fontWeight: 600 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "28px", minWidth: 0 }}>
+            <a href="#top" className="vector-shell-logo" style={{ flex: "none" }}>
+              VECTOR
+            </a>
+            <nav aria-label="Vector forms" className="pill-nav">
+              {PUBLIC_FORMS.map((form) => (
+                <button
+                  key={form.id}
+                  type="button"
+                  className="pill-nav-item"
+                  aria-current={activeForm === form.id ? "page" : undefined}
+                  onClick={() => navigateTo(form.id)}
+                >
+                  {form.title}
+                </button>
+              ))}
+              <button type="button" className="pill-nav-item" onClick={navigateToHub}>
+                Support Templates
+              </button>
+            </nav>
+          </div>
+          <a href={WHATBIT_VECTOR_URL} style={{ fontSize: "0.8125rem", fontWeight: 600, flex: "none" }}>
             Back to Vector on WHATBIT
           </a>
         </div>
@@ -111,37 +138,6 @@ export function ReferralApp() {
               : "Three forms are free to use. DOCX, Print/PDF, organisation branding and Support Templates require Vector Paid."}
           </p>
         </div>
-
-        <nav
-          aria-label="Vector forms"
-          className="no-print"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-            gap: "0.75rem",
-            marginBottom: "2rem",
-          }}
-        >
-          {PUBLIC_FORMS.map((form) => {
-            const selected = activeForm === form.id;
-            return (
-              <button
-                key={form.id}
-                type="button"
-                className={`card${selected ? " primary" : ""}`}
-                aria-pressed={selected}
-                aria-current={selected ? "page" : undefined}
-                onClick={() => navigateTo(form.id)}
-                style={{ textAlign: "left", minHeight: "96px", height: "auto" }}
-              >
-                <strong style={{ display: "block", marginBottom: "0.25rem" }}>{form.title}</strong>
-                <span style={{ display: "block", fontSize: "0.875rem", fontWeight: 400 }}>
-                  {form.description}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
 
         <BrandProfilePanel />
         <SupportTemplatesHub />

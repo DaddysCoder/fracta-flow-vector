@@ -16,6 +16,9 @@ export interface FormWizardProps {
   quotedValues?: Record<string, unknown>;
   /** Rendered above the wizard on every step (export controls, alerts). */
   header?: React.ReactNode;
+  /** e.g. "DOCUMENT 01 · FREE" — prefixed to the current section id in the
+   * small accent-coloured eyebrow line above each step. */
+  documentEyebrow: string;
   /** Called once the practitioner confirms the review step. */
   onComplete: () => void;
   completeLabel: string;
@@ -39,6 +42,7 @@ export function FormWizard({
   quotedFields = [],
   quotedValues = {},
   header,
+  documentEyebrow,
   onComplete,
   completeLabel,
 }: FormWizardProps) {
@@ -101,7 +105,7 @@ export function FormWizard({
           );
           if (sectionFields.length === 0) return null;
           return (
-            <section key={section.id} style={{ border: "1px solid var(--border, #e5e5e5)", borderRadius: "8px", padding: "0.75rem", marginBottom: "0.75rem" }}>
+            <section key={section.id} className="card" style={{ padding: "0.75rem 1rem", marginBottom: "0.75rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <h3 style={{ margin: "0 0 0.5rem", fontSize: "0.95rem" }}>
                   {section.id} {section.title}
@@ -129,21 +133,31 @@ export function FormWizard({
   return (
     <div>
       {header}
-      <p aria-hidden="true" style={{ display: "flex", gap: "0.25rem", margin: "0 0 1rem" }}>
+      <div className="wizard-eyebrow-row">
+        <div className="wizard-eyebrow">
+          {documentEyebrow} · {currentSection.id}
+        </div>
+        <div className="wizard-step-label">
+          Step {stepIndex + 1} of {steps.length}
+        </div>
+      </div>
+      <p aria-hidden="true" style={{ display: "flex", gap: "4px", margin: "0 0 1.5rem" }}>
         {steps.map((section, index) => (
           <span
             key={section.id}
             style={{
               flex: 1,
-              height: "4px",
+              height: "3px",
               borderRadius: "2px",
-              background: index <= stepIndex ? "var(--purple)" : "var(--border, #e5e5e5)",
+              background:
+                index < stepIndex
+                  ? "var(--purple)"
+                  : index === stepIndex
+                    ? "color-mix(in srgb, var(--purple) 25%, white)"
+                    : "var(--border-hairline)",
             }}
           />
         ))}
-      </p>
-      <p style={{ margin: "0 0 0.5rem", fontSize: "0.875rem" }}>
-        Step {stepIndex + 1} of {steps.length}
       </p>
 
       {missingFields.length > 0 && (
