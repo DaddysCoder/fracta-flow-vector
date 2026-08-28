@@ -12,10 +12,10 @@ import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
-import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
+import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
+import { FormWizard } from "./FormWizard.js";
 import { toPathwayPermissions, toTargetDocument } from "./registryAdapter.js";
 import { TRIAGE_ALWAYS_REQUIRED_FIELD_IDS, TRIAGE_DOCUMENT_ID, TRIAGE_VISIBILITY_RULES } from "./triage.js";
-import { requiredFieldIds } from "./visibility.js";
 
 const maybeTriageDocument = registry.documents[TRIAGE_DOCUMENT_ID];
 if (!maybeTriageDocument) throw new Error(`registry is missing document "${TRIAGE_DOCUMENT_ID}"`);
@@ -84,12 +84,6 @@ export interface TriageFormProps {
 export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => new Date() }: TriageFormProps) {
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
-
-  const required = useMemo(
-    () => requiredFieldIds(TRIAGE_VISIBILITY_RULES, values.scalar, TRIAGE_ALWAYS_REQUIRED_FIELD_IDS),
-    [values],
-  );
 
   const triageId = "triage-draft"; // one draft per session in this standalone build
 
@@ -110,18 +104,7 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
     return merged;
   }, [task]);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const missing = [...required].filter((id) => {
-      const v = values.scalar[id];
-      return v === undefined || v === null || v === "";
-    });
-    if (missing.length > 0) {
-      setMissingFields(missing);
-      return;
-    }
-    setMissingFields([]);
-
+  function handleSubmit() {
     const timestamp = now().toISOString();
     const scalarEntries: FieldEntry[] = Object.entries(values.scalar).map(([fieldId, value]) => ({
       fieldId,
@@ -157,43 +140,34 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <ExportControls
-        renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, brand)}
-        renderCompleted={(brand) =>
-          renderCompletedDocxBlob(
-            TRIAGE_DOCUMENT,
-            TRIAGE_DOCUMENT_ID,
-            TRIAGE_FIELDS,
-            brand,
-            flattenValuesForExport(values),
-          )
-        }
-        blankFilename="vector-practitioner-triage-blank.docx"
-        completedFilename="vector-practitioner-triage-completed.docx"
-      />
-
-      {missingFields.length > 0 && (
-        <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
-          Please complete: {missingFields.join(", ")}
-        </div>
-      )}
-
-      <FormRenderer
-        document={TRIAGE_DOCUMENT}
-        fields={TRIAGE_FIELDS}
-        values={values}
-        onChange={setValues}
-        visibilityRules={TRIAGE_VISIBILITY_RULES}
-        alwaysRequiredFieldIds={TRIAGE_ALWAYS_REQUIRED_FIELD_IDS}
-        newRowId={newRowId}
-        quotedFields={TRIAGE_QUOTED_FIELDS}
-        quotedValues={quotedValues}
-      />
-
-      <button type="submit" className="primary no-print">
-        Complete triage
-      </button>
-    </form>
+    <FormWizard
+      document={TRIAGE_DOCUMENT}
+      fields={TRIAGE_FIELDS}
+      values={values}
+      onChange={setValues}
+      visibilityRules={TRIAGE_VISIBILITY_RULES}
+      alwaysRequiredFieldIds={TRIAGE_ALWAYS_REQUIRED_FIELD_IDS}
+      newRowId={newRowId}
+      quotedFields={TRIAGE_QUOTED_FIELDS}
+      quotedValues={quotedValues}
+      onComplete={handleSubmit}
+      completeLabel="Complete triage"
+      header={
+        <ExportControls
+          renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, brand)}
+          renderCompleted={(brand) =>
+            renderCompletedDocxBlob(
+              TRIAGE_DOCUMENT,
+              TRIAGE_DOCUMENT_ID,
+              TRIAGE_FIELDS,
+              brand,
+              flattenValuesForExport(values),
+            )
+          }
+          blankFilename="vector-practitioner-triage-blank.docx"
+          completedFilename="vector-practitioner-triage-completed.docx"
+        />
+      }
+    />
   );
 }

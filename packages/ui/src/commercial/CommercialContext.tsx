@@ -1,7 +1,8 @@
 import { VECTOR_BRAND, type Brand } from "@pbs/export";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { resolveExportBrand } from "./brandProfile.js";
+import { DEFAULT_HEADING_FONT, resolveExportBrand } from "./brandProfile.js";
 import {
+  fetchVectorBrandProfile,
   fetchVectorEntitlements,
   startVectorCheckout,
   type VectorPurchase,
@@ -157,6 +158,44 @@ export function VectorCommercialProvider({
       window.removeEventListener("vector:brand-profile-saved", refreshBrand);
     };
   }, [exportBrandOverride, resolvedEntitlements]);
+
+  // Paid Brand Profile customisation (heading font + accent colour) applies
+  // live, app-wide, not just to exports — every heading and focus/required
+  // mark on screen derives from these two CSS custom properties.
+  useEffect(() => {
+    let cancelled = false;
+    async function applyBrandToDocument() {
+      const root = document.documentElement.style;
+      if (!resolvedEntitlements.companyBranding) {
+        root.removeProperty("--purple");
+        root.removeProperty("--heading-font");
+        return;
+      }
+      try {
+        const profile = await fetchVectorBrandProfile();
+        if (cancelled) return;
+        if (profile?.accentHex) root.setProperty("--purple", `#${profile.accentHex.replace(/^#/, "")}`);
+        else root.removeProperty("--purple");
+        const font = profile?.headingFont ?? DEFAULT_HEADING_FONT;
+        root.setProperty(
+          "--heading-font",
+          `"${font}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
+        );
+      } catch {
+        if (!cancelled) {
+          root.removeProperty("--purple");
+          root.removeProperty("--heading-font");
+        }
+      }
+    }
+
+    void applyBrandToDocument();
+    window.addEventListener("vector:brand-profile-saved", applyBrandToDocument);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("vector:brand-profile-saved", applyBrandToDocument);
+    };
+  }, [resolvedEntitlements.companyBranding]);
 
   const activeFeature = billingAttempt.status === "idle" ? null : billingAttempt.feature;
 

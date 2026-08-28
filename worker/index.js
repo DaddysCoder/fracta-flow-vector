@@ -27,6 +27,8 @@ const SESSION_COOKIE = "vector_account";
 const STRIPE_API = "https://api.stripe.com/v1";
 const PURCHASES = new Set(["single_document", "monthly", "yearly"]);
 
+const BRAND_HEADING_FONTS = ["Montserrat", "Sora", "Space Grotesk", "Manrope", "DM Sans"];
+
 const BRAND_PROFILE_FIELDS = [
   "organisationName",
   "accentHex",
@@ -34,6 +36,7 @@ const BRAND_PROFILE_FIELDS = [
   "paperHex",
   "contactLine",
   "footerText",
+  "headingFont",
 ];
 
 function parseCookies(request) {
@@ -492,6 +495,11 @@ function sanitizeBrandField(value) {
   return trimmed.length > 0 ? trimmed.slice(0, 500) : null;
 }
 
+function sanitizeHeadingFont(value) {
+  const trimmed = sanitizeBrandField(value);
+  return trimmed && BRAND_HEADING_FONTS.includes(trimmed) ? trimmed : null;
+}
+
 function brandRowToProfile(row) {
   if (!row) return null;
   return {
@@ -501,12 +509,13 @@ function brandRowToProfile(row) {
     paperHex: row.paper_hex,
     contactLine: row.contact_line,
     footerText: row.footer_text,
+    headingFont: row.heading_font,
   };
 }
 
 async function getBrandProfile(env, accountId) {
   const row = await env.DB.prepare(
-    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text
+    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text, heading_font
        FROM brand_profiles
       WHERE account_id = ?1`,
   )
@@ -524,8 +533,8 @@ async function saveBrandProfile(env, accountId, body) {
   await env.DB.prepare(
     `INSERT INTO brand_profiles (
         account_id, organisation_name, accent_hex, ink_hex, paper_hex,
-        contact_line, footer_text, created_at, updated_at
-      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        contact_line, footer_text, heading_font, created_at, updated_at
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       ON CONFLICT(account_id) DO UPDATE SET
         organisation_name = excluded.organisation_name,
         accent_hex = excluded.accent_hex,
@@ -533,6 +542,7 @@ async function saveBrandProfile(env, accountId, body) {
         paper_hex = excluded.paper_hex,
         contact_line = excluded.contact_line,
         footer_text = excluded.footer_text,
+        heading_font = excluded.heading_font,
         updated_at = CURRENT_TIMESTAMP`,
   )
     .bind(
@@ -543,6 +553,7 @@ async function saveBrandProfile(env, accountId, body) {
       sanitizeBrandField(body.paperHex),
       sanitizeBrandField(body.contactLine),
       sanitizeBrandField(body.footerText),
+      sanitizeHeadingFont(body.headingFont),
     )
     .run();
 

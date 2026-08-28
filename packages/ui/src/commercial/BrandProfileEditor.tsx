@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchVectorBrandProfile, saveVectorBrandProfile } from "./billing.js";
-import type { BrandProfileInput } from "./brandProfile.js";
+import { BRAND_ACCENT_SWATCHES, BRAND_HEADING_FONTS, DEFAULT_HEADING_FONT, type BrandProfileInput } from "./brandProfile.js";
 
 const EMPTY_PROFILE: BrandProfileInput = {
   organisationName: "",
@@ -9,6 +9,7 @@ const EMPTY_PROFILE: BrandProfileInput = {
   paperHex: "",
   contactLine: "",
   footerText: "",
+  headingFont: DEFAULT_HEADING_FONT,
 };
 
 export function BrandProfileEditor() {
@@ -67,17 +68,60 @@ export function BrandProfileEditor() {
         />
       </label>
       <label>
-        Accent colour (hex)
-        <input value={profile.accentHex ?? ""} onChange={(event) => updateField("accentHex", event.target.value)} />
+        Document heading font
+        <select
+          value={profile.headingFont ?? DEFAULT_HEADING_FONT}
+          onChange={(event) => updateField("headingFont", event.target.value)}
+        >
+          {BRAND_HEADING_FONTS.map((font) => (
+            <option key={font} value={font} style={{ fontFamily: font }}>
+              {font}
+            </option>
+          ))}
+        </select>
       </label>
-      <label>
-        Ink colour (hex)
-        <input value={profile.inkHex ?? ""} onChange={(event) => updateField("inkHex", event.target.value)} />
-      </label>
-      <label>
-        Paper colour (hex)
-        <input value={profile.paperHex ?? ""} onChange={(event) => updateField("paperHex", event.target.value)} />
-      </label>
+      <div>
+        <span className="field-label" style={{ display: "block" }}>
+          Accent colour
+        </span>
+        <div role="radiogroup" aria-label="Accent colour" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {BRAND_ACCENT_SWATCHES.map((swatch) => {
+            const active = (profile.accentHex ?? "").toUpperCase().replace(/^#/, "") === swatch.hex;
+            return (
+              <button
+                key={swatch.hex}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                title={`${swatch.label} · #${swatch.hex}`}
+                onClick={() => updateField("accentHex", swatch.hex)}
+                style={{
+                  width: "2.25rem",
+                  height: "2.25rem",
+                  borderRadius: "999px",
+                  background: `#${swatch.hex}`,
+                  border: active ? "3px solid var(--ink)" : "1px solid var(--muted)",
+                  cursor: "pointer",
+                }}
+              />
+            );
+          })}
+        </div>
+        <p className="field-note" style={{ fontFamily: "monospace" }}>
+          #{(profile.accentHex || BRAND_ACCENT_SWATCHES[0].hex).toUpperCase().replace(/^#/, "")}
+        </p>
+      </div>
+      <details>
+        <summary>Advanced: ink and paper colours</summary>
+        <label>
+          Ink colour (hex)
+          <input value={profile.inkHex ?? ""} onChange={(event) => updateField("inkHex", event.target.value)} />
+        </label>
+        <label>
+          Paper colour (hex)
+          <input value={profile.paperHex ?? ""} onChange={(event) => updateField("paperHex", event.target.value)} />
+        </label>
+      </details>
       <label>
         Contact line
         <input value={profile.contactLine ?? ""} onChange={(event) => updateField("contactLine", event.target.value)} />

@@ -37,8 +37,8 @@ export function buildDocxDocument(input: RenderDocxInput): Document {
       children: [new TextRun({ text: brand.name, bold: true, color: brand.accent, size: 20 })],
     }),
     new Paragraph({
-      text: `${documentId} — ${document.title}`,
       heading: HeadingLevel.TITLE,
+      children: [new TextRun({ text: `${documentId} — ${document.title}`, font: brand.headingFont })],
     }),
     new Paragraph({
       children: [
@@ -54,8 +54,8 @@ export function buildDocxDocument(input: RenderDocxInput): Document {
 
     children.push(
       new Paragraph({
-        text: `${section.id}  ${section.title}`,
         heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: `${section.id}  ${section.title}`, font: brand.headingFont })],
       }),
     );
 

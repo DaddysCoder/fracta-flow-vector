@@ -53,7 +53,9 @@ export function ReadOnlyField({ field, value }: ReadOnlyFieldProps) {
 
 const NOT_YET_AVAILABLE = "Not yet available";
 
-function formatReadOnlyValue(field: FieldDef, value: unknown): string {
+/** Shared with FormWizard's review step, so answers read identically there
+ * as they do in a quoted read-only field. */
+export function formatReadOnlyValue(field: FieldDef, value: unknown): string {
   if (value === undefined || value === null || value === "") return NOT_YET_AVAILABLE;
 
   switch (field.type) {
