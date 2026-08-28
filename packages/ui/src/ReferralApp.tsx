@@ -3,19 +3,15 @@ import "./tokens.css";
 import "./print.css";
 import { BrandProfilePanel } from "./commercial/BrandProfilePanel.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
-import {
-  SupportTemplatesHub,
-  SupportTemplatesHubPage,
-} from "./commercial/SupportTemplatesHub.js";
+import { SupportTemplatesHubPage } from "./commercial/SupportTemplatesHub.js";
 import { ReferralForm } from "./ReferralForm.js";
+import { ShellHeader } from "./ShellHeader.js";
 import { SourceForm } from "./SourceForm.js";
 import { TriageForm } from "./TriageForm.js";
 import {
   isBlockedLegacyDocumentRoute,
-  pathForPublicForm,
   PUBLIC_FORM_ROUTES,
   resolveAppView,
-  WHATBIT_VECTOR_URL,
   type AppView,
   type PublicForm,
 } from "./routing.js";
@@ -64,14 +60,6 @@ export function ReferralApp() {
     return () => window.removeEventListener("popstate", syncFromLocation);
   }, []);
 
-  function navigateTo(form: PublicForm) {
-    const nextPath = pathForPublicForm(form);
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, "", nextPath);
-    }
-    setActiveView({ kind: "public", form });
-  }
-
   if (activeView.kind === "support-hub") {
     return <SupportTemplatesHubPage />;
   }
@@ -81,70 +69,51 @@ export function ReferralApp() {
     return <SupportTemplateWizard config={config} />;
   }
 
+  if (activeView.kind === "brand") {
+    return (
+      <>
+        <ShellHeader activeId="brand" />
+        <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
+          <div id="top" />
+          <p style={{ color: "var(--purple)", fontWeight: 700, letterSpacing: "0.04em", margin: "0 0 0.25rem", textTransform: "uppercase", fontSize: "0.6875rem" }}>
+            Organisation
+          </p>
+          <h1 style={{ margin: "0 0 1.5rem" }}>Brand profile</h1>
+          <BrandProfilePanel />
+        </main>
+      </>
+    );
+  }
+
   const activeForm = activeView.form;
   const activeMeta = PUBLIC_FORMS.find((form) => form.id === activeForm) ?? PUBLIC_FORMS[0]!;
 
   return (
-    <main style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 1.25rem 4rem" }}>
-      <header style={{ marginBottom: "1.5rem" }}>
-        <p style={{ color: "var(--purple)", fontWeight: 800, letterSpacing: "0.04em", margin: 0 }}>
-          VECTOR
-        </p>
-        <h1 style={{ margin: "0.25rem 0 0.5rem" }}>{activeMeta.title}</h1>
-        <p style={{ margin: 0, maxWidth: "680px" }}>
-          Complete forms in your browser. Participant and client form content stays on this device
-          during normal use and is not stored on WHATBIT servers.
-        </p>
-        <p className="field-note no-print" style={{ marginTop: "0.5rem" }}>
-          {entitlements.plan === "paid"
-            ? "Vector Paid is active in this browser."
-            : "Three forms are free to use. DOCX, Print/PDF, organisation branding and Support Templates require Vector Paid."}
-        </p>
-        <p className="no-print" style={{ marginTop: "0.75rem" }}>
-          <a href={WHATBIT_VECTOR_URL}>Back to Vector on WHATBIT</a>
-        </p>
-      </header>
+    <>
+      <ShellHeader activeId={activeForm} />
 
-      <nav
-        aria-label="Vector forms"
-        className="no-print"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-          gap: "0.75rem",
-          marginBottom: "2rem",
-        }}
-      >
-        {PUBLIC_FORMS.map((form) => {
-          const selected = activeForm === form.id;
-          return (
-            <button
-              key={form.id}
-              type="button"
-              className={selected ? "primary" : undefined}
-              aria-pressed={selected}
-              aria-current={selected ? "page" : undefined}
-              onClick={() => navigateTo(form.id)}
-              style={{ textAlign: "left", minHeight: "96px" }}
-            >
-              <strong style={{ display: "block", marginBottom: "0.25rem" }}>{form.title}</strong>
-              <span style={{ display: "block", fontSize: "0.875rem", fontWeight: 400 }}>
-                {form.description}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+      <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
+        <div id="top" />
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h1 style={{ margin: "0 0 0.5rem" }}>{activeMeta.title}</h1>
+          <p style={{ margin: 0, maxWidth: "680px" }}>
+            Complete forms in your browser. Participant and client form content stays on this device
+            during normal use and is not stored on WHATBIT servers.
+          </p>
+          <p className="field-note no-print" style={{ marginTop: "0.5rem" }}>
+            {entitlements.plan === "paid"
+              ? "Vector Paid is active in this browser."
+              : "Three forms are free to use. DOCX, Print/PDF, organisation branding and Support Templates require Vector Paid."}
+          </p>
+        </div>
 
-      <BrandProfilePanel />
-      <SupportTemplatesHub />
-
-      <section aria-live="polite">
-        {activeForm === "referral" && <ReferralForm onSubmitted={() => undefined} />}
-        {activeForm === "triage" && <TriageForm onSubmitted={() => undefined} />}
-        {activeForm === "source" && <SourceForm priorFields={[]} onSubmitted={() => undefined} />}
-      </section>
-    </main>
+        <section aria-live="polite">
+          {activeForm === "referral" && <ReferralForm onSubmitted={() => undefined} />}
+          {activeForm === "triage" && <TriageForm onSubmitted={() => undefined} />}
+          {activeForm === "source" && <SourceForm priorFields={[]} onSubmitted={() => undefined} />}
+        </section>
+      </main>
+    </>
   );
 }
 
