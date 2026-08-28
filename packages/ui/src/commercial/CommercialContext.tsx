@@ -1,4 +1,4 @@
-import { FRACTA_FLOW_BRAND, type Brand } from "@pbs/export";
+import { VECTOR_BRAND, type Brand } from "@pbs/export";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { fetchVectorEntitlements, startVectorCheckout } from "./billing.js";
 import {
@@ -25,7 +25,7 @@ function defaultUpgrade(feature: PaidFeature) {
 
 const defaultCommercialState: VectorCommercialState = {
   entitlements: FREE_ENTITLEMENTS,
-  exportBrand: FRACTA_FLOW_BRAND,
+  exportBrand: VECTOR_BRAND,
   requestUpgrade: defaultUpgrade,
 };
 
