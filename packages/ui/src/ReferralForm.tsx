@@ -1,7 +1,8 @@
 import { createTriageTask, type FieldEntry, type TriageTask } from "@pbs/core";
-import { FRACTA_FLOW_BRAND, renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
+import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
+import { ExportControls } from "./commercial/ExportControls.js";
 import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
 import {
   REFERRAL_ALWAYS_REQUIRED_FIELD_IDS,
@@ -19,15 +20,6 @@ const REFERRAL_FIELDS = registry.fields.filter((f) =>
 );
 
 const EMPTY_VALUES: FormValues = { scalar: {}, groups: {} };
-
-function download(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 function newRowId(): string {
   return crypto.randomUUID();
@@ -52,22 +44,6 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
   );
 
   const referralId = "referral-draft"; // one draft per session in this standalone build
-
-  function handleDownloadBlank() {
-    renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, FRACTA_FLOW_BRAND).then(
-      (blob) => download(blob, "fracta-flow-referral-blank.docx"),
-    );
-  }
-
-  function handleDownloadCompleted() {
-    renderCompletedDocxBlob(
-      REFERRAL_DOCUMENT,
-      REFERRAL_DOCUMENT_ID,
-      REFERRAL_FIELDS,
-      FRACTA_FLOW_BRAND,
-      flattenValuesForExport(values),
-    ).then((blob) => download(blob, "fracta-flow-referral-completed.docx"));
-  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -115,17 +91,20 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="no-print" style={{ marginBottom: "1.5rem" }}>
-        <button type="button" onClick={handleDownloadBlank}>
-          Download blank DOCX
-        </button>{" "}
-        <button type="button" onClick={handleDownloadCompleted}>
-          Download completed DOCX
-        </button>{" "}
-        <button type="button" onClick={() => window.print()}>
-          Print
-        </button>
-      </div>
+      <ExportControls
+        renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, brand)}
+        renderCompleted={(brand) =>
+          renderCompletedDocxBlob(
+            REFERRAL_DOCUMENT,
+            REFERRAL_DOCUMENT_ID,
+            REFERRAL_FIELDS,
+            brand,
+            flattenValuesForExport(values),
+          )
+        }
+        blankFilename="vector-referral-blank.docx"
+        completedFilename="vector-referral-completed.docx"
+      />
 
       {missingFields.length > 0 && (
         <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
