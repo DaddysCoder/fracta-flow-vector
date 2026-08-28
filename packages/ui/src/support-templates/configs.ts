@@ -93,7 +93,7 @@ function rrpStep(): TemplateStep {
     code: "08",
     title: "Regulated restrictive practices",
     kind: "rrp",
-    note: "Describe each restrictive practice in use, and how it will be reduced or eliminated.",
+    note: "Describe each regulated restrictive practice included in the plan, why it is considered necessary, and how its use will be reduced and eliminated over time. Recording a practice in this plan does not itself authorise its use; applicable state or territory authorisation and consent requirements still apply.",
   };
 }
 
@@ -104,8 +104,8 @@ function ceaseStep(): TemplateStep {
     lists: [
       {
         key: "cease",
-        label: "Practices to be ceased immediately (unauthorised)",
-        placeholder: "e.g. removing workshop tools following incidents",
+        label: "Practices identified to cease immediately",
+        placeholder: "e.g. a practice that should not continue under the current plan or authorisation arrangements",
       },
     ],
     longs: [
@@ -216,8 +216,8 @@ export const GENERIC_BSP_CONFIG: TemplateConfig = {
       lists: [
         {
           key: "cease",
-          label: "Practices to be ceased immediately (unauthorised)",
-          placeholder: "e.g. removing workshop tools following incidents",
+          label: "Practices identified to cease immediately",
+          placeholder: "e.g. a practice that should not continue under the current plan or authorisation arrangements",
         },
       ],
       longs: [{ key: "implementation", label: "Implementation support and monitoring" }],
@@ -243,11 +243,11 @@ export const INTERIM_BSP_CONFIG: TemplateConfig = {
   saveLabel: "Save Interim BSP",
   completionTitle: "Interim BSP saved",
   completionNote:
-    "This plan is brief by design and holds while the fuller assessment is underway. Its details can carry into the Comprehensive BSP when you start one.",
+    "This plan is brief by design and supports immediate risk management while fuller assessment is underway. Its details can carry into the Comprehensive BSP when you start one.",
   steps: (ctx) => [
     personDetailsStep(
       ctx,
-      "Fields tagged FROM REFERRAL are filled from your Vector Referral and can be edited here. An Interim BSP holds a restrictive practice safely while fuller assessment is underway — it can be started at any point in that process, with no prerequisite assessment or saved referral required.",
+      "Fields tagged FROM REFERRAL are filled from your Vector Referral and can be edited here. An Interim BSP supports immediate needs and risk management while fuller assessment is underway. It can be started without a completed FBA or saved referral. If regulated restrictive practices are included, recording them in the plan does not itself authorise their use; applicable state or territory authorisation and consent requirements still apply.",
       [
         {
           key: "dateEngaged",
