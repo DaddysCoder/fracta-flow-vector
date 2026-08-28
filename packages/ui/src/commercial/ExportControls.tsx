@@ -1,4 +1,5 @@
 import type { Brand } from "@pbs/export";
+import { consumeVectorDocumentCredit } from "./billing.js";
 import { canUseFeature } from "./entitlements.js";
 import { useVectorCommercial } from "./CommercialContext.js";
 
@@ -26,6 +27,13 @@ export function ExportControls({
 }: ExportControlsProps) {
   const { entitlements, exportBrand, requestUpgrade } = useVectorCommercial();
   const canExport = canUseFeature(entitlements, "export");
+  const usesDocumentCredit = entitlements.plan !== "paid" && entitlements.documentCredits > 0;
+
+  async function consumeCreditIfNeeded() {
+    if (!usesDocumentCredit) return;
+    await consumeVectorDocumentCredit();
+    window.dispatchEvent(new CustomEvent("vector:document-credit-consumed"));
+  }
 
   async function runExport(render: (brand: Brand) => Promise<Blob>, filename: string) {
     if (!canExport) {
@@ -34,14 +42,16 @@ export function ExportControls({
     }
 
     const blob = await render(exportBrand);
+    await consumeCreditIfNeeded();
     download(blob, filename);
   }
 
-  function handlePrint() {
+  async function handlePrint() {
     if (!canExport) {
       requestUpgrade("export");
       return;
     }
+    await consumeCreditIfNeeded();
     window.print();
   }
 
@@ -49,13 +59,18 @@ export function ExportControls({
 
   return (
     <div className="no-print" style={{ marginBottom: "1.5rem" }} data-vector-plan={entitlements.plan}>
+      {usesDocumentCredit ? (
+        <div style={{ marginBottom: "0.6rem", fontSize: "0.9rem" }}>
+          {entitlements.documentCredits} document export{entitlements.documentCredits === 1 ? "" : "s"} available
+        </div>
+      ) : null}
       <button type="button" onClick={() => void runExport(renderBlank, blankFilename)}>
         {paidLabel}Download blank DOCX
       </button>{" "}
       <button type="button" onClick={() => void runExport(renderCompleted, completedFilename)}>
         {paidLabel}Download completed DOCX
       </button>{" "}
-      <button type="button" onClick={handlePrint}>
+      <button type="button" onClick={() => void handlePrint()}>
         {paidLabel}Print / save PDF
       </button>
     </div>

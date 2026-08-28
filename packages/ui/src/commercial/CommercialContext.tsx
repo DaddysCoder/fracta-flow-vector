@@ -12,7 +12,6 @@ import {
   type PaidFeature,
   type VectorEntitlements,
 } from "./entitlements.js";
-import { PaywallModal } from "./PaywallModal.js";
 
 export interface VectorCommercialState {
   entitlements: VectorEntitlements;
@@ -21,7 +20,7 @@ export interface VectorCommercialState {
 }
 
 function defaultUpgrade(feature: PaidFeature) {
-  void startVectorCheckout(feature).catch((error) => {
+  void startVectorCheckout(feature, "monthly").catch((error) => {
     window.dispatchEvent(
       new CustomEvent("vector:billing-error", {
         detail: { feature, error: error instanceof Error ? error.message : "checkout_failed" },
@@ -44,8 +43,9 @@ export interface VectorCommercialProviderProps extends Partial<VectorCommercialS
 
 type BillingAttempt =
   | { status: "idle" }
-  | { status: "opening"; feature: PaidFeature }
-  | { status: "error"; feature: PaidFeature; code: string };
+  | { status: "choosing"; feature: PaidFeature }
+  | { status: "opening"; feature: PaidFeature; purchase: VectorPurchase }
+  | { status: "error"; feature: PaidFeature; purchase: VectorPurchase; code: string };
 
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -56,6 +56,17 @@ function checkoutErrorMessage(code: string) {
     return "Checkout is temporarily unavailable. Please try again shortly.";
   }
   return "We couldn’t open secure checkout. Please try again.";
+}
+
+function purchaseLabel(purchase: VectorPurchase) {
+  switch (purchase) {
+    case "single_document":
+      return "A$5 · One document";
+    case "monthly":
+      return "A$19 · Monthly";
+    case "yearly":
+      return "A$180 · Yearly";
+  }
 }
 
 export function VectorCommercialProvider({
@@ -69,28 +80,27 @@ export function VectorCommercialProvider({
   );
   const [exportBrand, setExportBrand] = useState<Brand>(exportBrandOverride ?? VECTOR_BRAND);
   const [billingAttempt, setBillingAttempt] = useState<BillingAttempt>({ status: "idle" });
-  const [paywallFeature, setPaywallFeature] = useState<PaidFeature | null>(null);
 
   function requestUpgrade(feature: PaidFeature) {
     if (requestUpgradeOverride) {
       requestUpgradeOverride(feature);
       return;
     }
-
-    setPaywallFeature(feature);
+    setBillingAttempt({ status: "choosing", feature });
   }
 
-  function startCheckout(feature: PaidFeature, purchase: VectorPurchase) {
-    setPaywallFeature(null);
-    setBillingAttempt({ status: "opening", feature });
-    window.dispatchEvent(new CustomEvent("vector:billing-start", { detail: { feature, purchase } }));
+  function openCheckout(feature: PaidFeature, purchase: VectorPurchase) {
+    setBillingAttempt({ status: "opening", feature, purchase });
+    window.dispatchEvent(
+      new CustomEvent("vector:billing-start", { detail: { feature, purchase } }),
+    );
 
     void startVectorCheckout(feature, purchase).catch((error) => {
       const code = error instanceof Error ? error.message : "checkout_failed";
-      setBillingAttempt({ status: "error", feature, code });
+      setBillingAttempt({ status: "error", feature, purchase, code });
       window.dispatchEvent(
         new CustomEvent("vector:billing-error", {
-          detail: { feature, error: code },
+          detail: { feature, purchase, error: code },
         }),
       );
     });
@@ -103,25 +113,29 @@ export function VectorCommercialProvider({
     }
 
     let cancelled = false;
-    const returnedFromCheckout = new URLSearchParams(window.location.search).get("billing") === "success";
 
-    void (async () => {
-      const attempts = returnedFromCheckout ? 5 : 1;
+    async function refreshEntitlements(attempts = 1) {
       for (let attempt = 0; attempt < attempts; attempt += 1) {
         try {
           const state = await fetchVectorEntitlements();
           if (cancelled) return;
           setResolvedEntitlements(state.entitlements);
-          if (state.entitlements.plan === "paid") return;
+          if (state.entitlements.plan === "paid" || state.entitlements.documentCredits > 0) return;
         } catch {
           if (cancelled) return;
         }
         if (attempt < attempts - 1) await sleep(600 * (attempt + 1));
       }
-    })();
+    }
 
+    const returnedFromCheckout = new URLSearchParams(window.location.search).get("billing") === "success";
+    void refreshEntitlements(returnedFromCheckout ? 5 : 1);
+
+    const handleCreditConsumed = () => void refreshEntitlements(1);
+    window.addEventListener("vector:document-credit-consumed", handleCreditConsumed);
     return () => {
       cancelled = true;
+      window.removeEventListener("vector:document-credit-consumed", handleCreditConsumed);
     };
   }, [entitlements]);
 
@@ -183,6 +197,8 @@ export function VectorCommercialProvider({
     };
   }, [resolvedEntitlements.companyBranding]);
 
+  const activeFeature = billingAttempt.status === "idle" ? null : billingAttempt.feature;
+
   return (
     <VectorCommercialContext.Provider
       value={{ entitlements: resolvedEntitlements, exportBrand, requestUpgrade }}
@@ -191,7 +207,7 @@ export function VectorCommercialProvider({
       {!requestUpgradeOverride && billingAttempt.status !== "idle" ? (
         <div
           className="no-print"
-          role={billingAttempt.status === "error" ? "alert" : "status"}
+          role={billingAttempt.status === "error" ? "alert" : "dialog"}
           aria-live={billingAttempt.status === "error" ? "assertive" : "polite"}
           aria-atomic="true"
           style={{
@@ -199,24 +215,57 @@ export function VectorCommercialProvider({
             left: "50%",
             bottom: "1rem",
             zIndex: 1000,
-            width: "min(420px, calc(100vw - 2rem))",
+            width: "min(440px, calc(100vw - 2rem))",
             transform: "translateX(-50%)",
-            padding: "0.875rem 1rem",
+            padding: "1rem",
             border: "1px solid var(--border, #d8d8d8)",
-            borderRadius: "12px",
+            borderRadius: "14px",
             background: "var(--surface, #fff)",
             boxShadow: "0 12px 36px rgba(0, 0, 0, 0.14)",
           }}
         >
-          {billingAttempt.status === "opening" ? (
-            <strong>Opening secure checkout…</strong>
+          {billingAttempt.status === "choosing" ? (
+            <>
+              <strong style={{ display: "block", marginBottom: "0.35rem" }}>
+                Choose your Vector access
+              </strong>
+              <div style={{ fontSize: "0.92rem", marginBottom: "0.8rem" }}>
+                {activeFeature === "export"
+                  ? "Pay once for this document, or unlock the full paid workspace."
+                  : "Unlock the full Vector paid workspace."}
+              </div>
+              <div style={{ display: "grid", gap: "0.5rem" }}>
+                {activeFeature === "export" ? (
+                  <button
+                    type="button"
+                    onClick={() => openCheckout(activeFeature, "single_document")}
+                  >
+                    A$5 · One document
+                  </button>
+                ) : null}
+                <button type="button" onClick={() => openCheckout(activeFeature!, "monthly")}>
+                  A$19 · Monthly
+                </button>
+                <button type="button" onClick={() => openCheckout(activeFeature!, "yearly")}>
+                  A$180 · Yearly
+                </button>
+                <button type="button" onClick={() => setBillingAttempt({ status: "idle" })}>
+                  Keep using Vector Free
+                </button>
+              </div>
+            </>
+          ) : billingAttempt.status === "opening" ? (
+            <strong>Opening secure checkout for {purchaseLabel(billingAttempt.purchase)}…</strong>
           ) : (
             <>
               <strong style={{ display: "block" }}>
                 {checkoutErrorMessage(billingAttempt.code)}
               </strong>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                <button type="button" onClick={() => setPaywallFeature(billingAttempt.feature)}>
+                <button
+                  type="button"
+                  onClick={() => openCheckout(billingAttempt.feature, billingAttempt.purchase)}
+                >
                   Try again
                 </button>
                 <button type="button" onClick={() => setBillingAttempt({ status: "idle" })}>
@@ -226,13 +275,6 @@ export function VectorCommercialProvider({
             </>
           )}
         </div>
-      ) : null}
-      {!requestUpgradeOverride && paywallFeature ? (
-        <PaywallModal
-          feature={paywallFeature}
-          onConfirm={(purchase) => startCheckout(paywallFeature, purchase)}
-          onDismiss={() => setPaywallFeature(null)}
-        />
       ) : null}
     </VectorCommercialContext.Provider>
   );
