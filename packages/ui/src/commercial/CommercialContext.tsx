@@ -36,20 +36,53 @@ export interface VectorCommercialProviderProps extends Partial<VectorCommercialS
   children: ReactNode;
 }
 
+type BillingAttempt =
+  | { status: "idle" }
+  | { status: "opening"; feature: PaidFeature }
+  | { status: "error"; feature: PaidFeature; code: string };
+
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function checkoutErrorMessage(code: string) {
+  if (code === "billing_not_configured") {
+    return "Checkout is temporarily unavailable. Please try again shortly.";
+  }
+  return "We couldn’t open secure checkout. Please try again.";
 }
 
 export function VectorCommercialProvider({
   children,
   entitlements,
   exportBrand: exportBrandOverride,
-  requestUpgrade = defaultCommercialState.requestUpgrade,
+  requestUpgrade: requestUpgradeOverride,
 }: VectorCommercialProviderProps) {
   const [resolvedEntitlements, setResolvedEntitlements] = useState(
     entitlements ?? defaultCommercialState.entitlements,
   );
   const [exportBrand, setExportBrand] = useState<Brand>(exportBrandOverride ?? VECTOR_BRAND);
+  const [billingAttempt, setBillingAttempt] = useState<BillingAttempt>({ status: "idle" });
+
+  function requestUpgrade(feature: PaidFeature) {
+    if (requestUpgradeOverride) {
+      requestUpgradeOverride(feature);
+      return;
+    }
+
+    setBillingAttempt({ status: "opening", feature });
+    window.dispatchEvent(new CustomEvent("vector:billing-start", { detail: { feature } }));
+
+    void startVectorCheckout(feature).catch((error) => {
+      const code = error instanceof Error ? error.message : "checkout_failed";
+      setBillingAttempt({ status: "error", feature, code });
+      window.dispatchEvent(
+        new CustomEvent("vector:billing-error", {
+          detail: { feature, error: code },
+        }),
+      );
+    });
+  }
 
   useEffect(() => {
     if (entitlements) {
@@ -105,6 +138,45 @@ export function VectorCommercialProvider({
       value={{ entitlements: resolvedEntitlements, exportBrand, requestUpgrade }}
     >
       {children}
+      {!requestUpgradeOverride && billingAttempt.status !== "idle" ? (
+        <div
+          className="no-print"
+          role={billingAttempt.status === "error" ? "alert" : "status"}
+          aria-live={billingAttempt.status === "error" ? "assertive" : "polite"}
+          aria-atomic="true"
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: "1rem",
+            zIndex: 1000,
+            width: "min(420px, calc(100vw - 2rem))",
+            transform: "translateX(-50%)",
+            padding: "0.875rem 1rem",
+            border: "1px solid var(--border, #d8d8d8)",
+            borderRadius: "12px",
+            background: "var(--surface, #fff)",
+            boxShadow: "0 12px 36px rgba(0, 0, 0, 0.14)",
+          }}
+        >
+          {billingAttempt.status === "opening" ? (
+            <strong>Opening secure checkout…</strong>
+          ) : (
+            <>
+              <strong style={{ display: "block" }}>
+                {checkoutErrorMessage(billingAttempt.code)}
+              </strong>
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                <button type="button" onClick={() => requestUpgrade(billingAttempt.feature)}>
+                  Try again
+                </button>
+                <button type="button" onClick={() => setBillingAttempt({ status: "idle" })}>
+                  Dismiss
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : null}
     </VectorCommercialContext.Provider>
   );
 }
