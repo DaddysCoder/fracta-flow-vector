@@ -42,12 +42,13 @@ function sessionCookie(accountId) {
   return `${SESSION_COOKIE}=${encodeURIComponent(accountId)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000`;
 }
 
-function requireBillingConfig(env, { webhook = false } = {}) {
+function requireBillingConfig(env, { webhook = false, portal = false } = {}) {
   const missing = [];
   if (!env.DB) missing.push("DB");
   if (!env.STRIPE_SECRET_KEY) missing.push("STRIPE_SECRET_KEY");
-  if (!webhook && !env.STRIPE_PRICE_ID) missing.push("STRIPE_PRICE_ID");
+  if (!webhook && !portal && !env.STRIPE_PRICE_ID) missing.push("STRIPE_PRICE_ID");
   if (webhook && !env.STRIPE_WEBHOOK_SECRET) missing.push("STRIPE_WEBHOOK_SECRET");
+  if (portal && !env.STRIPE_PORTAL_CONFIGURATION_ID) missing.push("STRIPE_PORTAL_CONFIGURATION_ID");
   return missing;
 }
 
@@ -134,7 +135,7 @@ async function createCheckout(request, env) {
 }
 
 async function createPortal(request, env) {
-  const missing = requireBillingConfig(env);
+  const missing = requireBillingConfig(env, { portal: true });
   if (missing.length) return json({ error: "billing_not_configured", missing }, { status: 503 });
 
   const accountId = accountIdFromRequest(request);
@@ -146,6 +147,7 @@ async function createPortal(request, env) {
   const origin = new URL(request.url).origin;
   const portal = await stripeRequest(env, "/billing_portal/sessions", {
     customer: subscription.provider_customer_id,
+    configuration: env.STRIPE_PORTAL_CONFIGURATION_ID,
     return_url: origin,
   });
   return json({ url: portal.url });
@@ -197,15 +199,14 @@ async function verifyStripeSignature(payload, header, secret) {
 
 function subscriptionValues(subscription) {
   const firstItem = subscription.items?.data?.[0];
+  const periodEnd = subscription.current_period_end ?? firstItem?.current_period_end ?? null;
   return {
     accountId: subscription.metadata?.account_id ?? null,
     customerId: typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id,
     subscriptionId: subscription.id,
     priceId: firstItem?.price?.id ?? null,
     status: subscription.status ?? "inactive",
-    currentPeriodEnd: subscription.current_period_end
-      ? new Date(subscription.current_period_end * 1000).toISOString()
-      : null,
+    currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
     cancelAtPeriodEnd: subscription.cancel_at_period_end ? 1 : 0,
   };
 }
