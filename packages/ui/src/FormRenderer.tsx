@@ -13,13 +13,6 @@ export interface FormValues {
   groups: Record<string, RepeatableRow[]>;
 }
 
-/**
- * Flattens form values into the shape @pbs/export's docx renderer takes:
- * scalar fields keyed by id, repeatable fields keyed by id to an array of
- * one value per row (row order, empty values dropped). Row ids are not
- * carried — the docx layout is organized by field, never by row, so
- * nothing downstream needs them.
- */
 export function flattenValuesForExport(values: FormValues): Record<string, unknown> {
   const flat: Record<string, unknown> = { ...values.scalar };
   for (const rows of Object.values(values.groups)) {
@@ -37,28 +30,16 @@ export function flattenValuesForExport(values: FormValues): Record<string, unkno
 
 export interface FormRendererProps {
   document: DocumentDef;
-  /** Fields askedIn one of this document's own sections. */
   fields: FieldDef[];
   values: FormValues;
   onChange: (values: FormValues) => void;
   visibilityRules: VisibilityRule[];
   alwaysRequiredFieldIds: string[];
   newRowId: () => string;
-  /** Fields quoted into this document from elsewhere (registry `rendersIn`
-   * only — not `askedIn` here). Rendered read-only from `quotedValues`,
-   * never as an input. */
   quotedFields?: FieldDef[];
-  /** Resolved values for `quotedFields`, keyed by field id. A field with
-   * no entry renders as "Not yet available", never blank. */
   quotedValues?: Record<string, unknown>;
 }
 
-/**
- * Renders a document straight from its registry definition: fixed
- * section order, no per-participant reordering, one dispatch table for
- * field types. Adding a field to fields.json is enough to make it
- * appear here — there is no per-form component to write.
- */
 export function FormRenderer({
   document,
   fields,
@@ -92,7 +73,7 @@ export function FormRenderer({
         return (
           <section className="form-section" key={section.id} aria-labelledby={`section-${section.id}`}>
             <h2 className="section-title" id={`section-${section.id}`}>
-              {section.id} {section.title}
+              {section.title}
             </h2>
 
             {sectionQuoted.map((field) => (
@@ -135,15 +116,6 @@ export function FormRenderer({
   );
 }
 
-/**
- * Single-page, card-per-section variant of FormRenderer — for documents
- * the design handoff shows as one scrolling page of `.card` sections
- * (Source Register, RRP Assessment, Support Letter, Progress Report),
- * never a wizard. Reuses FormRenderer scoped to one section at a time
- * (the same "narrow `document.sections`" trick FormWizard uses for its
- * steps), so section-dispatch/visibility logic isn't duplicated — only
- * the `.card` wrapper per section is added here.
- */
 export function CardSectionsForm(props: FormRendererProps) {
   const { document, fields, quotedFields = [] } = props;
   return (
