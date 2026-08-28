@@ -26,9 +26,6 @@ const TRIAGE_FIELDS = registry.fields.filter((f) =>
   TRIAGE_DOCUMENT.sections.some((s) => s.id === f.askedIn),
 );
 
-/** Fields quoted into this document from elsewhere (registry `rendersIn`
- * only — never authored here). Section 02.A ("Referral review") and 02.G
- * ("Evidence currently available") exist purely to display these. */
 const TRIAGE_QUOTED_FIELDS = registry.fields.filter(
   (f) =>
     !TRIAGE_DOCUMENT.sections.some((s) => s.id === f.askedIn) &&
@@ -41,8 +38,6 @@ function newRowId(): string {
   return crypto.randomUUID();
 }
 
-/** Flattens a repeatable group's rows into FieldEntry[], keyed by rowId —
- * never by array position. */
 function flattenGroups(groups: Record<string, FormValues["groups"][string]>, sourceDocument: string, sourceDate: string): FieldEntry[] {
   const entries: FieldEntry[] = [];
   for (const rows of Object.values(groups)) {
@@ -56,11 +51,7 @@ function flattenGroups(groups: Record<string, FormValues["groups"][string]>, sou
 }
 
 export interface TriageResult {
-  /** Every field known about the case so far — the referral's original
-   * answers plus this triage's own — carried forward for document 03+. */
   caseFields: FieldEntry[];
-  /** The pathway this triage's RRP classification resolves to, plus the
-   * document permissions that classification carries. */
   resolvedPathway: ResolvedPathway;
 }
 
@@ -73,12 +64,8 @@ const EMPTY_TRIAGE_TASK: TriageTask = {
 };
 
 export interface TriageFormProps {
-  /** Optional referral task for quoted fields. Omitted in the public standalone launch. */
   task?: TriageTask;
-  /** Called once submission succeeds. Practitioner triage is where the RRP
-   * classification and pathway are decided — never inferred, never scored. */
   onSubmitted: (result: TriageResult) => void;
-  /** Injected for testability; defaults to real wall-clock time in the app. */
   now?: () => Date;
 }
 
@@ -87,14 +74,8 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
   const [submitted, setSubmitted] = useState(false);
   const { entitlements } = useVectorCommercial();
 
-  const triageId = "triage-draft"; // one draft per session in this standalone build
+  const triageId = "triage-draft";
 
-  // Standalone (MD-005/MD-006): this form must open and complete on its
-  // own, with no other tool's data assumed present. Cross-document
-  // prefill is locked off, so 02.A/02.G quote nothing across documents;
-  // `ReadOnlyField` renders "Not yet available" for any quoted field
-  // with no locally-recorded value, which is the correct standalone
-  // answer, not a bug. See CONTRADICTIONS.md #5.
   const quotedValues = useMemo(() => {
     const caseRecord: CaseRecord = { fields: task.fields };
     const targetDocument = toTargetDocument(TRIAGE_DOCUMENT_ID, triageId);
@@ -121,22 +102,40 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
     const resolvedPathway = resolvePathway(
       classification,
       toPathwayPermissions(classification),
-      new Set(), // fba.approved cannot be set this early — the FBA (document 04) hasn't happened yet
+      new Set(),
     );
 
     setSubmitted(true);
     onSubmitted({ caseFields, resolvedPathway });
   }
 
+  const exportControls = (
+    <ExportControls
+      renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, brand)}
+      renderCompleted={(brand) =>
+        renderCompletedDocxBlob(
+          TRIAGE_DOCUMENT,
+          TRIAGE_DOCUMENT_ID,
+          TRIAGE_FIELDS,
+          brand,
+          flattenValuesForExport(values),
+        )
+      }
+      blankFilename="vector-practitioner-triage-blank.docx"
+      completedFilename="vector-practitioner-triage-completed.docx"
+      showBlank={false}
+    />
+  );
+
   if (submitted) {
     return (
-      <div role="status">
+      <div role="status" className="vector-complete-state">
+        <div className="vector-complete-mark" aria-hidden="true">✓</div>
         <h1>Practitioner triage complete</h1>
         <p>
-          Your triage record remains in this browser session only. The RRP classification and
-          outcome above are your own judgement — nothing here was inferred or scored automatically.
-          Use export or print if you want a copy outside this device.
+          Your triage record remains in this browser session only. The classification and outcome remain your practitioner judgement; Vector does not infer or score them automatically.
         </p>
+        {exportControls}
       </div>
     );
   }
@@ -155,22 +154,6 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
       documentEyebrow={`Document ${TRIAGE_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
       onComplete={handleSubmit}
       completeLabel="Complete triage"
-      header={
-        <ExportControls
-          renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, brand)}
-          renderCompleted={(brand) =>
-            renderCompletedDocxBlob(
-              TRIAGE_DOCUMENT,
-              TRIAGE_DOCUMENT_ID,
-              TRIAGE_FIELDS,
-              brand,
-              flattenValuesForExport(values),
-            )
-          }
-          blankFilename="vector-practitioner-triage-blank.docx"
-          completedFilename="vector-practitioner-triage-completed.docx"
-        />
-      }
     />
   );
 }
