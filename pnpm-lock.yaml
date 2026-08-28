@@ -66,6 +66,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@pbs/export':
+        specifier: workspace:*
+        version: link:../export
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -76,9 +79,6 @@ importers:
       '@pbs/core':
         specifier: workspace:*
         version: link:../core
-      '@pbs/export':
-        specifier: workspace:*
-        version: link:../export
       '@pbs/registry':
         specifier: workspace:*
         version: link:../registry

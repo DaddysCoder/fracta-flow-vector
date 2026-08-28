@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  isBlockedLegacyDocumentRoute,
   pathForPublicForm,
   publicFormFromPath,
   PUBLIC_FORM_ROUTES,
+  resolveAppView,
 } from "../src/routing.js";
 
 describe("Vector public routes", () => {
@@ -10,6 +12,19 @@ describe("Vector public routes", () => {
     expect(publicFormFromPath("/referral")).toBe("referral");
     expect(publicFormFromPath("/practitioner-triage")).toBe("triage");
     expect(publicFormFromPath("/source-consultation-register")).toBe("source");
+  });
+
+  it("maps support template routes", () => {
+    expect(resolveAppView("/support-templates/behaviour-support-plan")).toEqual({
+      kind: "support-template",
+      templateId: "behaviour-support-plan",
+    });
+    expect(resolveAppView("/support-templates")).toEqual({ kind: "support-hub" });
+  });
+
+  it("blocks legacy document 04 routes from public shell", () => {
+    expect(isBlockedLegacyDocumentRoute("/bsa")).toBe(true);
+    expect(resolveAppView("/bsa")).toEqual({ kind: "public", form: "referral" });
   });
 
   it("normalises trailing slashes", () => {

@@ -3,16 +3,24 @@ import "./tokens.css";
 import "./print.css";
 import { BrandProfilePanel } from "./commercial/BrandProfilePanel.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
-import { SupportTemplatesHub } from "./commercial/SupportTemplatesHub.js";
+import {
+  SupportTemplatesHub,
+  SupportTemplatesHubPage,
+} from "./commercial/SupportTemplatesHub.js";
 import { ReferralForm } from "./ReferralForm.js";
 import { SourceForm } from "./SourceForm.js";
 import { TriageForm } from "./TriageForm.js";
 import {
+  isBlockedLegacyDocumentRoute,
   pathForPublicForm,
-  publicFormFromPath,
+  PUBLIC_FORM_ROUTES,
+  resolveAppView,
   WHATBIT_VECTOR_URL,
+  type AppView,
   type PublicForm,
 } from "./routing.js";
+import { getTemplateConfig } from "./support-templates/configs.js";
+import { SupportTemplateWizard } from "./support-templates/SupportTemplateWizard.js";
 
 const PUBLIC_FORMS: Array<{ id: PublicForm; title: string; description: string }> = [
   {
@@ -32,11 +40,12 @@ const PUBLIC_FORMS: Array<{ id: PublicForm; title: string; description: string }
   },
 ];
 
-function readActiveForm(): PublicForm {
-  if (typeof window === "undefined") return "referral";
+function readActiveView(): AppView {
+  if (typeof window === "undefined") return { kind: "public", form: "referral" };
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
-  if (path === "/") return "referral";
-  return publicFormFromPath(path);
+  if (path === "/") return { kind: "public", form: "referral" };
+  if (isBlockedLegacyDocumentRoute(path)) return { kind: "public", form: "referral" };
+  return resolveAppView(path);
 }
 
 /**
@@ -44,12 +53,12 @@ function readActiveForm(): PublicForm {
  * Document 04 and Documents 05–09 are not imported or exposed here.
  */
 export function ReferralApp() {
-  const [activeForm, setActiveForm] = useState<PublicForm>(() => readActiveForm());
+  const [activeView, setActiveView] = useState<AppView>(() => readActiveView());
   const { entitlements } = useVectorCommercial();
 
   useEffect(() => {
     function syncFromLocation() {
-      setActiveForm(readActiveForm());
+      setActiveView(readActiveView());
     }
     window.addEventListener("popstate", syncFromLocation);
     return () => window.removeEventListener("popstate", syncFromLocation);
@@ -60,9 +69,19 @@ export function ReferralApp() {
     if (window.location.pathname !== nextPath) {
       window.history.pushState({}, "", nextPath);
     }
-    setActiveForm(form);
+    setActiveView({ kind: "public", form });
   }
 
+  if (activeView.kind === "support-hub") {
+    return <SupportTemplatesHubPage />;
+  }
+
+  if (activeView.kind === "support-template") {
+    const config = getTemplateConfig(activeView.templateId);
+    return <SupportTemplateWizard config={config} />;
+  }
+
+  const activeForm = activeView.form;
   const activeMeta = PUBLIC_FORMS.find((form) => form.id === activeForm) ?? PUBLIC_FORMS[0]!;
 
   return (
@@ -128,3 +147,5 @@ export function ReferralApp() {
     </main>
   );
 }
+
+export { PUBLIC_FORM_ROUTES };
