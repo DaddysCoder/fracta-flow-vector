@@ -99,7 +99,7 @@ describe("resolve — tier2 (observation, pre-ticked bulk-accept)", () => {
 
   it("carries the case's source register forward into a document that only renders it", () => {
     const result = resolve(record, BSP_2026, CAPABILITIES.connected, NOW);
-    const rows = result.tier2.filter((t) => t.fieldId === "source.entry");
+    const rows = result.tier2.filter((t) => t.fieldId === "source_document.about");
     expect(rows.map((r) => r.rowId).sort()).toEqual(["src-1", "src-2"]);
     expect(rows.every((r) => r.proposed === "carry" && r.sourceDocument === "source-register-1")).toBe(
       true,
@@ -149,14 +149,14 @@ describe("resolve — tier3 (interpretation, always blank + evidence)", () => {
 
   it("always attaches every row of the case's source register, regardless of `informs`", () => {
     expect(conclusion!.evidence).toContainEqual({
-      fieldId: "source.entry",
+      fieldId: "source_document.about",
       rowId: "src-1",
       value: { who: "GP", note: "Reviewed GP letter dated 2026-05-20." },
       sourceDocument: "source-register-1",
       sourceDate: "2026-06-01",
     });
     expect(conclusion!.evidence).toContainEqual({
-      fieldId: "source.entry",
+      fieldId: "source_document.about",
       rowId: "src-2",
       value: { who: "Support worker", note: "Interview conducted 2026-06-02." },
       sourceDocument: "source-register-1",

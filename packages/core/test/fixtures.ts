@@ -7,7 +7,7 @@ import type { PathwayPermissions, RrpClassification } from "../src/pathway.js";
  * register. Fields asked within one of their sections are the case
  * register: every recorded row is always attached as tier3 evidence,
  * regardless of `informs` (see registry document "03: Source and
- * Consultation Register", field `source.entry`).
+ * Consultation Register", e.g. field `source_document.about`).
  */
 const registerSectionIds = new Set(
   Object.values(registry.documents)
@@ -75,13 +75,13 @@ export const BSP_2026 = toTargetDocument("07", "bsp-2026"); // the No-RP BSP bei
  *  - analysis.conclusion (tier3, askedIn 04.9): always blank in
  *    bsa-2026 regardless of any prior value, evidenced by the
  *    risk.matrix_* rows (which `inform` 04.9) and by every row of the
- *    case's source register (source.entry), unconditionally.
+ *    case's source register (source_document.about), unconditionally.
  *  - goals / risk.assessed (tier3, but only *rendered* — not asked — in
  *    the No-RP BSP): already finalized on bsa-2026, so they flow into
  *    bsp-2026 as ordinary renders (tier0), not blank.
  *  - accommodation (tier1): from referral-1, resurfaces in bsp-2026.
- *  - source.entry (tier2, repeatable, the case register): carried
- *    forward into bsp-2026's own Sources section.
+ *  - source_document.about (tier2, repeatable, the case register):
+ *    carried forward into bsp-2026's own Sources section.
  */
 export function buildFields(): FieldEntry[] {
   return [
@@ -143,14 +143,14 @@ export function buildFields(): FieldEntry[] {
       sourceDate: "2026-06-05",
     },
     {
-      fieldId: "source.entry",
+      fieldId: "source_document.about",
       rowId: "src-1",
       value: { who: "GP", note: "Reviewed GP letter dated 2026-05-20." },
       sourceDocument: "source-register-1",
       sourceDate: "2026-06-01",
     },
     {
-      fieldId: "source.entry",
+      fieldId: "source_document.about",
       rowId: "src-2",
       value: { who: "Support worker", note: "Interview conducted 2026-06-02." },
       sourceDocument: "source-register-1",
