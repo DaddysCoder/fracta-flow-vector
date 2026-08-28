@@ -1,5 +1,6 @@
 import { FRACTA_FLOW_BRAND, type Brand } from "@pbs/export";
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { fetchVectorEntitlements, startVectorCheckout } from "./billing.js";
 import {
   FREE_ENTITLEMENTS,
   type PaidFeature,
@@ -12,16 +13,20 @@ export interface VectorCommercialState {
   requestUpgrade: (feature: PaidFeature) => void;
 }
 
+function defaultUpgrade(feature: PaidFeature) {
+  void startVectorCheckout(feature).catch((error) => {
+    window.dispatchEvent(
+      new CustomEvent("vector:billing-error", {
+        detail: { feature, error: error instanceof Error ? error.message : "checkout_failed" },
+      }),
+    );
+  });
+}
+
 const defaultCommercialState: VectorCommercialState = {
   entitlements: FREE_ENTITLEMENTS,
   exportBrand: FRACTA_FLOW_BRAND,
-  requestUpgrade: (feature) => {
-    window.dispatchEvent(
-      new CustomEvent("vector:upgrade-requested", {
-        detail: { feature },
-      }),
-    );
-  },
+  requestUpgrade: defaultUpgrade,
 };
 
 const VectorCommercialContext = createContext<VectorCommercialState>(defaultCommercialState);
@@ -30,14 +35,53 @@ export interface VectorCommercialProviderProps extends Partial<VectorCommercialS
   children: ReactNode;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 export function VectorCommercialProvider({
   children,
-  entitlements = defaultCommercialState.entitlements,
+  entitlements,
   exportBrand = defaultCommercialState.exportBrand,
   requestUpgrade = defaultCommercialState.requestUpgrade,
 }: VectorCommercialProviderProps) {
+  const [resolvedEntitlements, setResolvedEntitlements] = useState(
+    entitlements ?? defaultCommercialState.entitlements,
+  );
+
+  useEffect(() => {
+    if (entitlements) {
+      setResolvedEntitlements(entitlements);
+      return;
+    }
+
+    let cancelled = false;
+    const returnedFromCheckout = new URLSearchParams(window.location.search).get("billing") === "success";
+
+    void (async () => {
+      const attempts = returnedFromCheckout ? 5 : 1;
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        try {
+          const state = await fetchVectorEntitlements();
+          if (cancelled) return;
+          setResolvedEntitlements(state.entitlements);
+          if (state.entitlements.plan === "paid") return;
+        } catch {
+          if (cancelled) return;
+        }
+        if (attempt < attempts - 1) await sleep(600 * (attempt + 1));
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [entitlements]);
+
   return (
-    <VectorCommercialContext.Provider value={{ entitlements, exportBrand, requestUpgrade }}>
+    <VectorCommercialContext.Provider
+      value={{ entitlements: resolvedEntitlements, exportBrand, requestUpgrade }}
+    >
       {children}
     </VectorCommercialContext.Provider>
   );
