@@ -2,72 +2,104 @@ import type { TriageTask } from "@pbs/core";
 import { useState } from "react";
 import "./tokens.css";
 import "./print.css";
-import { BsaForm, type BsaResult } from "./BsaForm.js";
 import { ReferralForm } from "./ReferralForm.js";
-import { SourceForm, type SourceResult } from "./SourceForm.js";
-import { TriageForm, type TriageResult } from "./TriageForm.js";
+import { SourceForm } from "./SourceForm.js";
+import { TriageForm } from "./TriageForm.js";
+import { useVectorCommercial } from "./commercial/CommercialContext.js";
+
+type PublicForm = "referral" | "triage" | "source";
+
+const EMPTY_TRIAGE_TASK: TriageTask = {
+  id: "vector-standalone-triage",
+  referralDocumentId: "vector-standalone-referral",
+  createdAt: "1970-01-01T00:00:00.000Z",
+  priority: "standard",
+  fields: [],
+};
+
+const PUBLIC_FORMS: Array<{ id: PublicForm; title: string; description: string }> = [
+  {
+    id: "referral",
+    title: "Referral",
+    description: "Capture referral information and create a practitioner triage task.",
+  },
+  {
+    id: "triage",
+    title: "Practitioner Triage",
+    description: "Complete practitioner triage as a standalone form.",
+  },
+  {
+    id: "source",
+    title: "Source & Consultation Register",
+    description: "Record sources and consultation information as a standalone register.",
+  },
+];
 
 /**
- * Standalone shell for all four documents built so far (MD-005/MD-006):
- * no login, no other tool, no network call — everything here runs
- * client-side against the registry bundled into this build. Each form
- * runs under CAPABILITIES.standalone, including 02-04 despite being
- * chained here in one session: cross-document prefill is off, so quoted
- * fields fall back to "Not yet available" exactly as they would if a
- * practitioner opened any one of these forms on its own, with no earlier
- * document's data available at all. This is deliberate — the staged spec
- * requires every document to work standalone before connected mode is
- * turned on uniformly in a later stage (see CONTRADICTIONS.md #5).
+ * Public Vector launch shell.
+ *
+ * Exactly three clinical forms are navigable here. Each form runs locally
+ * in standalone mode; participant/client answers are kept in React state and
+ * are never posted to the Worker. The only network activity in this app is
+ * commercial entitlement/billing metadata handled by VectorCommercialProvider.
+ *
+ * Document 04 / Combined BSA-FBA remains in the repository for separate
+ * architecture work but is deliberately not imported or exposed here.
  */
 export function ReferralApp() {
-  const [task, setTask] = useState<TriageTask | null>(null);
-  const [triageResult, setTriageResult] = useState<TriageResult | null>(null);
-  const [sourceResult, setSourceResult] = useState<SourceResult | null>(null);
-  const [bsaResult, setBsaResult] = useState<BsaResult | null>(null);
-
-  const step = !task ? "01" : !triageResult ? "02" : !sourceResult ? "03" : !bsaResult ? "04" : "done";
-  const titles: Record<string, string> = {
-    "01": "01 — Referral",
-    "02": "02 — Practitioner Triage",
-    "03": "03 — Source and Consultation Register",
-    "04": "04 — Combined BSA/FBA",
-    done: "04 — Combined BSA/FBA",
-  };
+  const [activeForm, setActiveForm] = useState<PublicForm>("referral");
+  const { entitlements } = useVectorCommercial();
 
   return (
-    <main style={{ maxWidth: "760px", margin: "0 auto", padding: "2rem 1.25rem" }}>
+    <main style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 1.25rem 4rem" }}>
       <header style={{ marginBottom: "1.5rem" }}>
-        <p style={{ color: "var(--purple)", fontWeight: 700, margin: 0 }}>Fracta Flow</p>
-        <h1 style={{ margin: "0.25rem 0" }}>{titles[step]}</h1>
-        <p className="field-note no-print">
-          {step === "01"
-            ? "Standalone mode. No account, no other tool, no network call."
-            : "Quoted fields below are read-only and show \"Not yet available\" in this standalone build."}
+        <p style={{ color: "var(--purple)", fontWeight: 800, letterSpacing: "0.04em", margin: 0 }}>
+          VECTOR
+        </p>
+        <h1 style={{ margin: "0.25rem 0 0.5rem" }}>Practical behaviour support forms</h1>
+        <p style={{ margin: 0, maxWidth: "680px" }}>
+          Complete forms in your browser. Participant and client form content stays on this device
+          during normal use and is not stored on WHATBIT servers.
+        </p>
+        <p className="field-note no-print" style={{ marginTop: "0.5rem" }}>
+          {entitlements.plan === "paid"
+            ? "Vector Paid is active in this browser."
+            : "Three forms are free to use. DOCX, Print/PDF, organisation branding and Support Templates require Vector Paid."}
         </p>
       </header>
 
-      {!task && <ReferralForm onSubmitted={setTask} />}
-      {task && !triageResult && <TriageForm task={task} onSubmitted={setTriageResult} />}
-      {triageResult && !sourceResult && (
-        <SourceForm priorFields={triageResult.caseFields} onSubmitted={setSourceResult} />
-      )}
-      {triageResult && sourceResult && !bsaResult && (
-        <BsaForm
-          priorFields={sourceResult.caseFields}
-          pathway={triageResult.resolvedPathway.pathway}
-          onSubmitted={setBsaResult}
-        />
-      )}
+      <nav
+        aria-label="Vector forms"
+        className="no-print"
+        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "0.75rem", marginBottom: "2rem" }}
+      >
+        {PUBLIC_FORMS.map((form) => {
+          const selected = activeForm === form.id;
+          return (
+            <button
+              key={form.id}
+              type="button"
+              className={selected ? "primary" : undefined}
+              aria-pressed={selected}
+              onClick={() => setActiveForm(form.id)}
+              style={{ textAlign: "left", minHeight: "96px" }}
+            >
+              <strong style={{ display: "block", marginBottom: "0.25rem" }}>{form.title}</strong>
+              <span style={{ display: "block", fontSize: "0.875rem", fontWeight: 400 }}>
+                {form.description}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
 
-      {bsaResult && (
-        <pre className="no-print" style={{ background: "#f4f4f4", padding: "1rem", marginTop: "1.5rem" }}>
-          {JSON.stringify(
-            { resolvedPathway: triageResult?.resolvedPathway, ...bsaResult, approvedGates: [...bsaResult.approvedGates] },
-            null,
-            2,
-          )}
-        </pre>
-      )}
+      <section aria-live="polite">
+        {activeForm === "referral" && <ReferralForm onSubmitted={() => undefined} />}
+        {activeForm === "triage" && (
+          <TriageForm task={EMPTY_TRIAGE_TASK} onSubmitted={() => undefined} />
+        )}
+        {activeForm === "source" && <SourceForm priorFields={[]} onSubmitted={() => undefined} />}
+      </section>
     </main>
   );
 }
