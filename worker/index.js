@@ -12,6 +12,7 @@ const FREE_ENTITLEMENTS = Object.freeze({
   exportDocuments: false,
   companyBranding: false,
   supportTemplates: false,
+  documentCredits: 0,
 });
 
 const PAID_ENTITLEMENTS = Object.freeze({
@@ -19,10 +20,12 @@ const PAID_ENTITLEMENTS = Object.freeze({
   exportDocuments: true,
   companyBranding: true,
   supportTemplates: true,
+  documentCredits: 0,
 });
 
 const SESSION_COOKIE = "vector_account";
 const STRIPE_API = "https://api.stripe.com/v1";
+const PURCHASES = new Set(["single_document", "monthly", "yearly"]);
 
 const BRAND_PROFILE_FIELDS = [
   "organisationName",
@@ -52,14 +55,56 @@ function sessionCookie(accountId) {
   return `${SESSION_COOKIE}=${encodeURIComponent(accountId)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000`;
 }
 
-function requireBillingConfig(env, { webhook = false, portal = false } = {}) {
+function subscriptionPriceIds(env) {
+  return [env.STRIPE_PRICE_ID, env.STRIPE_YEARLY_PRICE_ID].filter(Boolean);
+}
+
+function checkoutPriceId(env, purchase) {
+  switch (purchase) {
+    case "single_document":
+      return env.STRIPE_SINGLE_DOCUMENT_PRICE_ID;
+    case "yearly":
+      return env.STRIPE_YEARLY_PRICE_ID;
+    case "monthly":
+    default:
+      return env.STRIPE_PRICE_ID;
+  }
+}
+
+function checkoutPriceBinding(purchase) {
+  switch (purchase) {
+    case "single_document":
+      return "STRIPE_SINGLE_DOCUMENT_PRICE_ID";
+    case "yearly":
+      return "STRIPE_YEARLY_PRICE_ID";
+    case "monthly":
+    default:
+      return "STRIPE_PRICE_ID";
+  }
+}
+
+function requireBillingConfig(
+  env,
+  { webhook = false, portal = false, purchase = null, allCheckoutPrices = false } = {},
+) {
   const missing = [];
   if (!env.DB) missing.push("DB");
   if (!env.STRIPE_SECRET_KEY) missing.push("STRIPE_SECRET_KEY");
-  if (!webhook && !portal && !env.STRIPE_PRICE_ID) missing.push("STRIPE_PRICE_ID");
+
+  if (purchase) {
+    const binding = checkoutPriceBinding(purchase);
+    if (!env[binding]) missing.push(binding);
+  }
+
+  if (allCheckoutPrices) {
+    if (!env.STRIPE_PRICE_ID) missing.push("STRIPE_PRICE_ID");
+    if (!env.STRIPE_YEARLY_PRICE_ID) missing.push("STRIPE_YEARLY_PRICE_ID");
+    if (!env.STRIPE_SINGLE_DOCUMENT_PRICE_ID) missing.push("STRIPE_SINGLE_DOCUMENT_PRICE_ID");
+  }
+
   if (webhook && !env.STRIPE_WEBHOOK_SECRET) missing.push("STRIPE_WEBHOOK_SECRET");
   if (portal && !env.STRIPE_PORTAL_CONFIGURATION_ID) missing.push("STRIPE_PORTAL_CONFIGURATION_ID");
-  return missing;
+  return [...new Set(missing)];
 }
 
 async function stripeRequest(env, path, params) {
@@ -72,10 +117,16 @@ async function stripeRequest(env, path, params) {
     body: new URLSearchParams(params),
   });
 
-  const payload = await response.json();
+  const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const message = payload?.error?.message ?? "Stripe request failed";
-    throw new Error(message);
+    console.error("Stripe request failed", {
+      path,
+      status: response.status,
+      type: payload?.error?.type ?? null,
+      code: payload?.error?.code ?? null,
+      message: payload?.error?.message ?? "Stripe request failed",
+    });
+    throw new Error("stripe_request_failed");
   }
   return payload;
 }
@@ -92,15 +143,42 @@ async function getAccountSubscription(env, accountId) {
     .first();
 }
 
+async function getDocumentCreditBalance(env, accountId) {
+  if (!env.DB || !accountId) return 0;
+  try {
+    const row = await env.DB.prepare(
+      "SELECT balance FROM document_credits WHERE account_id = ?1",
+    )
+      .bind(accountId)
+      .first();
+    return Number(row?.balance ?? 0);
+  } catch (error) {
+    console.error("Document credit lookup failed", error);
+    return 0;
+  }
+}
+
 async function currentEntitlements(env, accountId) {
   const subscription = await getAccountSubscription(env, accountId);
+  const documentCredits = await getDocumentCreditBalance(env, accountId);
+  const baseEntitlements = entitlementsForSubscription(
+    subscription,
+    subscriptionPriceIds(env),
+    FREE_ENTITLEMENTS,
+    PAID_ENTITLEMENTS,
+  );
+
+  const entitlements =
+    baseEntitlements.plan === "paid"
+      ? { ...baseEntitlements, documentCredits }
+      : {
+          ...baseEntitlements,
+          exportDocuments: documentCredits > 0,
+          documentCredits,
+        };
+
   return {
-    entitlements: entitlementsForSubscription(
-      subscription,
-      env.STRIPE_PRICE_ID,
-      FREE_ENTITLEMENTS,
-      PAID_ENTITLEMENTS,
-    ),
+    entitlements,
     subscription: subscription
       ? {
           status: subscription.status,
@@ -112,15 +190,35 @@ async function currentEntitlements(env, accountId) {
   };
 }
 
+async function readCheckoutBody(request) {
+  try {
+    const body = await request.json();
+    return body && typeof body === "object" && !Array.isArray(body) ? body : {};
+  } catch {
+    return {};
+  }
+}
+
 async function createCheckout(request, env) {
-  const missing = requireBillingConfig(env);
+  const body = await readCheckoutBody(request);
+  const purchase = typeof body.purchase === "string" ? body.purchase : "monthly";
+  const feature = typeof body.feature === "string" ? body.feature : null;
+
+  if (!PURCHASES.has(purchase)) {
+    return json({ error: "invalid_purchase" }, { status: 400 });
+  }
+  if (purchase === "single_document" && feature && feature !== "export") {
+    return json({ error: "single_document_export_only" }, { status: 400 });
+  }
+
+  const missing = requireBillingConfig(env, { purchase });
   if (missing.length) return json({ error: "billing_not_configured", missing }, { status: 503 });
 
   let accountId = accountIdFromRequest(request);
   if (!accountId) accountId = crypto.randomUUID();
 
   const existing = await getAccountSubscription(env, accountId);
-  if (isVectorPaidSubscription(existing, env.STRIPE_PRICE_ID)) {
+  if (isVectorPaidSubscription(existing, subscriptionPriceIds(env))) {
     return json({ error: "already_paid" }, { status: 409 });
   }
 
@@ -132,19 +230,36 @@ async function createCheckout(request, env) {
     .run();
 
   const origin = new URL(request.url).origin;
-  const session = await stripeRequest(env, "/checkout/sessions", {
-    mode: "subscription",
-    "line_items[0][price]": env.STRIPE_PRICE_ID,
+  const mode = purchase === "single_document" ? "payment" : "subscription";
+  const params = {
+    mode,
+    "line_items[0][price]": checkoutPriceId(env, purchase),
     "line_items[0][quantity]": "1",
-    success_url: `${origin}/?billing=success`,
-    cancel_url: `${origin}/?billing=cancelled`,
+    success_url: `${origin}/?billing=success&purchase=${encodeURIComponent(purchase)}`,
+    cancel_url: `${origin}/?billing=cancelled&purchase=${encodeURIComponent(purchase)}`,
     client_reference_id: accountId,
     "metadata[account_id]": accountId,
-    "subscription_data[metadata][account_id]": accountId,
-  });
+    "metadata[purchase]": purchase,
+    "metadata[feature]": feature ?? "",
+  };
+
+  if (mode === "subscription") {
+    params["subscription_data[metadata][account_id]"] = accountId;
+    params["subscription_data[metadata][purchase]"] = purchase;
+  }
+
+  let session;
+  try {
+    session = await stripeRequest(env, "/checkout/sessions", params);
+  } catch (error) {
+    if (error instanceof Error && error.message === "stripe_request_failed") {
+      return json({ error: "stripe_request_failed" }, { status: 502 });
+    }
+    throw error;
+  }
 
   return json(
-    { url: session.url, checkoutSessionId: session.id },
+    { url: session.url, checkoutSessionId: session.id, purchase },
     { headers: { "set-cookie": sessionCookie(accountId) } },
   );
 }
@@ -264,6 +379,18 @@ async function upsertSubscription(env, subscription) {
     .run();
 }
 
+async function grantDocumentCredit(env, accountId) {
+  await env.DB.prepare(
+    `INSERT INTO document_credits (account_id, balance, created_at, updated_at)
+     VALUES (?1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+     ON CONFLICT(account_id) DO UPDATE SET
+       balance = document_credits.balance + 1,
+       updated_at = CURRENT_TIMESTAMP`,
+  )
+    .bind(accountId)
+    .run();
+}
+
 async function handleCheckoutCompleted(env, session) {
   const accountId = session.metadata?.account_id ?? session.client_reference_id ?? null;
   if (!accountId) return;
@@ -278,6 +405,10 @@ async function handleCheckoutCompleted(env, session) {
   )
     .bind(accountId, email)
     .run();
+
+  if (session.metadata?.purchase === "single_document" && session.payment_status === "paid") {
+    await grantDocumentCredit(env, accountId);
+  }
 }
 
 async function handleWebhook(request, env) {
@@ -318,6 +449,41 @@ async function handleWebhook(request, env) {
     .run();
 
   return json({ received: true });
+}
+
+async function consumeDocumentCredit(request, env) {
+  if (!env.DB) return json({ error: "billing_not_configured", missing: ["DB"] }, { status: 503 });
+
+  const accountId = accountIdFromRequest(request);
+  if (!accountId) return json({ error: "account_required" }, { status: 401 });
+
+  const subscription = await getAccountSubscription(env, accountId);
+  if (isVectorPaidSubscription(subscription, subscriptionPriceIds(env))) {
+    return json({ consumed: false, remaining: null, plan: "paid" });
+  }
+
+  let result;
+  try {
+    result = await env.DB.prepare(
+      `UPDATE document_credits
+          SET balance = balance - 1,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE account_id = ?1
+          AND balance > 0`,
+    )
+      .bind(accountId)
+      .run();
+  } catch (error) {
+    console.error("Document credit consume failed", error);
+    return json({ error: "document_credits_not_configured" }, { status: 503 });
+  }
+
+  if (Number(result?.meta?.changes ?? 0) < 1) {
+    return json({ error: "document_credit_required" }, { status: 402 });
+  }
+
+  const remaining = await getDocumentCreditBalance(env, accountId);
+  return json({ consumed: true, remaining, plan: "free" });
 }
 
 function sanitizeBrandField(value) {
@@ -384,14 +550,15 @@ async function saveBrandProfile(env, accountId, body) {
 }
 
 async function requireVectorPaidAccount(request, env) {
-  const missing = requireBillingConfig(env);
-  if (missing.length) return { response: json({ error: "billing_not_configured", missing }, { status: 503 }) };
+  if (!env.DB) {
+    return { response: json({ error: "billing_not_configured", missing: ["DB"] }, { status: 503 }) };
+  }
 
   const accountId = accountIdFromRequest(request);
   if (!accountId) return { response: json({ error: "account_required" }, { status: 401 }) };
 
   const subscription = await getAccountSubscription(env, accountId);
-  if (!isVectorPaidSubscription(subscription, env.STRIPE_PRICE_ID)) {
+  if (!isVectorPaidSubscription(subscription, subscriptionPriceIds(env))) {
     return { response: json({ error: "paid_required" }, { status: 403 }) };
   }
 
@@ -436,10 +603,14 @@ export default {
 
     try {
       if (url.pathname === "/api/health") {
+        const checkoutMissing = requireBillingConfig(env, { allCheckoutPrices: true });
         return json({
           ok: true,
           service: "vector",
-          billingConfigured: requireBillingConfig(env).length === 0,
+          billingConfigured: checkoutMissing.length === 0,
+          checkoutConfigured: checkoutMissing.length === 0,
+          webhookConfigured: requireBillingConfig(env, { webhook: true }).length === 0,
+          portalConfigured: requireBillingConfig(env, { portal: true }).length === 0,
         });
       }
 
@@ -459,6 +630,10 @@ export default {
 
       if (url.pathname === "/api/billing/webhook" && request.method === "POST") {
         return await handleWebhook(request, env);
+      }
+
+      if (url.pathname === "/api/document-credit/consume" && request.method === "POST") {
+        return await consumeDocumentCredit(request, env);
       }
 
       if (url.pathname === "/api/brand-profile") {
