@@ -66,7 +66,15 @@ export function ReferralApp() {
 
   if (activeView.kind === "support-template") {
     const config = getTemplateConfig(activeView.templateId);
-    return <SupportTemplateWizard config={config} />;
+    return (
+      <>
+        <ShellHeader activeId="support-hub" />
+        <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
+          <div id="top" />
+          <SupportTemplateWizard config={config} />
+        </main>
+      </>
+    );
   }
 
   if (activeView.kind === "brand") {
