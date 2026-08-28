@@ -89,7 +89,7 @@ currently implements only the RRP-identified half of the condition (visible when
 is unimplemented pending either a new registry field or a decision that the RRP half
 alone is sufficient.
 
-## 4. Source register/Consultation narrative spec is far richer than the one field the registry actually defines (open — not blocking)
+## 4. Source register/Consultation narrative spec is far richer than the one field the registry actually defines (resolved 2026-08-28)
 
 **Found:** 2026-08-17, during Stage 10 (Form 03 Source and Consultation Register).
 
@@ -108,17 +108,52 @@ a single repeatable `long_text` field with no sub-structure at all — one free-
 box per row, repeated. There is no field for author, date, reliability, consent, or
 any of the other ~19 sub-attributes the doc pack names.
 
-**Not resolved here because:** the doc pack is a narrative description of what the
-module should conceptually hold, not a field-by-field schema — it gives no field
-ids, tiers, types, or transition rules to implement against, unlike the concrete
-per-field specs earlier stages built from. Inventing ~19 new fields (with tiers,
-staleness, pathway, and transition metadata all guessed) to match the prose would
-be exactly the kind of guess this log exists to avoid. Form 03 (`packages/ui/src/SourceForm.tsx`)
-is built on the registry exactly as it stands today: one repeatable free-text entry
-field, with the practitioner's identity and the document date quoted in read-only
-alongside it. Flagging so Pol can decide whether `source.entry` should be split into
-structured sub-fields (and if so, supply the concrete field list/schema) or whether
-free-text entries are the intended design and the doc pack's breakdown is aspirational/future.
+**Not resolved at the time because:** the doc pack is a narrative description of
+what the module should conceptually hold, not a field-by-field schema — it gives
+no field ids, tiers, types, or transition rules to implement against, unlike the
+concrete per-field specs earlier stages built from. Inventing ~19 new fields (with
+tiers, staleness, pathway, and transition metadata all guessed) to match the prose
+would have been exactly the kind of guess this log exists to avoid.
+
+**Resolution (2026-08-28, "match source register please"):** Pol pointed at a
+different, genuinely concrete source: the design prototype's own markup for this
+screen (`Vector App Redesign (digital).dc.html`'s `isSource` block, cross-checked
+against the mobile handoff), which lays out real field-by-field UI — not narrative
+prose. The registry's `03.1`/`source.entry` was replaced with:
+
+- **03.A Document register** (`source_document` group, 7 fields: name, type,
+  date made, author name, author role, company/service, what it's about) —
+  `source_document.type` is UI-computed ("auto-detected") from the document name
+  via a keyword heuristic (`packages/ui/src/SourceForm.tsx`), never a clinical
+  judgement, and stored as a plain `select` field.
+- **03.B Consultation log**, split into `consultation_participant` and
+  `consultation_other` groups (4 fields each: name, role, date and mode, what was
+  discussed/provided) — matching the prototype's two separate lists.
+
+All 15 new fields are tier 2/clinical (matching `source.entry`'s prior
+classification), `askedIn` 03.A/03.B respectively. `registryAdapter.ts`'s
+`isCaseRegister` detection is by document *title* regex, not the old section id,
+so both new sections keep register-evidence status (every row treated as evidence
+for tier3 authoring elsewhere) with no change needed there. Document-register
+fields keep `source.entry`'s old `rendersIn` target (07.4/08.4/09.5, the BSPs'
+"Sources" sections); consultation fields now render into 07.3/08.3/09.4
+("Consultation") — sections that previously had no register-authored field
+pointed at them at all (only `referrer.identity` did).
+
+**Storage/migration:** `SourceForm` has never persisted to `sessionStorage` or any
+other browser storage — its state is in-memory React state only, cleared on
+reload, matching every other standalone form's "browser session only" copy. No
+persisted data exists in the old `source.entry` shape anywhere (checked
+`localReferralHandoff.ts` and the Support Template Wizard's own `storage.ts`,
+neither of which reference the register's field ids), so no migration was needed.
+
+**Still open, deliberately not built:** the prototype's UI is *simpler* than the
+narrative doc pack's ~19 sub-attributes — it has no fields for relevance,
+reliability, currency, consent/authority, disagreements, or follow-up (either
+register). Since the concrete spec (the prototype) doesn't surface those, they
+were not invented here, per the same guessing rule that kept this open originally.
+If those sub-attributes are still wanted, that needs its own concrete field list
+(prototype update or an explicit spec), not a guess against this narrative pack.
 
 ## 5. `TriageForm`/`SourceForm` hardcoded `CAPABILITIES.connected`, contradicting the standalone-first build order (resolved — reversed)
 

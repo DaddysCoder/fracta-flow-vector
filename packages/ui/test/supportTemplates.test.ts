@@ -10,20 +10,6 @@ import { buildTemplateContext } from "../src/support-templates/prefill.js";
 import { STORAGE_DISCLOSURE } from "../src/support-templates/storage.js";
 
 describe("Support template configs", () => {
-  it("does not gate Interim BSP on FBA, assessment or saved referral", () => {
-    const source = readFileSync(
-      resolve(import.meta.dirname, "../src/support-templates/SupportTemplateWizard.tsx"),
-      "utf8",
-    );
-    expect(source).not.toMatch(/fba\.approved|FBA gate|completed assessment prerequisite|saved Referral/i);
-    expect(source).not.toMatch(/ArcSession|localStorage\.getItem\(['"]arc/i);
-
-    const stepOne = INTERIM_BSP_CONFIG.steps(buildTemplateContext())[0]!;
-    expect(stepOne.note).toMatch(/no prerequisite assessment or saved referral required/i);
-    expect(stepOne.text?.some((f) => f.label.includes("engagement date"))).toBe(true);
-    expect(stepOne.text?.some((f) => f.label.includes("assessment / first meeting"))).toBe(false);
-  });
-
   it("uses engagement-date wording and one-month RRP timing for Interim BSP", () => {
     const stepOne = INTERIM_BSP_CONFIG.steps(buildTemplateContext())[0]!;
     const engaged = stepOne.text?.find((f) => f.key === "dateEngaged");

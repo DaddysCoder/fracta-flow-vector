@@ -45,7 +45,7 @@ describe("renderCompletedDocx", () => {
 
   it("renders a repeatable field's rows as separate entries, not joined onto one line", async () => {
     const buffer = await renderCompletedDocx(SOURCE_REGISTER, "03", SOURCE_FIELDS, FRACTA_FLOW_BRAND, {
-      "source.entry": ["Interview with case worker, 2 Aug 2026.", "Prior BSP document review, 5 Aug 2026."],
+      "source_document.about": ["Interview with case worker, 2 Aug 2026.", "Prior BSP document review, 5 Aug 2026."],
     });
     const xml = await documentXml(buffer);
     expect(xml).toContain("Interview with case worker, 2 Aug 2026.");
