@@ -14,23 +14,13 @@ export interface FormWizardProps {
   newRowId: () => string;
   quotedFields?: FieldDef[];
   quotedValues?: Record<string, unknown>;
-  /** Rendered above the wizard on every step (export controls, alerts). */
+  /** Optional actions shown on the review screen, not above every form step. */
   header?: React.ReactNode;
-  /** e.g. "DOCUMENT 01 · FREE" — prefixed to the current section id in the
-   * small accent-coloured eyebrow line above each step. */
   documentEyebrow: string;
-  /** Called once the practitioner confirms the review step. */
   onComplete: () => void;
   completeLabel: string;
 }
 
-/**
- * Steps a document's own sections one at a time — Next/Back, a review step
- * listing every answered field with a "Change" link back to its owning
- * step, then hands off to `onComplete`. Reuses FormRenderer unchanged by
- * scoping `document.sections` to the current step; no per-field markup or
- * duplicated field dispatch lives here.
- */
 export function FormWizard({
   document,
   fields,
@@ -95,44 +85,53 @@ export function FormWizard({
 
   if (phase === "review") {
     return (
-      <div>
+      <div className="vector-form-wizard">
+        <h1 className="vector-review-title">Check this over</h1>
+        <p className="vector-review-intro">Review your answers before finishing. Use Change to edit a section.</p>
+
+        <div className="vector-review-list">
+          {steps.map((section, index) => {
+            const sectionFields = fields.filter(
+              (f) => f.askedIn === section.id && isFieldVisible(f.id, visibilityRules, values.scalar),
+            );
+            if (sectionFields.length === 0) return null;
+            return (
+              <section key={section.id} className="vector-review-section">
+                <div className="vector-review-section-header">
+                  <h2 className="vector-review-section-title">{section.title}</h2>
+                  <button type="button" className="vector-review-change" onClick={() => goToStep(index)}>
+                    Change
+                  </button>
+                </div>
+                {sectionFields.map((field) => (
+                  <div key={field.id} className="vector-review-row">
+                    <span className="vector-review-label">{field.label}</span>
+                    <span className="vector-review-value">
+                      {formatReadOnlyValue(field, values.scalar[field.id])}
+                    </span>
+                  </div>
+                ))}
+              </section>
+            );
+          })}
+        </div>
+
         {header}
-        <h2 style={{ fontSize: "1.1rem" }}>Review your answers</h2>
-        <p>Check each answer before finishing. Use "Change" to jump back and edit a step.</p>
-        {steps.map((section, index) => {
-          const sectionFields = fields.filter(
-            (f) => f.askedIn === section.id && isFieldVisible(f.id, visibilityRules, values.scalar),
-          );
-          if (sectionFields.length === 0) return null;
-          return (
-            <section key={section.id} className="card" style={{ padding: "0.75rem 1rem", marginBottom: "0.75rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <h3 style={{ margin: "0 0 0.5rem", fontSize: "0.95rem" }}>
-                  {section.id} {section.title}
-                </h3>
-                <button type="button" onClick={() => goToStep(index)}>
-                  Change
-                </button>
-              </div>
-              {sectionFields.map((field) => (
-                <p key={field.id} style={{ margin: "0.25rem 0" }}>
-                  <strong>{field.label}: </strong>
-                  {formatReadOnlyValue(field, values.scalar[field.id])}
-                </p>
-              ))}
-            </section>
-          );
-        })}
-        <button type="button" className="primary no-print" onClick={onComplete}>
-          {completeLabel}
-        </button>
+
+        <div className="wizard-actions no-print">
+          <button type="button" className="wizard-back" onClick={() => goToStep(steps.length - 1)}>
+            Back
+          </button>
+          <button type="button" className="primary wizard-next" onClick={onComplete}>
+            {completeLabel}
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      {header}
+    <div className="vector-form-wizard">
       <div className="wizard-eyebrow-row">
         <div className="wizard-eyebrow">
           {documentEyebrow} · {currentSection.id}
@@ -141,27 +140,20 @@ export function FormWizard({
           Step {stepIndex + 1} of {steps.length}
         </div>
       </div>
-      <p aria-hidden="true" style={{ display: "flex", gap: "4px", margin: "0 0 1.5rem" }}>
+
+      <div className="vector-progress" aria-hidden="true">
         {steps.map((section, index) => (
           <span
             key={section.id}
-            style={{
-              flex: 1,
-              height: "3px",
-              borderRadius: "2px",
-              background:
-                index < stepIndex
-                  ? "var(--purple)"
-                  : index === stepIndex
-                    ? "color-mix(in srgb, var(--purple) 25%, white)"
-                    : "var(--border-hairline)",
-            }}
+            className={`vector-progress-segment${index < stepIndex ? " is-complete" : ""}${
+              index === stepIndex ? " is-current" : ""
+            }`}
           />
         ))}
-      </p>
+      </div>
 
       {missingFields.length > 0 && (
-        <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
+        <div role="alert" className="vector-validation-alert">
           Please complete: {missingFields.join(", ")}
         </div>
       )}
@@ -178,11 +170,13 @@ export function FormWizard({
         quotedValues={quotedValues}
       />
 
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <button type="button" onClick={handleBack} disabled={stepIndex === 0}>
-          Back
-        </button>
-        <button type="button" className="primary" onClick={handleNext}>
+      <div className="wizard-actions no-print">
+        {stepIndex > 0 ? (
+          <button type="button" className="wizard-back" onClick={handleBack}>
+            Back
+          </button>
+        ) : null}
+        <button type="button" className="primary wizard-next" onClick={handleNext}>
           {stepIndex < steps.length - 1 ? "Next" : "Review"}
         </button>
       </div>
