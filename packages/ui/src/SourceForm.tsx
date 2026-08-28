@@ -1,7 +1,8 @@
 import { CAPABILITIES, resolve, type CaseRecord, type FieldEntry } from "@pbs/core";
-import { FRACTA_FLOW_BRAND, renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
+import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
+import { ExportControls } from "./commercial/ExportControls.js";
 import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
 import { toTargetDocument } from "./registryAdapter.js";
 import { SOURCE_ALWAYS_REQUIRED_FIELD_IDS, SOURCE_DOCUMENT_ID, SOURCE_VISIBILITY_RULES } from "./source.js";
@@ -25,15 +26,6 @@ const SOURCE_QUOTED_FIELDS = registry.fields.filter(
 );
 
 const EMPTY_VALUES: FormValues = { scalar: {}, groups: {} };
-
-function download(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 function newRowId(): string {
   return crypto.randomUUID();
@@ -99,22 +91,6 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
     return merged;
   }, [priorFields]);
 
-  function handleDownloadBlank() {
-    renderBlankDocxBlob(SOURCE_DOCUMENT, SOURCE_DOCUMENT_ID, SOURCE_FIELDS, FRACTA_FLOW_BRAND).then((blob) =>
-      download(blob, "fracta-flow-source-register-blank.docx"),
-    );
-  }
-
-  function handleDownloadCompleted() {
-    renderCompletedDocxBlob(
-      SOURCE_DOCUMENT,
-      SOURCE_DOCUMENT_ID,
-      SOURCE_FIELDS,
-      FRACTA_FLOW_BRAND,
-      flattenValuesForExport(values),
-    ).then((blob) => download(blob, "fracta-flow-source-register-completed.docx"));
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const missing = [...required].filter((id) => {
@@ -152,17 +128,20 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="no-print" style={{ marginBottom: "1.5rem" }}>
-        <button type="button" onClick={handleDownloadBlank}>
-          Download blank DOCX
-        </button>{" "}
-        <button type="button" onClick={handleDownloadCompleted}>
-          Download completed DOCX
-        </button>{" "}
-        <button type="button" onClick={() => window.print()}>
-          Print
-        </button>
-      </div>
+      <ExportControls
+        renderBlank={(brand) => renderBlankDocxBlob(SOURCE_DOCUMENT, SOURCE_DOCUMENT_ID, SOURCE_FIELDS, brand)}
+        renderCompleted={(brand) =>
+          renderCompletedDocxBlob(
+            SOURCE_DOCUMENT,
+            SOURCE_DOCUMENT_ID,
+            SOURCE_FIELDS,
+            brand,
+            flattenValuesForExport(values),
+          )
+        }
+        blankFilename="vector-source-register-blank.docx"
+        completedFilename="vector-source-register-completed.docx"
+      />
 
       {missingFields.length > 0 && (
         <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
