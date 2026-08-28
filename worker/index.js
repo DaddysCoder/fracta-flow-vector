@@ -1,3 +1,5 @@
+import { entitlementsForSubscription, isVectorPaidSubscription } from "./entitlements.mjs";
+
 function json(body, init = {}) {
   const headers = new Headers(init.headers);
   headers.set("content-type", "application/json; charset=utf-8");
@@ -19,9 +21,17 @@ const PAID_ENTITLEMENTS = Object.freeze({
   supportTemplates: true,
 });
 
-const PAID_STATUSES = new Set(["active", "trialing"]);
 const SESSION_COOKIE = "vector_account";
 const STRIPE_API = "https://api.stripe.com/v1";
+
+const BRAND_PROFILE_FIELDS = [
+  "organisationName",
+  "accentHex",
+  "inkHex",
+  "paperHex",
+  "contactLine",
+  "footerText",
+];
 
 function parseCookies(request) {
   const raw = request.headers.get("cookie") ?? "";
@@ -84,12 +94,17 @@ async function getAccountSubscription(env, accountId) {
 
 async function currentEntitlements(env, accountId) {
   const subscription = await getAccountSubscription(env, accountId);
-  const paid = subscription && PAID_STATUSES.has(subscription.status);
   return {
-    entitlements: paid ? PAID_ENTITLEMENTS : FREE_ENTITLEMENTS,
+    entitlements: entitlementsForSubscription(
+      subscription,
+      env.STRIPE_PRICE_ID,
+      FREE_ENTITLEMENTS,
+      PAID_ENTITLEMENTS,
+    ),
     subscription: subscription
       ? {
           status: subscription.status,
+          priceId: subscription.provider_price_id,
           currentPeriodEnd: subscription.current_period_end,
           cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
         }
@@ -105,7 +120,7 @@ async function createCheckout(request, env) {
   if (!accountId) accountId = crypto.randomUUID();
 
   const existing = await getAccountSubscription(env, accountId);
-  if (existing && PAID_STATUSES.has(existing.status)) {
+  if (isVectorPaidSubscription(existing, env.STRIPE_PRICE_ID)) {
     return json({ error: "already_paid" }, { status: 409 });
   }
 
@@ -305,6 +320,116 @@ async function handleWebhook(request, env) {
   return json({ received: true });
 }
 
+function sanitizeBrandField(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, 500) : null;
+}
+
+function brandRowToProfile(row) {
+  if (!row) return null;
+  return {
+    organisationName: row.organisation_name,
+    accentHex: row.accent_hex,
+    inkHex: row.ink_hex,
+    paperHex: row.paper_hex,
+    contactLine: row.contact_line,
+    footerText: row.footer_text,
+  };
+}
+
+async function getBrandProfile(env, accountId) {
+  const row = await env.DB.prepare(
+    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text
+       FROM brand_profiles
+      WHERE account_id = ?1`,
+  )
+    .bind(accountId)
+    .first();
+  return brandRowToProfile(row);
+}
+
+async function saveBrandProfile(env, accountId, body) {
+  const organisationName = sanitizeBrandField(body.organisationName);
+  if (!organisationName) {
+    return { error: "organisation_name_required" };
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO brand_profiles (
+        account_id, organisation_name, accent_hex, ink_hex, paper_hex,
+        contact_line, footer_text, created_at, updated_at
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(account_id) DO UPDATE SET
+        organisation_name = excluded.organisation_name,
+        accent_hex = excluded.accent_hex,
+        ink_hex = excluded.ink_hex,
+        paper_hex = excluded.paper_hex,
+        contact_line = excluded.contact_line,
+        footer_text = excluded.footer_text,
+        updated_at = CURRENT_TIMESTAMP`,
+  )
+    .bind(
+      accountId,
+      organisationName,
+      sanitizeBrandField(body.accentHex),
+      sanitizeBrandField(body.inkHex),
+      sanitizeBrandField(body.paperHex),
+      sanitizeBrandField(body.contactLine),
+      sanitizeBrandField(body.footerText),
+    )
+    .run();
+
+  return { profile: await getBrandProfile(env, accountId) };
+}
+
+async function requireVectorPaidAccount(request, env) {
+  const missing = requireBillingConfig(env);
+  if (missing.length) return { response: json({ error: "billing_not_configured", missing }, { status: 503 }) };
+
+  const accountId = accountIdFromRequest(request);
+  if (!accountId) return { response: json({ error: "account_required" }, { status: 401 }) };
+
+  const subscription = await getAccountSubscription(env, accountId);
+  if (!isVectorPaidSubscription(subscription, env.STRIPE_PRICE_ID)) {
+    return { response: json({ error: "paid_required" }, { status: 403 }) };
+  }
+
+  return { accountId };
+}
+
+async function handleBrandProfile(request, env) {
+  const auth = await requireVectorPaidAccount(request, env);
+  if (auth.response) return auth.response;
+
+  if (request.method === "GET") {
+    const profile = await getBrandProfile(env, auth.accountId);
+    return json({ profile });
+  }
+
+  if (request.method === "PUT") {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "invalid_json" }, { status: 400 });
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return json({ error: "invalid_body" }, { status: 400 });
+    }
+    const unknownKeys = Object.keys(body).filter((key) => !BRAND_PROFILE_FIELDS.includes(key));
+    if (unknownKeys.length > 0) {
+      return json({ error: "unknown_fields", fields: unknownKeys }, { status: 400 });
+    }
+
+    const result = await saveBrandProfile(env, auth.accountId, body);
+    if (result.error) return json({ error: result.error }, { status: 400 });
+    return json(result);
+  }
+
+  return json({ error: "method_not_allowed" }, { status: 405 });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -334,6 +459,10 @@ export default {
 
       if (url.pathname === "/api/billing/webhook" && request.method === "POST") {
         return await handleWebhook(request, env);
+      }
+
+      if (url.pathname === "/api/brand-profile") {
+        return await handleBrandProfile(request, env);
       }
 
       if (url.pathname.startsWith("/api/")) {

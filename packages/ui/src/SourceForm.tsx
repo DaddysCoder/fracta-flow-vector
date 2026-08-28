@@ -120,8 +120,11 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
   if (submitted) {
     return (
       <div role="status">
-        <h1>Source and consultation register submitted</h1>
-        <p>Every source and consultation logged above is carried forward with this case.</p>
+        <h1>Source and consultation register complete</h1>
+        <p>
+          Your register entries remain in this browser session only. Nothing was uploaded or stored
+          on WHATBIT servers. Use export or print if you want a copy outside this device.
+        </p>
       </div>
     );
   }
@@ -162,7 +165,7 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
       />
 
       <button type="submit" className="primary no-print">
-        Submit source register
+        Complete register
       </button>
     </form>
   );
