@@ -12,7 +12,8 @@
   "vars": {
     "STRIPE_PRICE_ID": "price_1U9PtYFIXid8q5ww6023smGl",
     "STRIPE_YEARLY_PRICE_ID": "price_1U9PtfFIXid8q5wwC7q1sAoT",
-    "STRIPE_SINGLE_DOCUMENT_PRICE_ID": "price_1U9Pt0FIXid8q5wwDir1g6gO"
+    "STRIPE_SINGLE_DOCUMENT_PRICE_ID": "price_1U9Pt0FIXid8q5wwDir1g6gO",
+    "STRIPE_PORTAL_CONFIGURATION_ID": "bpc_1U9GR1FIXid8q5wwOXKn3Bao"
   },
   "assets": {
     "directory": "./packages/ui/dist",
