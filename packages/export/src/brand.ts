@@ -7,6 +7,9 @@ export interface Brand {
   ink: string;
   paper: string;
   accent: string;
+  /** Heading font family for exported titles/section headings. Undefined
+   * lets docx/print fall back to the default document font. */
+  headingFont?: string;
 }
 
 /** Vector's default brand for standalone exports. */
@@ -22,12 +25,19 @@ export const VECTOR_BRAND: Brand = {
 export const FRACTA_FLOW_BRAND: Brand = VECTOR_BRAND;
 
 /** Paid organisation-branded exports override Vector's defaults. */
-export function providerBrand(provider: { name: string; ink?: string; paper?: string; accent?: string }): Brand {
+export function providerBrand(provider: {
+  name: string;
+  ink?: string;
+  paper?: string;
+  accent?: string;
+  headingFont?: string;
+}): Brand {
   return {
     mode: "provider_brand_profile",
     name: provider.name,
     ink: provider.ink ?? VECTOR_BRAND.ink,
     paper: provider.paper ?? VECTOR_BRAND.paper,
     accent: provider.accent ?? VECTOR_BRAND.accent,
+    headingFont: provider.headingFont,
   };
 }

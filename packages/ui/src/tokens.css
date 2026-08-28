@@ -11,6 +11,8 @@
   --paper: #ffffff;
   --muted: #6b6b6b;
   --purple: #7b2ff7;
+  /** Paid Brand Profile heading font — Montserrat until a customer picks one. */
+  --heading-font: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   --tap-target-min: 44px;
   --font-size-base: 17px;
@@ -166,6 +168,12 @@ section.form-section {
 
 section.form-section:first-of-type {
   border-top: none;
+}
+
+.section-title,
+h1,
+h2 {
+  font-family: var(--heading-font);
 }
 
 .section-title {

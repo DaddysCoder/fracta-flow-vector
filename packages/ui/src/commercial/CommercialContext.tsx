@@ -1,12 +1,18 @@
 import { VECTOR_BRAND, type Brand } from "@pbs/export";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { resolveExportBrand } from "./brandProfile.js";
-import { fetchVectorEntitlements, startVectorCheckout } from "./billing.js";
+import { DEFAULT_HEADING_FONT, resolveExportBrand } from "./brandProfile.js";
+import {
+  fetchVectorBrandProfile,
+  fetchVectorEntitlements,
+  startVectorCheckout,
+  type VectorPurchase,
+} from "./billing.js";
 import {
   FREE_ENTITLEMENTS,
   type PaidFeature,
   type VectorEntitlements,
 } from "./entitlements.js";
+import { PaywallModal } from "./PaywallModal.js";
 
 export interface VectorCommercialState {
   entitlements: VectorEntitlements;
@@ -63,6 +69,7 @@ export function VectorCommercialProvider({
   );
   const [exportBrand, setExportBrand] = useState<Brand>(exportBrandOverride ?? VECTOR_BRAND);
   const [billingAttempt, setBillingAttempt] = useState<BillingAttempt>({ status: "idle" });
+  const [paywallFeature, setPaywallFeature] = useState<PaidFeature | null>(null);
 
   function requestUpgrade(feature: PaidFeature) {
     if (requestUpgradeOverride) {
@@ -70,10 +77,15 @@ export function VectorCommercialProvider({
       return;
     }
 
-    setBillingAttempt({ status: "opening", feature });
-    window.dispatchEvent(new CustomEvent("vector:billing-start", { detail: { feature } }));
+    setPaywallFeature(feature);
+  }
 
-    void startVectorCheckout(feature).catch((error) => {
+  function startCheckout(feature: PaidFeature, purchase: VectorPurchase) {
+    setPaywallFeature(null);
+    setBillingAttempt({ status: "opening", feature });
+    window.dispatchEvent(new CustomEvent("vector:billing-start", { detail: { feature, purchase } }));
+
+    void startVectorCheckout(feature, purchase).catch((error) => {
       const code = error instanceof Error ? error.message : "checkout_failed";
       setBillingAttempt({ status: "error", feature, code });
       window.dispatchEvent(
@@ -133,6 +145,44 @@ export function VectorCommercialProvider({
     };
   }, [exportBrandOverride, resolvedEntitlements]);
 
+  // Paid Brand Profile customisation (heading font + accent colour) applies
+  // live, app-wide, not just to exports — every heading and focus/required
+  // mark on screen derives from these two CSS custom properties.
+  useEffect(() => {
+    let cancelled = false;
+    async function applyBrandToDocument() {
+      const root = document.documentElement.style;
+      if (!resolvedEntitlements.companyBranding) {
+        root.removeProperty("--purple");
+        root.removeProperty("--heading-font");
+        return;
+      }
+      try {
+        const profile = await fetchVectorBrandProfile();
+        if (cancelled) return;
+        if (profile?.accentHex) root.setProperty("--purple", `#${profile.accentHex.replace(/^#/, "")}`);
+        else root.removeProperty("--purple");
+        const font = profile?.headingFont ?? DEFAULT_HEADING_FONT;
+        root.setProperty(
+          "--heading-font",
+          `"${font}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
+        );
+      } catch {
+        if (!cancelled) {
+          root.removeProperty("--purple");
+          root.removeProperty("--heading-font");
+        }
+      }
+    }
+
+    void applyBrandToDocument();
+    window.addEventListener("vector:brand-profile-saved", applyBrandToDocument);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("vector:brand-profile-saved", applyBrandToDocument);
+    };
+  }, [resolvedEntitlements.companyBranding]);
+
   return (
     <VectorCommercialContext.Provider
       value={{ entitlements: resolvedEntitlements, exportBrand, requestUpgrade }}
@@ -166,7 +216,7 @@ export function VectorCommercialProvider({
                 {checkoutErrorMessage(billingAttempt.code)}
               </strong>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                <button type="button" onClick={() => requestUpgrade(billingAttempt.feature)}>
+                <button type="button" onClick={() => setPaywallFeature(billingAttempt.feature)}>
                   Try again
                 </button>
                 <button type="button" onClick={() => setBillingAttempt({ status: "idle" })}>
@@ -176,6 +226,13 @@ export function VectorCommercialProvider({
             </>
           )}
         </div>
+      ) : null}
+      {!requestUpgradeOverride && paywallFeature ? (
+        <PaywallModal
+          feature={paywallFeature}
+          onConfirm={(purchase) => startCheckout(paywallFeature, purchase)}
+          onDismiss={() => setPaywallFeature(null)}
+        />
       ) : null}
     </VectorCommercialContext.Provider>
   );

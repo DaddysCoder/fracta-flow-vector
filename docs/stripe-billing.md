@@ -1,9 +1,15 @@
 # Vector billing setup
 
-Vector uses one freemium product model:
+Vector uses one freemium product model with three purchasable tiers:
 
 - Free: use the three launch forms online.
 - Paid: document export, Print/PDF, organisation branding, saved brand profile, and support templates.
+  Unlocked by any of:
+  - **Monthly** subscription (`STRIPE_PRICE_ID`)
+  - **Annual** subscription, "2 months free" (`STRIPE_YEARLY_PRICE_ID`)
+  - **One-off**, a single document credit with no subscription (`STRIPE_SINGLE_DOCUMENT_PRICE_ID`) — a
+    one-time Stripe Checkout payment that grants one row in `document_credits`, spent via
+    `POST /api/document-credit/consume`.
 
 ## Stripe
 
@@ -13,7 +19,8 @@ Live Stripe product:
 - Product ID: `prod_V9bnI1AvbEr9nO`
 - Account: WhatBit
 
-The recurring price is deliberately not hard-coded in the app. `STRIPE_PRICE_ID` selects the one paid Vector subscription price.
+None of the three prices are hard-coded in the app — `POST /api/billing/checkout` takes a `purchase`
+field (`"monthly" | "yearly" | "single_document"`) and looks up the matching price id.
 
 ### Checkout
 
@@ -21,13 +28,19 @@ The recurring price is deliberately not hard-coded in the app. `STRIPE_PRICE_ID`
 
 The Worker creates a Stripe-hosted Checkout Session with:
 
-- `mode=subscription`
-- one `STRIPE_PRICE_ID` line item
+- `mode=subscription` for `monthly`/`yearly`, `mode=payment` for `single_document`
+- one line item, priced from `STRIPE_PRICE_ID` / `STRIPE_YEARLY_PRICE_ID` / `STRIPE_SINGLE_DOCUMENT_PRICE_ID`
 - a server-generated Vector account ID in `client_reference_id`
-- the same account ID in Checkout and subscription metadata
+- the same account ID, plus the `purchase` tier, in Checkout (and subscription) metadata
 - success/cancel redirects back to Vector
 
 The account ID is stored in a Secure, HttpOnly, SameSite=Lax cookie. Until full sign-in is added, paid access is therefore bound to that browser session rather than to email alone. This is intentional: an email address by itself must never be accepted as proof that somebody owns a paid account.
+
+### One-off document credits
+
+`checkout.session.completed` for a `mode=payment` session with `metadata.purchase = "single_document"`
+grants one row in `document_credits` (`+1` balance) rather than a subscription. The client spends it via
+`POST /api/document-credit/consume`, which decrements atomically and never goes below zero.
 
 ### Webhook
 
@@ -52,13 +65,16 @@ Vector requires its own Stripe Billing Portal configuration via `STRIPE_PORTAL_C
 
 ## Cloudflare bindings and secrets
 
-Create a D1 database and bind it as `DB` in `wrangler.jsonc`, then apply `migrations/0001_commercial.sql`.
+Create a D1 database and bind it as `DB` in `wrangler.jsonc`, then apply `migrations/0001_commercial.sql`,
+`migrations/0002_document_credits.sql` and `migrations/0003_brand_heading_font.sql` in order.
 
 Required Worker values:
 
 - `STRIPE_SECRET_KEY` — secret
 - `STRIPE_WEBHOOK_SECRET` — secret
-- `STRIPE_PRICE_ID` — the live recurring Vector price ID
+- `STRIPE_PRICE_ID` — the live monthly Vector subscription price ID
+- `STRIPE_YEARLY_PRICE_ID` — the live annual Vector subscription price ID
+- `STRIPE_SINGLE_DOCUMENT_PRICE_ID` — the live one-off document price ID (`mode=payment`, not a subscription)
 - `STRIPE_PORTAL_CONFIGURATION_ID` — dedicated Vector portal configuration
 - `DB` — D1 binding
 - `ASSETS` — configured by Wrangler static assets
@@ -67,13 +83,14 @@ Do not commit Stripe secret keys or webhook secrets.
 
 ## Remaining launch actions
 
-1. Choose the recurring Vector price amount/cadence.
-2. Create that Stripe Price under `prod_V9bnI1AvbEr9nO` and set `STRIPE_PRICE_ID`.
+1. Choose the Vector price amounts/cadence for all three tiers (monthly, annual, one-off).
+2. Create those three Stripe Prices under `prod_V9bnI1AvbEr9nO` and set `STRIPE_PRICE_ID`,
+   `STRIPE_YEARLY_PRICE_ID` and `STRIPE_SINGLE_DOCUMENT_PRICE_ID`.
 3. Create the dedicated Vector Billing Portal configuration and set `STRIPE_PORTAL_CONFIGURATION_ID`.
-4. Create/bind the Cloudflare D1 database and run the migration.
+4. Create/bind the Cloudflare D1 database and run the migrations.
 5. Set the Stripe secret key in the Worker.
 6. Deploy Vector to its final Cloudflare URL.
 7. Create the Stripe webhook endpoint against `<final-vector-url>/api/billing/webhook` and set its signing secret in the Worker.
-8. Run one live low-value checkout and cancellation test before public launch.
+8. Run one live low-value checkout and cancellation test per tier before public launch.
 
 The Arc support-template content can be added later without changing the billing model; `supportTemplates` is already a paid entitlement.

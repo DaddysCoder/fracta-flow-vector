@@ -1,16 +1,16 @@
 import { createTriageTask, type FieldEntry, type TriageTask } from "@pbs/core";
 import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
-import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
+import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
+import { FormWizard } from "./FormWizard.js";
 import { saveReferralHandoff } from "./localReferralHandoff.js";
 import {
   REFERRAL_ALWAYS_REQUIRED_FIELD_IDS,
   REFERRAL_DOCUMENT_ID,
   REFERRAL_VISIBILITY_RULES,
 } from "./referral.js";
-import { requiredFieldIds } from "./visibility.js";
 
 const maybeReferralDocument = registry.documents[REFERRAL_DOCUMENT_ID];
 if (!maybeReferralDocument) throw new Error(`registry is missing document "${REFERRAL_DOCUMENT_ID}"`);
@@ -37,27 +37,10 @@ export interface ReferralFormProps {
 export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFormProps) {
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
-
-  const required = useMemo(
-    () => requiredFieldIds(REFERRAL_VISIBILITY_RULES, values.scalar, REFERRAL_ALWAYS_REQUIRED_FIELD_IDS),
-    [values],
-  );
 
   const referralId = "referral-draft"; // one draft per session in this standalone build
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const missing = [...required].filter((id) => {
-      const v = values.scalar[id];
-      return v === undefined || v === null || v === "";
-    });
-    if (missing.length > 0) {
-      setMissingFields(missing);
-      return;
-    }
-    setMissingFields([]);
-
+  function handleSubmit() {
     const timestamp = now().toISOString();
     const fields: FieldEntry[] = Object.entries(values.scalar).map(([fieldId, value]) => ({
       fieldId,
@@ -93,41 +76,32 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <ExportControls
-        renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, brand)}
-        renderCompleted={(brand) =>
-          renderCompletedDocxBlob(
-            REFERRAL_DOCUMENT,
-            REFERRAL_DOCUMENT_ID,
-            REFERRAL_FIELDS,
-            brand,
-            flattenValuesForExport(values),
-          )
-        }
-        blankFilename="vector-referral-blank.docx"
-        completedFilename="vector-referral-completed.docx"
-      />
-
-      {missingFields.length > 0 && (
-        <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
-          Please complete: {missingFields.join(", ")}
-        </div>
-      )}
-
-      <FormRenderer
-        document={REFERRAL_DOCUMENT}
-        fields={REFERRAL_FIELDS}
-        values={values}
-        onChange={setValues}
-        visibilityRules={REFERRAL_VISIBILITY_RULES}
-        alwaysRequiredFieldIds={REFERRAL_ALWAYS_REQUIRED_FIELD_IDS}
-        newRowId={newRowId}
-      />
-
-      <button type="submit" className="primary no-print">
-        Complete referral
-      </button>
-    </form>
+    <FormWizard
+      document={REFERRAL_DOCUMENT}
+      fields={REFERRAL_FIELDS}
+      values={values}
+      onChange={setValues}
+      visibilityRules={REFERRAL_VISIBILITY_RULES}
+      alwaysRequiredFieldIds={REFERRAL_ALWAYS_REQUIRED_FIELD_IDS}
+      newRowId={newRowId}
+      onComplete={handleSubmit}
+      completeLabel="Complete referral"
+      header={
+        <ExportControls
+          renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, brand)}
+          renderCompleted={(brand) =>
+            renderCompletedDocxBlob(
+              REFERRAL_DOCUMENT,
+              REFERRAL_DOCUMENT_ID,
+              REFERRAL_FIELDS,
+              brand,
+              flattenValuesForExport(values),
+            )
+          }
+          blankFilename="vector-referral-blank.docx"
+          completedFilename="vector-referral-completed.docx"
+        />
+      }
+    />
   );
 }

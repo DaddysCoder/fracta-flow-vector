@@ -28,6 +28,111 @@ const SUPPORT_TEMPLATES: Array<{
   },
 ];
 
+const ARC_FONT_STACK =
+  "'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+const ARC_CROSS_SELL: Array<{ id: string; title: string; description: string; stripe: string; preview: string }> = [
+  {
+    id: "admin-hub",
+    title: "Admin Hub",
+    description: "Org-wide stats and settings in one place.",
+    stripe: "#5B21B6",
+    preview: "▦ ▦ ▦ ▦",
+  },
+  {
+    id: "document-checker",
+    title: "Document Checker",
+    description: "Catches missing or inconsistent fields before you export.",
+    stripe: "#2C6E4F",
+    preview: "✓ ✓ ! ✓",
+  },
+  {
+    id: "referral-tracker",
+    title: "Referral Tracker",
+    description: "A 4-column board for every referral's status.",
+    stripe: "#1A5FB4",
+    preview: "▤ ▤ ▤ ▤",
+  },
+];
+
+/** Arc CRM's own brand (Geist, ink #171717) — intentionally not overridden
+ * by Vector's brand picker, so this reads as a distinct product. Visual
+ * reference only: no real Arc integration exists yet. */
+function ArcCrossSell() {
+  return (
+    <section
+      aria-labelledby="arc-cross-sell-heading"
+      className="no-print"
+      style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--border, #e5e5e5)", fontFamily: ARC_FONT_STACK }}
+    >
+      <h2 id="arc-cross-sell-heading" style={{ marginTop: 0, fontSize: "1rem", color: "#171717" }}>
+        Arc CRM · coming soon
+      </h2>
+      <p style={{ margin: "0 0 1rem", color: "#171717" }}>
+        Admin tools for practices running Vector at scale, from the same WhatBit family.
+      </p>
+      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.75rem", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+        {ARC_CROSS_SELL.map((card) => (
+          <li
+            key={card.id}
+            style={{
+              borderTop: `4px solid ${card.stripe}`,
+              border: "1px solid #e5e5e5",
+              borderTopWidth: "4px",
+              borderTopColor: card.stripe,
+              borderRadius: "10px",
+              padding: "0.75rem",
+              background: "#fff",
+              color: "#171717",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                color: "#92400E",
+                background: "#FEF3C7",
+                borderRadius: "999px",
+                padding: "0.15rem 0.5rem",
+              }}
+            >
+              <span aria-hidden="true" style={{ width: "6px", height: "6px", borderRadius: "999px", background: "#D97706" }} />
+              COMING SOON
+            </span>
+            <strong style={{ display: "block", marginTop: "0.5rem" }}>{card.title}</strong>
+            <span style={{ display: "block", fontSize: "0.875rem", margin: "0.25rem 0 0.5rem" }}>{card.description}</span>
+            <div
+              aria-hidden="true"
+              style={{
+                fontFamily: "'Geist Mono', ui-monospace, monospace",
+                fontSize: "0.75rem",
+                background: "#FAFAFA",
+                border: "1px solid #e5e5e5",
+                borderRadius: "6px",
+                padding: "0.5rem",
+                height: "64px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                letterSpacing: "0.2em",
+              }}
+            >
+              {card.preview}
+            </div>
+            <span style={{ display: "block", marginTop: "0.5rem", fontSize: "0.8rem", fontWeight: 600, color: card.stripe }}>
+              See it in Arc →
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function SupportTemplatesHub() {
   const { entitlements, requestUpgrade } = useVectorCommercial();
   const canUseTemplates = canUseFeature(entitlements, "support_templates");
@@ -84,14 +189,12 @@ export function SupportTemplatesHub() {
           <a href={SUPPORT_TEMPLATE_ROUTES.hub}>View all Support Templates</a>
         </p>
       ) : null}
+      <ArcCrossSell />
     </section>
   );
 }
 
 export function SupportTemplatesHubPage() {
-  const { entitlements, requestUpgrade } = useVectorCommercial();
-  const canUseTemplates = canUseFeature(entitlements, "support_templates");
-
   return (
     <main style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 1.25rem 4rem" }}>
       <header style={{ marginBottom: "1.5rem" }}>
@@ -102,16 +205,7 @@ export function SupportTemplatesHubPage() {
           storage.
         </p>
       </header>
-      {!canUseTemplates ? (
-        <div className="support-template-gate" style={{ border: "1px solid #e5e5e5", borderRadius: "12px", padding: "1.5rem" }}>
-          <p>Support Templates require Vector Paid.</p>
-          <button type="button" className="primary" onClick={() => requestUpgrade("support_templates")}>
-            Upgrade to unlock
-          </button>
-        </div>
-      ) : (
-        <SupportTemplatesHub />
-      )}
+      <SupportTemplatesHub />
       <p className="no-print" style={{ marginTop: "1.5rem" }}>
         <a href="/referral">← Back to Vector forms</a>
       </p>

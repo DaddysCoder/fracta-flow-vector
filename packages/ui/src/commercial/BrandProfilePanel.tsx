@@ -25,8 +25,10 @@ export function BrandProfilePanel() {
     <section className="no-print" style={{ marginBottom: "1.5rem", padding: "1rem", border: "1px solid var(--border)" }}>
       <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Organisation branding</h2>
       <p style={{ margin: "0 0 0.75rem" }}>
-        Saved branding applies to paid exports in this browser. Organisation details are commercial
-        metadata only — never mixed with participant form content.
+        Applied to every exported DOCX and printed document — referral, triage, register and support
+        plan templates all pick this up automatically. Your heading font and accent colour also update
+        live across the app the moment you save. Organisation details are commercial metadata only —
+        never mixed with participant form content.
       </p>
       <BrandProfileEditor />
       <button type="button" style={{ marginTop: "0.75rem" }} onClick={() => void openVectorBillingPortal()}>

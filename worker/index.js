@@ -24,6 +24,8 @@ const PAID_ENTITLEMENTS = Object.freeze({
 const SESSION_COOKIE = "vector_account";
 const STRIPE_API = "https://api.stripe.com/v1";
 
+const BRAND_HEADING_FONTS = ["Montserrat", "Sora", "Space Grotesk", "Manrope", "DM Sans"];
+
 const BRAND_PROFILE_FIELDS = [
   "organisationName",
   "accentHex",
@@ -31,6 +33,7 @@ const BRAND_PROFILE_FIELDS = [
   "paperHex",
   "contactLine",
   "footerText",
+  "headingFont",
 ];
 
 function parseCookies(request) {
@@ -52,11 +55,26 @@ function sessionCookie(accountId) {
   return `${SESSION_COOKIE}=${encodeURIComponent(accountId)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000`;
 }
 
-function requireBillingConfig(env, { webhook = false, portal = false } = {}) {
+/** All three billing tiers' Stripe price ids. Annual and one-off are new
+ * relative to Vector's original single-price subscription — each is only
+ * required once the org actually offers that tier (see docs/stripe-billing.md). */
+const PURCHASE_PRICE_ENV = {
+  monthly: "STRIPE_PRICE_ID",
+  yearly: "STRIPE_YEARLY_PRICE_ID",
+  single_document: "STRIPE_SINGLE_DOCUMENT_PRICE_ID",
+};
+
+function vectorSubscriptionPriceIds(env) {
+  return [env.STRIPE_PRICE_ID, env.STRIPE_YEARLY_PRICE_ID].filter(Boolean);
+}
+
+function requireBillingConfig(env, { webhook = false, portal = false, purchase = "monthly" } = {}) {
   const missing = [];
   if (!env.DB) missing.push("DB");
   if (!env.STRIPE_SECRET_KEY) missing.push("STRIPE_SECRET_KEY");
-  if (!webhook && !portal && !env.STRIPE_PRICE_ID) missing.push("STRIPE_PRICE_ID");
+  if (!webhook && !portal && !env[PURCHASE_PRICE_ENV[purchase] ?? "STRIPE_PRICE_ID"]) {
+    missing.push(PURCHASE_PRICE_ENV[purchase] ?? "STRIPE_PRICE_ID");
+  }
   if (webhook && !env.STRIPE_WEBHOOK_SECRET) missing.push("STRIPE_WEBHOOK_SECRET");
   if (portal && !env.STRIPE_PORTAL_CONFIGURATION_ID) missing.push("STRIPE_PORTAL_CONFIGURATION_ID");
   return missing;
@@ -97,7 +115,7 @@ async function currentEntitlements(env, accountId) {
   return {
     entitlements: entitlementsForSubscription(
       subscription,
-      env.STRIPE_PRICE_ID,
+      vectorSubscriptionPriceIds(env),
       FREE_ENTITLEMENTS,
       PAID_ENTITLEMENTS,
     ),
@@ -113,15 +131,25 @@ async function currentEntitlements(env, accountId) {
 }
 
 async function createCheckout(request, env) {
-  const missing = requireBillingConfig(env);
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+  const purchase = ["monthly", "yearly", "single_document"].includes(body?.purchase) ? body.purchase : "monthly";
+
+  const missing = requireBillingConfig(env, { purchase });
   if (missing.length) return json({ error: "billing_not_configured", missing }, { status: 503 });
 
   let accountId = accountIdFromRequest(request);
   if (!accountId) accountId = crypto.randomUUID();
 
-  const existing = await getAccountSubscription(env, accountId);
-  if (isVectorPaidSubscription(existing, env.STRIPE_PRICE_ID)) {
-    return json({ error: "already_paid" }, { status: 409 });
+  if (purchase !== "single_document") {
+    const existing = await getAccountSubscription(env, accountId);
+    if (isVectorPaidSubscription(existing, vectorSubscriptionPriceIds(env))) {
+      return json({ error: "already_paid" }, { status: 409 });
+    }
   }
 
   await env.DB.prepare(
@@ -132,15 +160,18 @@ async function createCheckout(request, env) {
     .run();
 
   const origin = new URL(request.url).origin;
+  const priceId = env[PURCHASE_PRICE_ENV[purchase]];
+  const isSubscription = purchase !== "single_document";
   const session = await stripeRequest(env, "/checkout/sessions", {
-    mode: "subscription",
-    "line_items[0][price]": env.STRIPE_PRICE_ID,
+    mode: isSubscription ? "subscription" : "payment",
+    "line_items[0][price]": priceId,
     "line_items[0][quantity]": "1",
     success_url: `${origin}/?billing=success`,
     cancel_url: `${origin}/?billing=cancelled`,
     client_reference_id: accountId,
     "metadata[account_id]": accountId,
-    "subscription_data[metadata][account_id]": accountId,
+    "metadata[purchase]": purchase,
+    ...(isSubscription ? { "subscription_data[metadata][account_id]": accountId } : {}),
   });
 
   return json(
@@ -264,6 +295,18 @@ async function upsertSubscription(env, subscription) {
     .run();
 }
 
+async function grantDocumentCredit(env, accountId) {
+  await env.DB.prepare(
+    `INSERT INTO document_credits (account_id, balance, created_at, updated_at)
+     VALUES (?1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+     ON CONFLICT(account_id) DO UPDATE SET
+       balance = document_credits.balance + 1,
+       updated_at = CURRENT_TIMESTAMP`,
+  )
+    .bind(accountId)
+    .run();
+}
+
 async function handleCheckoutCompleted(env, session) {
   const accountId = session.metadata?.account_id ?? session.client_reference_id ?? null;
   if (!accountId) return;
@@ -278,6 +321,10 @@ async function handleCheckoutCompleted(env, session) {
   )
     .bind(accountId, email)
     .run();
+
+  if (session.mode === "payment" && session.metadata?.purchase === "single_document") {
+    await grantDocumentCredit(env, accountId);
+  }
 }
 
 async function handleWebhook(request, env) {
@@ -326,6 +373,11 @@ function sanitizeBrandField(value) {
   return trimmed.length > 0 ? trimmed.slice(0, 500) : null;
 }
 
+function sanitizeHeadingFont(value) {
+  const trimmed = sanitizeBrandField(value);
+  return trimmed && BRAND_HEADING_FONTS.includes(trimmed) ? trimmed : null;
+}
+
 function brandRowToProfile(row) {
   if (!row) return null;
   return {
@@ -335,12 +387,13 @@ function brandRowToProfile(row) {
     paperHex: row.paper_hex,
     contactLine: row.contact_line,
     footerText: row.footer_text,
+    headingFont: row.heading_font,
   };
 }
 
 async function getBrandProfile(env, accountId) {
   const row = await env.DB.prepare(
-    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text
+    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text, heading_font
        FROM brand_profiles
       WHERE account_id = ?1`,
   )
@@ -358,8 +411,8 @@ async function saveBrandProfile(env, accountId, body) {
   await env.DB.prepare(
     `INSERT INTO brand_profiles (
         account_id, organisation_name, accent_hex, ink_hex, paper_hex,
-        contact_line, footer_text, created_at, updated_at
-      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        contact_line, footer_text, heading_font, created_at, updated_at
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       ON CONFLICT(account_id) DO UPDATE SET
         organisation_name = excluded.organisation_name,
         accent_hex = excluded.accent_hex,
@@ -367,6 +420,7 @@ async function saveBrandProfile(env, accountId, body) {
         paper_hex = excluded.paper_hex,
         contact_line = excluded.contact_line,
         footer_text = excluded.footer_text,
+        heading_font = excluded.heading_font,
         updated_at = CURRENT_TIMESTAMP`,
   )
     .bind(
@@ -377,6 +431,7 @@ async function saveBrandProfile(env, accountId, body) {
       sanitizeBrandField(body.paperHex),
       sanitizeBrandField(body.contactLine),
       sanitizeBrandField(body.footerText),
+      sanitizeHeadingFont(body.headingFont),
     )
     .run();
 
@@ -391,7 +446,7 @@ async function requireVectorPaidAccount(request, env) {
   if (!accountId) return { response: json({ error: "account_required" }, { status: 401 }) };
 
   const subscription = await getAccountSubscription(env, accountId);
-  if (!isVectorPaidSubscription(subscription, env.STRIPE_PRICE_ID)) {
+  if (!isVectorPaidSubscription(subscription, vectorSubscriptionPriceIds(env))) {
     return { response: json({ error: "paid_required" }, { status: 403 }) };
   }
 
@@ -430,6 +485,27 @@ async function handleBrandProfile(request, env) {
   return json({ error: "method_not_allowed" }, { status: 405 });
 }
 
+/** Spends one one-off document credit (from a "single_document" purchase)
+ * atomically — never lets balance go negative. */
+async function consumeDocumentCredit(request, env) {
+  if (!env.DB) return json({ error: "billing_not_configured", missing: ["DB"] }, { status: 503 });
+
+  const accountId = accountIdFromRequest(request);
+  if (!accountId) return json({ error: "account_required" }, { status: 401 });
+
+  const row = await env.DB.prepare(
+    `UPDATE document_credits
+        SET balance = balance - 1, updated_at = CURRENT_TIMESTAMP
+      WHERE account_id = ?1 AND balance > 0
+      RETURNING balance`,
+  )
+    .bind(accountId)
+    .first();
+
+  if (!row) return json({ error: "no_credit_available" }, { status: 402 });
+  return json({ remaining: row.balance });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -463,6 +539,10 @@ export default {
 
       if (url.pathname === "/api/brand-profile") {
         return await handleBrandProfile(request, env);
+      }
+
+      if (url.pathname === "/api/document-credit/consume" && request.method === "POST") {
+        return await consumeDocumentCredit(request, env);
       }
 
       if (url.pathname.startsWith("/api/")) {
