@@ -9,6 +9,9 @@
       "custom_domain": true
     }
   ],
+  "vars": {
+    "STRIPE_PRICE_ID": "price_1U9IgWFIXid8q5wwQNGrCIUQ"
+  },
   "assets": {
     "directory": "./packages/ui/dist",
     "binding": "ASSETS",
