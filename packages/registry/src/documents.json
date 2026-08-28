@@ -95,8 +95,12 @@
     ],
     "sections": [
       {
-        "id": "03.1",
-        "title": "Source entries"
+        "id": "03.A",
+        "title": "Document register"
+      },
+      {
+        "id": "03.B",
+        "title": "Consultation log"
       }
     ]
   },

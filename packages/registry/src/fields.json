@@ -318,7 +318,7 @@
     "repeatable": false,
     "askedIn": "02.A",
     "rendersIn": [
-      "03.1",
+      "03.A",
       "04.1",
       "05.1",
       "06.1",
@@ -392,7 +392,7 @@
     "rendersIn": [
       "01.A",
       "02.A",
-      "03.1",
+      "03.A",
       "04.1",
       "05.1",
       "06.1",
@@ -1811,18 +1811,508 @@
     "phraseBank": true
   },
   {
-    "id": "source.entry",
-    "label": "Source and consultation entry",
+    "id": "source_document.name",
+    "label": "Document name",
     "tier": 2,
     "clinical": true,
-    "type": "long_text",
-    "group": "source",
+    "type": "short_text",
+    "group": "source_document",
     "repeatable": true,
-    "askedIn": "03.1",
+    "askedIn": "03.A",
     "rendersIn": [
       "07.4",
       "08.4",
       "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "source_document.type",
+    "label": "Document type",
+    "tier": 2,
+    "clinical": true,
+    "type": "select",
+    "group": "source_document",
+    "repeatable": true,
+    "askedIn": "03.A",
+    "rendersIn": [
+      "07.4",
+      "08.4",
+      "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "source_document.date_made",
+    "label": "Date the document was made",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "source_document",
+    "repeatable": true,
+    "askedIn": "03.A",
+    "rendersIn": [
+      "07.4",
+      "08.4",
+      "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "source_document.author_name",
+    "label": "Author name",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "source_document",
+    "repeatable": true,
+    "askedIn": "03.A",
+    "rendersIn": [
+      "07.4",
+      "08.4",
+      "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "source_document.author_role",
+    "label": "Author role",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "source_document",
+    "repeatable": true,
+    "askedIn": "03.A",
+    "rendersIn": [
+      "07.4",
+      "08.4",
+      "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "source_document.company",
+    "label": "Company or service",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "source_document",
+    "repeatable": true,
+    "askedIn": "03.A",
+    "rendersIn": [
+      "07.4",
+      "08.4",
+      "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "source_document.about",
+    "label": "What the document is about",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "group": "source_document",
+    "repeatable": true,
+    "askedIn": "03.A",
+    "rendersIn": [
+      "07.4",
+      "08.4",
+      "09.5"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "consultation_participant.name",
+    "label": "Name",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "consultation_participant",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "consultation_participant.role",
+    "label": "Role",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "consultation_participant",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "consultation_participant.date_mode",
+    "label": "Date and mode",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "consultation_participant",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "consultation_participant.what",
+    "label": "What was discussed or provided",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "group": "consultation_participant",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "consultation_other.name",
+    "label": "Name",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "consultation_other",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "consultation_other.role",
+    "label": "Role",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "consultation_other",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "consultation_other.date_mode",
+    "label": "Date and mode",
+    "tier": 2,
+    "clinical": true,
+    "type": "short_text",
+    "group": "consultation_other",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "consultation_other.what",
+    "label": "What was discussed or provided",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "group": "consultation_other",
+    "repeatable": true,
+    "askedIn": "03.B",
+    "rendersIn": [
+      "07.3",
+      "08.3",
+      "09.4"
     ],
     "informs": [],
     "transition": {

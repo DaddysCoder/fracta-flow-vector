@@ -93,6 +93,18 @@ export const FIELD_OPTIONS: Record<string, FieldOption[]> = {
     { value: "monthly", label: "Monthly" },
     { value: "occasional", label: "Occasional" },
   ],
+  "source_document.type": [
+    { value: "report", label: "Report" },
+    { value: "referral", label: "Referral" },
+    { value: "assessment", label: "Assessment" },
+    { value: "interview", label: "Interview" },
+    { value: "observation", label: "Observation" },
+    { value: "case_note", label: "Case note" },
+    { value: "email", label: "Email" },
+    { value: "letter", label: "Letter" },
+    { value: "data", label: "Data" },
+    { value: "other", label: "Other" },
+  ],
   "progress.strategy_trialled.disposition": [
     { value: "continue", label: "Continue" },
     { value: "adjust", label: "Adjust" },
