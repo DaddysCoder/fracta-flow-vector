@@ -19,7 +19,7 @@ const SUPPORT_TEMPLATES: Array<{
   {
     id: "interim-behaviour-support-plan",
     title: "Interim Behaviour Support Plan",
-    description: "Hold restrictive practice safely while fuller assessment continues.",
+    description: "Supports immediate needs and risk management while fuller assessment continues. A completed FBA is not required to start.",
   },
   {
     id: "comprehensive-behaviour-support-plan",
@@ -54,8 +54,8 @@ export function SupportTemplatesHub() {
         Support Templates
       </h2>
       <p style={{ margin: "0 0 1rem" }}>
-        Three paid behaviour support plan templates. Content stays in this browser&apos;s session storage and is not
-        sent to WHATBIT servers.
+        One general Behaviour Support Plan template, plus the formal Interim and Comprehensive NDIS BSP templates.
+        Content stays in this browser&apos;s session storage and is not sent to WHATBIT servers.
       </p>
       <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.75rem" }}>
         {SUPPORT_TEMPLATES.map((template) => (
