@@ -1,0 +1,37 @@
+name: Recover Vector bundle
+
+on:
+  push:
+    branches:
+      - recover-vector-bundle
+    paths:
+      - .github/workflows/recover-vector.yml
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild and verify bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .recovery/part* > /tmp/vector.bundle.b64
+          echo "0da0c6d2ea616ddb0fd6ba13a9447a95f85083aca71fa97d92f356a1f6b62adf  /tmp/vector.bundle.b64" | sha256sum -c -
+          base64 -d /tmp/vector.bundle.b64 > /tmp/vector.bundle
+          echo "2da511736cefaac903bf34b3fddff4b4bdf28c999ea3663cd807ab617e7cc2b4  /tmp/vector.bundle" | sha256sum -c -
+          git bundle verify /tmp/vector.bundle
+          git fetch /tmp/vector.bundle refs/heads/sol/vector-launch-final:refs/remotes/bundle/vector-final
+          test "$(git rev-parse refs/remotes/bundle/vector-final)" = "faf11ee23e3687b9c3a56246e1ac1fbf67e6316d"
+
+      - name: Publish recovered branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin refs/remotes/bundle/vector-final:refs/heads/sol/vector-launch-final
