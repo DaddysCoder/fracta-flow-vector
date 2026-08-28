@@ -3,6 +3,7 @@ import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
 import { registry, type DocumentDef } from "@pbs/registry";
 import { useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
+import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { FormWizard } from "./FormWizard.js";
 import { saveReferralHandoff } from "./localReferralHandoff.js";
@@ -37,6 +38,7 @@ export interface ReferralFormProps {
 export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFormProps) {
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
+  const { entitlements } = useVectorCommercial();
 
   const referralId = "referral-draft"; // one draft per session in this standalone build
 
@@ -84,6 +86,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
       visibilityRules={REFERRAL_VISIBILITY_RULES}
       alwaysRequiredFieldIds={REFERRAL_ALWAYS_REQUIRED_FIELD_IDS}
       newRowId={newRowId}
+      documentEyebrow={`Document ${REFERRAL_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
       onComplete={handleSubmit}
       completeLabel="Complete referral"
       header={

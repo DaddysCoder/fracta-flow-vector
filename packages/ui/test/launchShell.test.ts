@@ -14,6 +14,10 @@ describe("Vector launch shell", () => {
     expect(source).toMatch(/ReferralForm/);
     expect(source).toMatch(/TriageForm/);
     expect(source).toMatch(/SourceForm/);
+  });
+
+  it("links back to WHATBIT from the shared shell header", () => {
+    const source = readFileSync(resolve(import.meta.dirname, "../src/ShellHeader.tsx"), "utf8");
     expect(source).toMatch(/WHATBIT_VECTOR_URL/);
   });
 

@@ -146,25 +146,50 @@ export function SourceForm({ priorFields, onSubmitted, now = () => new Date() }:
         completedFilename="vector-source-register-completed.docx"
       />
 
+      {/* Prototype shows this as its own eyebrow line, matching every
+       * other document's "DOCUMENT 0N · TIER" mark — Source has no
+       * wizard steps of its own, so there is no step suffix. */}
+      <div className="wizard-eyebrow-row">
+        <span className="wizard-eyebrow">DOCUMENT 03 · FREE</span>
+      </div>
+
       {missingFields.length > 0 && (
         <div role="alert" style={{ border: "2px solid #111", padding: "0.75rem", marginBottom: "1rem" }}>
           Please complete: {missingFields.join(", ")}
         </div>
       )}
 
-      <FormRenderer
-        document={SOURCE_DOCUMENT}
-        fields={SOURCE_FIELDS}
-        values={values}
-        onChange={setValues}
-        visibilityRules={SOURCE_VISIBILITY_RULES}
-        alwaysRequiredFieldIds={SOURCE_ALWAYS_REQUIRED_FIELD_IDS}
-        newRowId={newRowId}
-        quotedFields={SOURCE_QUOTED_FIELDS}
-        quotedValues={quotedValues}
-      />
+      {/*
+       * The design handoff's prototype shows Source split into two
+       * bespoke sub-registers (03.A Document register with an
+       * auto-detected type badge and duplicate-name warning, 03.B
+       * Consultation log split into participant/others) — see
+       * `Vector App Redesign (digital).dc.html`'s `isSource` block.
+       * The registry (packages/registry/src/fields.json) has exactly one
+       * section (03.1) and one repeatable free-text field
+       * (`source.entry`), not the ~19 structured sub-fields that bespoke
+       * layout would need. This gap was already flagged and deliberately
+       * left unresolved — see CONTRADICTIONS.md #4 — rather than guessed
+       * at here. What follows is the registry's actual single-section,
+       * single-field shape, styled with the same card/token language as
+       * every other screen so the *visual system* still matches even
+       * though the *data model* doesn't yet support the richer layout.
+       */}
+      <div className="card">
+        <FormRenderer
+          document={SOURCE_DOCUMENT}
+          fields={SOURCE_FIELDS}
+          values={values}
+          onChange={setValues}
+          visibilityRules={SOURCE_VISIBILITY_RULES}
+          alwaysRequiredFieldIds={SOURCE_ALWAYS_REQUIRED_FIELD_IDS}
+          newRowId={newRowId}
+          quotedFields={SOURCE_QUOTED_FIELDS}
+          quotedValues={quotedValues}
+        />
+      </div>
 
-      <button type="submit" className="primary no-print">
+      <button type="submit" className="primary no-print" style={{ marginTop: "1.5rem" }}>
         Complete register
       </button>
     </form>

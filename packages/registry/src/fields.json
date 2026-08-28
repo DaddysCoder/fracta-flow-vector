@@ -2914,7 +2914,7 @@
       "comprehensive"
     ],
     "phraseBank": false,
-    "note": "Options: yes | no. Flags for human priority review only — never determines acceptance or clinical pathway."
+    "note": "Options: yes | no. Flags for human priority review only \u2014 never determines acceptance or clinical pathway."
   },
   {
     "id": "referral.urgent_explanation",
@@ -2976,7 +2976,7 @@
       "comprehensive"
     ],
     "phraseBank": false,
-    "note": "Options: confirmed | unknown | not_applicable. \"unknown\" never blocks submission — funding uncertainty must never block clinical triage."
+    "note": "Options: confirmed | unknown | not_applicable. \"unknown\" never blocks submission \u2014 funding uncertainty must never block clinical triage."
   },
   {
     "id": "existing.plan_type",
@@ -3144,6 +3144,2856 @@
     "informs": [],
     "transition": {
       "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.practice_types",
+    "label": "Which regulated restrictive practice(s) are in use?",
+    "tier": 2,
+    "clinical": true,
+    "type": "multiselect",
+    "repeatable": false,
+    "askedIn": "10.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Practitioner's own selection \u2014 drives which of 10.2-10.6 apply. Not inferred."
+  },
+  {
+    "id": "rrpassess.seclusion.what_happens",
+    "label": "What happens \u2014 Seclusion",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.seclusion.since",
+    "label": "Since (when this practice started) \u2014 Seclusion",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.seclusion.evidence",
+    "label": "Evidence collected \u2014 Seclusion",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.seclusion.rationale",
+    "label": "Rationale \u2014 Seclusion",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.seclusion.least_restrictive_analysis",
+    "label": "Least restrictive analysis \u2014 Seclusion",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.seclusion.reduction_plan",
+    "label": "Plan to reduce or eliminate \u2014 Seclusion",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.seclusion.duration_review",
+    "label": "Duration and review date \u2014 Seclusion",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.what_happens",
+    "label": "What happens \u2014 Chemical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.since",
+    "label": "Since (when this practice started) \u2014 Chemical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.evidence",
+    "label": "Evidence collected \u2014 Chemical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.rationale",
+    "label": "Rationale \u2014 Chemical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.least_restrictive_analysis",
+    "label": "Least restrictive analysis \u2014 Chemical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.reduction_plan",
+    "label": "Plan to reduce or eliminate \u2014 Chemical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.duration_review",
+    "label": "Duration and review date \u2014 Chemical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.what_happens",
+    "label": "What happens \u2014 Mechanical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.since",
+    "label": "Since (when this practice started) \u2014 Mechanical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.evidence",
+    "label": "Evidence collected \u2014 Mechanical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.rationale",
+    "label": "Rationale \u2014 Mechanical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.least_restrictive_analysis",
+    "label": "Least restrictive analysis \u2014 Mechanical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.reduction_plan",
+    "label": "Plan to reduce or eliminate \u2014 Mechanical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.mechanical.duration_review",
+    "label": "Duration and review date \u2014 Mechanical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.what_happens",
+    "label": "What happens \u2014 Physical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.since",
+    "label": "Since (when this practice started) \u2014 Physical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.evidence",
+    "label": "Evidence collected \u2014 Physical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.rationale",
+    "label": "Rationale \u2014 Physical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.least_restrictive_analysis",
+    "label": "Least restrictive analysis \u2014 Physical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.reduction_plan",
+    "label": "Plan to reduce or eliminate \u2014 Physical restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.physical.duration_review",
+    "label": "Duration and review date \u2014 Physical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.what_happens",
+    "label": "What happens \u2014 Environmental restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.since",
+    "label": "Since (when this practice started) \u2014 Environmental restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.evidence",
+    "label": "Evidence collected \u2014 Environmental restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.rationale",
+    "label": "Rationale \u2014 Environmental restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.least_restrictive_analysis",
+    "label": "Least restrictive analysis \u2014 Environmental restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.reduction_plan",
+    "label": "Plan to reduce or eliminate \u2014 Environmental restraint",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [
+      "SL.7"
+    ],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.environmental.duration_review",
+    "label": "Duration and review date \u2014 Environmental restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "10.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "confirm",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.medication_name",
+    "label": "Medication name \u2014 Chemical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.dose",
+    "label": "Dose \u2014 Chemical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.side_effects",
+    "label": "Side effects noted \u2014 Chemical restraint",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "rrpassess.chemical.frequency",
+    "label": "Frequency \u2014 Chemical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "PRN or Routine."
+  },
+  {
+    "id": "rrpassess.chemical.route",
+    "label": "Route of administration \u2014 Chemical restraint",
+    "tier": 1,
+    "clinical": false,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "10.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Oral or Other."
+  },
+  {
+    "id": "letter.participant_name",
+    "label": "Name",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.participant_ndis",
+    "label": "NDIS number",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.participant_dob",
+    "label": "Date of birth",
+    "tier": 0,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.participant_gender",
+    "label": "Gender",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.participant_address",
+    "label": "Address",
+    "tier": 1,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.participant_state",
+    "label": "State",
+    "tier": 1,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.person_responsible",
+    "label": "Person responsible / guardian",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.author_name",
+    "label": "Name",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.author_contact",
+    "label": "Contact details",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.author_registration",
+    "label": "NDIS practitioner number",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.author_organisation",
+    "label": "Organisation",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.author_role",
+    "label": "Role",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "SL.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.purpose",
+    "label": "Purpose of this report",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.sources",
+    "label": "Source of information (documents reviewed)",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.recommendations_summary",
+    "label": "Recommendations (summary)",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.about",
+    "label": "About",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.strengths",
+    "label": "Strengths and protective factors",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.functional_impact.current_impact",
+    "label": "Current functional impact",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": true,
+    "askedIn": "SL.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "group": "functional_impact"
+  },
+  {
+    "id": "letter.functional_impact.support_required",
+    "label": "Support required",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": true,
+    "askedIn": "SL.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "group": "functional_impact"
+  },
+  {
+    "id": "letter.functional_impact.evidence",
+    "label": "Evidence",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": true,
+    "askedIn": "SL.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "group": "functional_impact"
+  },
+  {
+    "id": "letter.behaviours_what",
+    "label": "What are they",
+    "tier": 2,
+    "clinical": true,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.behaviours_frequency",
+    "label": "Frequency / duration / intensity",
+    "tier": 2,
+    "clinical": true,
+    "type": "select",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.setting_events",
+    "label": "Setting events",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.antecedents",
+    "label": "Antecedents / triggers",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.early_warning_signs",
+    "label": "Early warning signs",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.likely_function",
+    "label": "Likely function",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.maintaining_consequences",
+    "label": "Maintaining consequences",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.restrictive_practices_summary",
+    "label": "Restrictive practices in use, if any",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.7",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Practitioner's own summary. Full per-practice detail is quoted from the RRP Assessment (document 10) via rendersIn, not re-entered here."
+  },
+  {
+    "id": "letter.informal_supports",
+    "label": "Informal supports currently in place",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.formal_supports",
+    "label": "Formal supports currently in place",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.support_recommendation.pbs",
+    "label": "Positive Behaviour Support recommendation",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.support_recommendation.allied_health",
+    "label": "Allied health recommendation",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.support_recommendation.support_coordination",
+    "label": "Support coordination recommendation",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.impact_if_not_provided",
+    "label": "Impact on the person and their family",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.9",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hourly_rate",
+    "label": "Hourly rate (AUD)",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.travel_hours",
+    "label": "Travel time (hours, return)",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "note": "Apportioned per (travel_hours / 2) / participants_seen_this_trip x rate - not a flat loading."
+  },
+  {
+    "id": "letter.quote.travel_participants",
+    "label": "Participants seen this trip",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.sessions",
+    "label": "Specialist behaviour intervention support (direct sessions) - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.mdt",
+    "label": "Multidisciplinary team coordination - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.incident",
+    "label": "Incident data collection and review - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.resources",
+    "label": "Resource development - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.planwriting",
+    "label": "Behaviour support plan writing - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.training",
+    "label": "Staff training - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.rrp_docs",
+    "label": "Restrictive practice documentation (if present) - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.quote.hours.progress",
+    "label": "Progress report preparation - hours",
+    "tier": 1,
+    "clinical": false,
+    "type": "number",
+    "repeatable": false,
+    "askedIn": "SL.10",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.summary",
+    "label": "Summary",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "SL.11",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "letter.signature_date",
+    "label": "Practitioner signature date",
+    "tier": 0,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "SL.11",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "progress.since_last_report",
+    "label": "Progress since last report",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "PR.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "progress.strategy_trialled.strategy",
+    "label": "Strategy",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": true,
+    "askedIn": "PR.7",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "group": "strategy_trialled"
+  },
+  {
+    "id": "progress.strategy_trialled.outcome",
+    "label": "Outcome",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": true,
+    "askedIn": "PR.7",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "group": "strategy_trialled"
+  },
+  {
+    "id": "progress.strategy_trialled.disposition",
+    "label": "Continue / adjust / discontinue",
+    "tier": 3,
+    "clinical": true,
+    "type": "select",
+    "repeatable": true,
+    "askedIn": "PR.7",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false,
+    "group": "strategy_trialled"
+  },
+  {
+    "id": "progress.goal_progress",
+    "label": "Goal progress",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "PR.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "progress.summary",
+    "label": "Summary",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "PR.9",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "progress.signature_date",
+    "label": "Practitioner signature date",
+    "tier": 0,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "PR.9",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
       "allowed": [
         "carry",
         "confirm",

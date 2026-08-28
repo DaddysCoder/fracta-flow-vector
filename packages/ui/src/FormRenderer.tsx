@@ -134,3 +134,30 @@ export function FormRenderer({
     </>
   );
 }
+
+/**
+ * Single-page, card-per-section variant of FormRenderer — for documents
+ * the design handoff shows as one scrolling page of `.card` sections
+ * (Source Register, RRP Assessment, Support Letter, Progress Report),
+ * never a wizard. Reuses FormRenderer scoped to one section at a time
+ * (the same "narrow `document.sections`" trick FormWizard uses for its
+ * steps), so section-dispatch/visibility logic isn't duplicated — only
+ * the `.card` wrapper per section is added here.
+ */
+export function CardSectionsForm(props: FormRendererProps) {
+  const { document, fields, quotedFields = [] } = props;
+  return (
+    <>
+      {document.sections.map((section) => {
+        const hasFields = fields.some((f) => f.askedIn === section.id);
+        const hasQuoted = quotedFields.some((f) => f.rendersIn.includes(section.id));
+        if (!hasFields && !hasQuoted) return null;
+        return (
+          <div className="card" key={section.id} style={{ marginBottom: "1.25rem" }}>
+            <FormRenderer {...props} document={{ ...document, sections: [section] }} />
+          </div>
+        );
+      })}
+    </>
+  );
+}

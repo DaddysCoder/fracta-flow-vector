@@ -1,12 +1,24 @@
 export type VectorPlan = "free" | "paid";
 
-export type PaidFeature = "export" | "company_branding" | "support_templates";
+export type PaidFeature =
+  | "export"
+  | "company_branding"
+  | "support_templates"
+  | "rrp_assessment"
+  | "support_letter"
+  | "progress_report";
 
 export interface VectorEntitlements {
   plan: VectorPlan;
   exportDocuments: boolean;
   companyBranding: boolean;
   supportTemplates: boolean;
+  /** Documents 10-12 (net-new, not part of the Support Templates hub) — the
+   * README's entitlement table lists these as their own rows, distinct from
+   * "Support Templates hub + BSP/Interim/Comprehensive wizards". */
+  rrpAssessment: boolean;
+  supportLetter: boolean;
+  progressReport: boolean;
   documentCredits: number;
 }
 
@@ -15,6 +27,9 @@ export const FREE_ENTITLEMENTS: VectorEntitlements = Object.freeze({
   exportDocuments: false,
   companyBranding: false,
   supportTemplates: false,
+  rrpAssessment: false,
+  supportLetter: false,
+  progressReport: false,
   documentCredits: 0,
 });
 
@@ -23,6 +38,9 @@ export const PAID_ENTITLEMENTS: VectorEntitlements = Object.freeze({
   exportDocuments: true,
   companyBranding: true,
   supportTemplates: true,
+  rrpAssessment: true,
+  supportLetter: true,
+  progressReport: true,
   documentCredits: 0,
 });
 
@@ -38,5 +56,11 @@ export function canUseFeature(entitlements: VectorEntitlements, feature: PaidFea
       return entitlements.companyBranding;
     case "support_templates":
       return entitlements.supportTemplates;
+    case "rrp_assessment":
+      return entitlements.rrpAssessment;
+    case "support_letter":
+      return entitlements.supportLetter;
+    case "progress_report":
+      return entitlements.progressReport;
   }
 }

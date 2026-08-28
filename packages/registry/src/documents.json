@@ -2,141 +2,553 @@
   "01": {
     "title": "Referral",
     "st": "ST-01",
-    "pathways": ["no_rp", "interim", "comprehensive"],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
     "sections": [
-      { "id": "01.A", "title": "Participant" },
-      { "id": "01.B", "title": "Person making the referral" },
-      { "id": "01.C", "title": "NDIS and service basics" },
-      { "id": "01.D", "title": "Reason for referral" },
-      { "id": "01.E", "title": "Current urgency" },
-      { "id": "01.F", "title": "Existing behaviour-support material" },
-      { "id": "01.G", "title": "Best person for practitioner triage" },
-      { "id": "01.H", "title": "Brief allocation considerations" }
+      {
+        "id": "01.A",
+        "title": "Participant"
+      },
+      {
+        "id": "01.B",
+        "title": "Person making the referral"
+      },
+      {
+        "id": "01.C",
+        "title": "NDIS and service basics"
+      },
+      {
+        "id": "01.D",
+        "title": "Reason for referral"
+      },
+      {
+        "id": "01.E",
+        "title": "Current urgency"
+      },
+      {
+        "id": "01.F",
+        "title": "Existing behaviour-support material"
+      },
+      {
+        "id": "01.G",
+        "title": "Best person for practitioner triage"
+      },
+      {
+        "id": "01.H",
+        "title": "Brief allocation considerations"
+      }
     ]
   },
   "02": {
     "title": "Practitioner Triage",
     "st": "ST-02",
-    "pathways": ["no_rp", "interim", "comprehensive"],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
     "sections": [
-      { "id": "02.A", "title": "Referral review" },
-      { "id": "02.B", "title": "Participation, consent and communication" },
-      { "id": "02.C", "title": "What is happening now" },
-      { "id": "02.D", "title": "Immediate risk and urgency" },
-      { "id": "02.E", "title": "Possible RRP screen" },
-      { "id": "02.F", "title": "Health and safeguarding" },
-      { "id": "02.G", "title": "Evidence currently available" },
-      { "id": "02.H", "title": "Practitioner triage outcome" }
+      {
+        "id": "02.A",
+        "title": "Referral review"
+      },
+      {
+        "id": "02.B",
+        "title": "Participation, consent and communication"
+      },
+      {
+        "id": "02.C",
+        "title": "What is happening now"
+      },
+      {
+        "id": "02.D",
+        "title": "Immediate risk and urgency"
+      },
+      {
+        "id": "02.E",
+        "title": "Possible RRP screen"
+      },
+      {
+        "id": "02.F",
+        "title": "Health and safeguarding"
+      },
+      {
+        "id": "02.G",
+        "title": "Evidence currently available"
+      },
+      {
+        "id": "02.H",
+        "title": "Practitioner triage outcome"
+      }
     ]
   },
   "03": {
     "title": "Source and Consultation Register",
     "st": "ST-03",
-    "pathways": ["no_rp", "interim", "comprehensive"],
-    "sections": [{ "id": "03.1", "title": "Source entries" }]
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "sections": [
+      {
+        "id": "03.1",
+        "title": "Source entries"
+      }
+    ]
   },
   "04": {
     "title": "Combined BSA/FBA",
     "st": "ST-04",
-    "pathways": ["no_rp", "interim", "comprehensive"],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
     "sections": [
-      { "id": "04.1", "title": "Scope and participant voice" },
-      { "id": "04.2", "title": "People and settings" },
-      { "id": "04.3", "title": "Sources and methods" },
-      { "id": "04.4", "title": "Behaviour objects" },
-      { "id": "04.5", "title": "Observation scaffold" },
-      { "id": "04.6", "title": "Evidence reconciliation" },
-      { "id": "04.7", "title": "Pattern analysis" },
-      { "id": "04.8", "title": "Competing hypotheses and formulation" },
-      { "id": "04.9", "title": "Practitioner conclusion" },
-      { "id": "04.10", "title": "Downstream preview" }
+      {
+        "id": "04.1",
+        "title": "Scope and participant voice"
+      },
+      {
+        "id": "04.2",
+        "title": "People and settings"
+      },
+      {
+        "id": "04.3",
+        "title": "Sources and methods"
+      },
+      {
+        "id": "04.4",
+        "title": "Behaviour objects"
+      },
+      {
+        "id": "04.5",
+        "title": "Observation scaffold"
+      },
+      {
+        "id": "04.6",
+        "title": "Evidence reconciliation"
+      },
+      {
+        "id": "04.7",
+        "title": "Pattern analysis"
+      },
+      {
+        "id": "04.8",
+        "title": "Competing hypotheses and formulation"
+      },
+      {
+        "id": "04.9",
+        "title": "Practitioner conclusion"
+      },
+      {
+        "id": "04.10",
+        "title": "Downstream preview"
+      }
     ]
   },
   "05": {
     "title": "Behaviour Data Capture",
     "st": "ST-05",
-    "pathways": ["no_rp", "interim", "comprehensive"],
-    "sections": [{ "id": "05.1", "title": "Observation records" }]
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "sections": [
+      {
+        "id": "05.1",
+        "title": "Observation records"
+      }
+    ]
   },
   "06": {
     "title": "Strategy Instance Worksheet",
     "st": "ST-08",
-    "pathways": ["no_rp", "comprehensive"],
+    "pathways": [
+      "no_rp",
+      "comprehensive"
+    ],
     "sections": [
-      { "id": "06.1", "title": "Strategy instance" },
-      { "id": "06.2", "title": "Custom resource" }
+      {
+        "id": "06.1",
+        "title": "Strategy instance"
+      },
+      {
+        "id": "06.2",
+        "title": "Custom resource"
+      }
     ]
   },
   "07": {
     "title": "No-RP BSP",
     "st": "ST-09",
-    "pathways": ["no_rp"],
+    "pathways": [
+      "no_rp"
+    ],
     "sections": [
-      { "id": "07.1", "title": "Person, plan and practitioner details" },
-      { "id": "07.2", "title": "Purpose" },
-      { "id": "07.3", "title": "Consultation" },
-      { "id": "07.4", "title": "Sources" },
-      { "id": "07.5", "title": "About the person" },
-      { "id": "07.6", "title": "Behaviour and risk findings" },
-      { "id": "07.7", "title": "Approved findings for implementation" },
-      { "id": "07.8", "title": "Goals" },
-      { "id": "07.9", "title": "Proactive strategies" },
-      { "id": "07.10", "title": "Skill-development strategies" },
-      { "id": "07.11", "title": "Response and recovery strategies" },
-      { "id": "07.12", "title": "Implementation responsibilities" },
-      { "id": "07.13", "title": "Training and fidelity" },
-      { "id": "07.14", "title": "Data and outcomes" },
-      { "id": "07.15", "title": "Monitoring and review" },
-      { "id": "07.16", "title": "Practitioner declaration" }
+      {
+        "id": "07.1",
+        "title": "Person, plan and practitioner details"
+      },
+      {
+        "id": "07.2",
+        "title": "Purpose"
+      },
+      {
+        "id": "07.3",
+        "title": "Consultation"
+      },
+      {
+        "id": "07.4",
+        "title": "Sources"
+      },
+      {
+        "id": "07.5",
+        "title": "About the person"
+      },
+      {
+        "id": "07.6",
+        "title": "Behaviour and risk findings"
+      },
+      {
+        "id": "07.7",
+        "title": "Approved findings for implementation"
+      },
+      {
+        "id": "07.8",
+        "title": "Goals"
+      },
+      {
+        "id": "07.9",
+        "title": "Proactive strategies"
+      },
+      {
+        "id": "07.10",
+        "title": "Skill-development strategies"
+      },
+      {
+        "id": "07.11",
+        "title": "Response and recovery strategies"
+      },
+      {
+        "id": "07.12",
+        "title": "Implementation responsibilities"
+      },
+      {
+        "id": "07.13",
+        "title": "Training and fidelity"
+      },
+      {
+        "id": "07.14",
+        "title": "Data and outcomes"
+      },
+      {
+        "id": "07.15",
+        "title": "Monitoring and review"
+      },
+      {
+        "id": "07.16",
+        "title": "Practitioner declaration"
+      }
     ]
   },
   "08": {
     "title": "Interim RRP BSP",
     "st": "ST-10",
-    "pathways": ["interim"],
+    "pathways": [
+      "interim"
+    ],
     "sections": [
-      { "id": "08.1", "title": "Person, plan and practitioner details" },
-      { "id": "08.2", "title": "Purpose" },
-      { "id": "08.3", "title": "Consultation available so far" },
-      { "id": "08.4", "title": "Current sources" },
-      { "id": "08.5", "title": "Relevant participant profile" },
-      { "id": "08.6", "title": "Observable behaviour and current concerns" },
-      { "id": "08.7", "title": "Current risk" },
-      { "id": "08.8", "title": "Immediate safety needs" },
-      { "id": "08.9", "title": "Temporary safeguards" },
-      { "id": "08.10", "title": "Current RRP governance status" },
-      { "id": "08.11", "title": "RRP protocol" },
-      { "id": "08.12", "title": "Monitoring" },
-      { "id": "08.13", "title": "Temporary reduction actions" },
-      { "id": "08.14", "title": "Practices that must cease" },
-      { "id": "08.15", "title": "Assessment plan" },
-      { "id": "08.16", "title": "Data collection plan" },
-      { "id": "08.17", "title": "Responsibility and implementation" },
-      { "id": "08.18", "title": "Review dates" },
-      { "id": "08.19", "title": "Practitioner declaration" }
+      {
+        "id": "08.1",
+        "title": "Person, plan and practitioner details"
+      },
+      {
+        "id": "08.2",
+        "title": "Purpose"
+      },
+      {
+        "id": "08.3",
+        "title": "Consultation available so far"
+      },
+      {
+        "id": "08.4",
+        "title": "Current sources"
+      },
+      {
+        "id": "08.5",
+        "title": "Relevant participant profile"
+      },
+      {
+        "id": "08.6",
+        "title": "Observable behaviour and current concerns"
+      },
+      {
+        "id": "08.7",
+        "title": "Current risk"
+      },
+      {
+        "id": "08.8",
+        "title": "Immediate safety needs"
+      },
+      {
+        "id": "08.9",
+        "title": "Temporary safeguards"
+      },
+      {
+        "id": "08.10",
+        "title": "Current RRP governance status"
+      },
+      {
+        "id": "08.11",
+        "title": "RRP protocol"
+      },
+      {
+        "id": "08.12",
+        "title": "Monitoring"
+      },
+      {
+        "id": "08.13",
+        "title": "Temporary reduction actions"
+      },
+      {
+        "id": "08.14",
+        "title": "Practices that must cease"
+      },
+      {
+        "id": "08.15",
+        "title": "Assessment plan"
+      },
+      {
+        "id": "08.16",
+        "title": "Data collection plan"
+      },
+      {
+        "id": "08.17",
+        "title": "Responsibility and implementation"
+      },
+      {
+        "id": "08.18",
+        "title": "Review dates"
+      },
+      {
+        "id": "08.19",
+        "title": "Practitioner declaration"
+      }
     ]
   },
   "09": {
     "title": "Comprehensive RRP BSP",
     "st": "ST-11",
-    "pathways": ["comprehensive"],
+    "pathways": [
+      "comprehensive"
+    ],
     "sections": [
-      { "id": "09.1", "title": "Person, plan, practitioner and provider details" },
-      { "id": "09.2", "title": "Contents" },
-      { "id": "09.3", "title": "Purpose" },
-      { "id": "09.4", "title": "Consultation" },
-      { "id": "09.5", "title": "Other sources of information" },
-      { "id": "09.6", "title": "About the person" },
-      { "id": "09.7", "title": "Risks of harm" },
-      { "id": "09.8", "title": "Why the behaviour occurs" },
-      { "id": "09.9", "title": "Goals" },
-      { "id": "09.10", "title": "Proactive strategies" },
-      { "id": "09.11", "title": "Skill development" },
-      { "id": "09.12", "title": "Response strategies" },
-      { "id": "09.13", "title": "Regulated restrictive practices" },
-      { "id": "09.14", "title": "Practices to cease immediately" },
-      { "id": "09.15", "title": "Implementation, monitoring and review" },
-      { "id": "09.16", "title": "Practitioner declaration" }
+      {
+        "id": "09.1",
+        "title": "Person, plan, practitioner and provider details"
+      },
+      {
+        "id": "09.2",
+        "title": "Contents"
+      },
+      {
+        "id": "09.3",
+        "title": "Purpose"
+      },
+      {
+        "id": "09.4",
+        "title": "Consultation"
+      },
+      {
+        "id": "09.5",
+        "title": "Other sources of information"
+      },
+      {
+        "id": "09.6",
+        "title": "About the person"
+      },
+      {
+        "id": "09.7",
+        "title": "Risks of harm"
+      },
+      {
+        "id": "09.8",
+        "title": "Why the behaviour occurs"
+      },
+      {
+        "id": "09.9",
+        "title": "Goals"
+      },
+      {
+        "id": "09.10",
+        "title": "Proactive strategies"
+      },
+      {
+        "id": "09.11",
+        "title": "Skill development"
+      },
+      {
+        "id": "09.12",
+        "title": "Response strategies"
+      },
+      {
+        "id": "09.13",
+        "title": "Regulated restrictive practices"
+      },
+      {
+        "id": "09.14",
+        "title": "Practices to cease immediately"
+      },
+      {
+        "id": "09.15",
+        "title": "Implementation, monitoring and review"
+      },
+      {
+        "id": "09.16",
+        "title": "Practitioner declaration"
+      }
+    ]
+  },
+  "10": {
+    "title": "RRP Assessment",
+    "st": "ST-12",
+    "pathways": [
+      "interim",
+      "comprehensive"
+    ],
+    "sections": [
+      {
+        "id": "10.1",
+        "title": "Practice types in use"
+      },
+      {
+        "id": "10.2",
+        "title": "Seclusion"
+      },
+      {
+        "id": "10.3",
+        "title": "Chemical restraint"
+      },
+      {
+        "id": "10.4",
+        "title": "Mechanical restraint"
+      },
+      {
+        "id": "10.5",
+        "title": "Physical restraint"
+      },
+      {
+        "id": "10.6",
+        "title": "Environmental restraint"
+      }
+    ]
+  },
+  "11": {
+    "title": "Support Letter",
+    "st": "ST-13",
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "sections": [
+      {
+        "id": "SL.1",
+        "title": "Participant details"
+      },
+      {
+        "id": "SL.2",
+        "title": "Author details"
+      },
+      {
+        "id": "SL.3",
+        "title": "Purpose and sources"
+      },
+      {
+        "id": "SL.4",
+        "title": "Background on the participant"
+      },
+      {
+        "id": "SL.5",
+        "title": "Disability and health-related functional impact"
+      },
+      {
+        "id": "SL.6",
+        "title": "Behaviours of concern"
+      },
+      {
+        "id": "SL.7",
+        "title": "Restrictive practices"
+      },
+      {
+        "id": "SL.8",
+        "title": "Supports"
+      },
+      {
+        "id": "SL.9",
+        "title": "Impact if this support isn't provided"
+      },
+      {
+        "id": "SL.10",
+        "title": "Quote - behaviour support"
+      },
+      {
+        "id": "SL.11",
+        "title": "Summary and sign-off"
+      }
+    ]
+  },
+  "12": {
+    "title": "Progress Report",
+    "st": "ST-14",
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "sections": [
+      {
+        "id": "SL.1",
+        "title": "Participant details"
+      },
+      {
+        "id": "SL.2",
+        "title": "Author details"
+      },
+      {
+        "id": "SL.3",
+        "title": "Purpose and sources"
+      },
+      {
+        "id": "SL.4",
+        "title": "Background on the participant"
+      },
+      {
+        "id": "SL.5",
+        "title": "Disability and health-related functional impact"
+      },
+      {
+        "id": "PR.6",
+        "title": "Progress since last report"
+      },
+      {
+        "id": "PR.7",
+        "title": "Strategies trialled"
+      },
+      {
+        "id": "PR.8",
+        "title": "Goal progress"
+      },
+      {
+        "id": "PR.9",
+        "title": "Summary and sign-off"
+      }
     ]
   }
 }

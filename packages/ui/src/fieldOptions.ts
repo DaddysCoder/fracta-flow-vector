@@ -63,4 +63,39 @@ export const FIELD_OPTIONS: Record<string, FieldOption[]> = {
     { value: "4", label: "4 — Major" },
     { value: "5", label: "5 — Severe" },
   ],
+  "rrpassess.practice_types": [
+    { value: "seclusion", label: "Seclusion" },
+    { value: "chemical", label: "Chemical restraint" },
+    { value: "mechanical", label: "Mechanical restraint" },
+    { value: "physical", label: "Physical restraint" },
+    { value: "environmental", label: "Environmental restraint" },
+  ],
+  "rrpassess.chemical.frequency": [
+    { value: "prn", label: "PRN" },
+    { value: "routine", label: "Routine" },
+  ],
+  "rrpassess.chemical.route": [
+    { value: "oral", label: "Oral" },
+    { value: "other", label: "Other" },
+  ],
+  "letter.behaviours_what": [
+    { value: "property_damage", label: "Property damage" },
+    { value: "verbal_aggression", label: "Verbal aggression" },
+    { value: "physical_aggression", label: "Physical aggression" },
+    { value: "self_injurious", label: "Self-injurious behaviour" },
+    { value: "absconding", label: "Absconding" },
+    { value: "other", label: "Other" },
+  ],
+  "letter.behaviours_frequency": [
+    { value: "daily", label: "Daily" },
+    { value: "several_weekly", label: "Several times a week" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+    { value: "occasional", label: "Occasional" },
+  ],
+  "progress.strategy_trialled.disposition": [
+    { value: "continue", label: "Continue" },
+    { value: "adjust", label: "Adjust" },
+    { value: "discontinue", label: "Discontinue" },
+  ],
 };
