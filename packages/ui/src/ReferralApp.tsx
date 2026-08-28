@@ -82,11 +82,12 @@ export function ReferralApp() {
           <div id="top" />
           <div className="vector-brand-page">
             <p className="wizard-eyebrow" style={{ margin: "0 0 8px" }}>
-              Brand Profile · Paid
+              Organisation
             </p>
-            <h1 style={{ margin: "0 0 24px", fontSize: "28px", letterSpacing: "-0.01em" }}>
-              Document template style
-            </h1>
+            <h1 style={{ margin: "0 0 6px", fontSize: "28px", letterSpacing: "-0.01em" }}>Brand profile</h1>
+            <p style={{ margin: "0 0 28px", color: "var(--muted)", fontSize: "15px", lineHeight: 1.6 }}>
+              Applied automatically to every exported document.
+            </p>
             <BrandProfilePanel />
           </div>
         </main>

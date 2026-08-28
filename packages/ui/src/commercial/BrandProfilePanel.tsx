@@ -9,12 +9,13 @@ export function BrandProfilePanel() {
 
   if (!canBrand) {
     return (
-      <section className="card no-print" style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Organisation branding</h2>
-        <p style={{ margin: "0 0 0.75rem" }}>
-          Paid Vector unlocks saved organisation branding on exports.
+      <section className="card no-print">
+        <h2 className="section-title">Organisation branding</h2>
+        <p style={{ margin: "0 0 1rem", color: "var(--muted)" }}>
+          Paid Vector unlocks your logo, organisation name, heading font and brand colour on every
+          exported document.
         </p>
-        <button type="button" onClick={() => requestUpgrade("company_branding")}>
+        <button type="button" className="primary" onClick={() => requestUpgrade("company_branding")}>
           Upgrade for organisation branding
         </button>
       </section>
@@ -22,18 +23,14 @@ export function BrandProfilePanel() {
   }
 
   return (
-    <section className="card no-print" style={{ marginBottom: "1.5rem" }}>
-      <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Organisation branding</h2>
-      <p style={{ margin: "0 0 0.75rem" }}>
-        Applied to every exported DOCX and printed document — referral, triage, register and support
-        plan templates all pick this up automatically. Your heading font and accent colour also update
-        live across the app the moment you save. Organisation details are commercial metadata only —
-        never mixed with participant form content.
-      </p>
+    <div className="no-print">
       <BrandProfileEditor />
-      <button type="button" style={{ marginTop: "0.75rem" }} onClick={() => void openVectorBillingPortal()}>
+      <p className="field-note" style={{ marginTop: "1.25rem" }}>
+        Organisation details are commercial metadata only — never mixed with participant form content.
+      </p>
+      <button type="button" style={{ marginTop: "0.5rem" }} onClick={() => void openVectorBillingPortal()}>
         Manage billing
       </button>
-    </section>
+    </div>
   );
 }
