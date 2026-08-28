@@ -1,5 +1,6 @@
 import { canUseFeature } from "./entitlements.js";
 import { useVectorCommercial } from "./CommercialContext.js";
+import { ShellHeader } from "../ShellHeader.js";
 import {
   pathForSupportTemplate,
   SUPPORT_TEMPLATE_ROUTES,
@@ -197,19 +198,19 @@ export function SupportTemplatesHub() {
 
 export function SupportTemplatesHubPage() {
   return (
-    <main style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 1.25rem 4rem" }}>
-      <header style={{ marginBottom: "1.5rem" }}>
-        <p style={{ color: "var(--purple)", fontWeight: 800, letterSpacing: "0.04em", margin: 0 }}>VECTOR</p>
-        <h1 style={{ margin: "0.25rem 0 0.5rem" }}>Support Templates</h1>
-        <p style={{ margin: 0 }}>
-          Paid behaviour support plan templates for Vector. All template content stays on this device in session
-          storage.
-        </p>
-      </header>
-      <SupportTemplatesHub />
-      <p className="no-print" style={{ marginTop: "1.5rem" }}>
-        <a href="/referral">← Back to Vector forms</a>
-      </p>
-    </main>
+    <>
+      <ShellHeader activeId="support-hub" />
+      <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
+        <div id="top" />
+        <header style={{ marginBottom: "1.5rem" }}>
+          <h1 style={{ margin: "0 0 0.5rem" }}>Support Templates</h1>
+          <p style={{ margin: 0 }}>
+            Paid behaviour support plan templates for Vector. All template content stays on this device in session
+            storage.
+          </p>
+        </header>
+        <SupportTemplatesHub />
+      </main>
+    </>
   );
 }

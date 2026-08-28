@@ -8,13 +8,16 @@ export type SupportTemplateId =
 export type AppView =
   | { kind: "public"; form: PublicForm }
   | { kind: "support-hub" }
-  | { kind: "support-template"; templateId: SupportTemplateId };
+  | { kind: "support-template"; templateId: SupportTemplateId }
+  | { kind: "brand" };
 
 export const PUBLIC_FORM_ROUTES = {
   referral: "/referral",
   triage: "/practitioner-triage",
   source: "/source-consultation-register",
 } as const satisfies Record<PublicForm, string>;
+
+export const BRAND_PROFILE_ROUTE = "/brand-profile";
 
 export const SUPPORT_TEMPLATE_ROUTES = {
   hub: "/support-templates",
@@ -61,11 +64,17 @@ export function isBlockedLegacyDocumentRoute(pathname: string): boolean {
   return DOCUMENT_04_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
 }
 
+export function isBrandProfileRoute(pathname: string): boolean {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  return path === BRAND_PROFILE_ROUTE;
+}
+
 export function resolveAppView(pathname: string): AppView {
   const path = pathname.replace(/\/+$/, "") || "/";
   const templateId = supportTemplateFromPath(path);
   if (templateId) return { kind: "support-template", templateId };
   if (isSupportTemplatesHub(path)) return { kind: "support-hub" };
+  if (isBrandProfileRoute(path)) return { kind: "brand" };
   return { kind: "public", form: publicFormFromPath(path) };
 }
 

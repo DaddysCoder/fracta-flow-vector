@@ -3,20 +3,15 @@ import "./tokens.css";
 import "./print.css";
 import { BrandProfilePanel } from "./commercial/BrandProfilePanel.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
-import {
-  SupportTemplatesHub,
-  SupportTemplatesHubPage,
-} from "./commercial/SupportTemplatesHub.js";
+import { SupportTemplatesHubPage } from "./commercial/SupportTemplatesHub.js";
 import { ReferralForm } from "./ReferralForm.js";
+import { ShellHeader } from "./ShellHeader.js";
 import { SourceForm } from "./SourceForm.js";
 import { TriageForm } from "./TriageForm.js";
 import {
   isBlockedLegacyDocumentRoute,
-  pathForPublicForm,
   PUBLIC_FORM_ROUTES,
   resolveAppView,
-  SUPPORT_TEMPLATE_ROUTES,
-  WHATBIT_VECTOR_URL,
   type AppView,
   type PublicForm,
 } from "./routing.js";
@@ -65,22 +60,6 @@ export function ReferralApp() {
     return () => window.removeEventListener("popstate", syncFromLocation);
   }, []);
 
-  function navigateTo(form: PublicForm) {
-    const nextPath = pathForPublicForm(form);
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, "", nextPath);
-    }
-    setActiveView({ kind: "public", form });
-  }
-
-  function navigateToHub() {
-    const nextPath = SUPPORT_TEMPLATE_ROUTES.hub;
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, "", nextPath);
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    }
-  }
-
   if (activeView.kind === "support-hub") {
     return <SupportTemplatesHubPage />;
   }
@@ -90,39 +69,28 @@ export function ReferralApp() {
     return <SupportTemplateWizard config={config} />;
   }
 
+  if (activeView.kind === "brand") {
+    return (
+      <>
+        <ShellHeader activeId="brand" />
+        <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
+          <div id="top" />
+          <p style={{ color: "var(--purple)", fontWeight: 700, letterSpacing: "0.04em", margin: "0 0 0.25rem", textTransform: "uppercase", fontSize: "0.6875rem" }}>
+            Organisation
+          </p>
+          <h1 style={{ margin: "0 0 1.5rem" }}>Brand profile</h1>
+          <BrandProfilePanel />
+        </main>
+      </>
+    );
+  }
+
   const activeForm = activeView.form;
   const activeMeta = PUBLIC_FORMS.find((form) => form.id === activeForm) ?? PUBLIC_FORMS[0]!;
 
   return (
     <>
-      <header className="vector-shell-header no-print">
-        <div className="vector-shell-header-inner">
-          <div style={{ display: "flex", alignItems: "center", gap: "28px", minWidth: 0 }}>
-            <a href="#top" className="vector-shell-logo" style={{ flex: "none" }}>
-              VECTOR
-            </a>
-            <nav aria-label="Vector forms" className="pill-nav">
-              {PUBLIC_FORMS.map((form) => (
-                <button
-                  key={form.id}
-                  type="button"
-                  className="pill-nav-item"
-                  aria-current={activeForm === form.id ? "page" : undefined}
-                  onClick={() => navigateTo(form.id)}
-                >
-                  {form.title}
-                </button>
-              ))}
-              <button type="button" className="pill-nav-item" onClick={navigateToHub}>
-                Support Templates
-              </button>
-            </nav>
-          </div>
-          <a href={WHATBIT_VECTOR_URL} style={{ fontSize: "0.8125rem", fontWeight: 600, flex: "none" }}>
-            Back to Vector on WHATBIT
-          </a>
-        </div>
-      </header>
+      <ShellHeader activeId={activeForm} />
 
       <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
         <div id="top" />
@@ -138,9 +106,6 @@ export function ReferralApp() {
               : "Three forms are free to use. DOCX, Print/PDF, organisation branding and Support Templates require Vector Paid."}
           </p>
         </div>
-
-        <BrandProfilePanel />
-        <SupportTemplatesHub />
 
         <section aria-live="polite">
           {activeForm === "referral" && <ReferralForm onSubmitted={() => undefined} />}
