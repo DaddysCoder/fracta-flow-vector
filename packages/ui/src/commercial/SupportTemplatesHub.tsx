@@ -1,31 +1,31 @@
 import { canUseFeature } from "./entitlements.js";
 import { useVectorCommercial } from "./CommercialContext.js";
 import { ShellHeader } from "../ShellHeader.js";
-import {
-  pathForSupportTemplate,
-  SUPPORT_TEMPLATE_ROUTES,
-  type SupportTemplateId,
-} from "../routing.js";
+import { pathForSupportTemplate, type SupportTemplateId } from "../routing.js";
 
 const SUPPORT_TEMPLATES: Array<{
   id: SupportTemplateId;
+  eyebrow: string;
   title: string;
   description: string;
 }> = [
   {
     id: "behaviour-support-plan",
+    eyebrow: "Behaviour Support Plan",
     title: "Behaviour Support Plan",
-    description: "For participants without regulated restrictive practice.",
+    description: "For participants with no regulated restrictive practice.",
   },
   {
     id: "interim-behaviour-support-plan",
+    eyebrow: "Interim BSP",
     title: "Interim Behaviour Support Plan",
-    description: "Supports immediate needs and risk management while fuller assessment continues. A completed FBA is not required to start.",
+    description: "Immediate risk management while fuller assessment is underway.",
   },
   {
     id: "comprehensive-behaviour-support-plan",
+    eyebrow: "Comprehensive BSP",
     title: "Comprehensive Behaviour Support Plan",
-    description: "Full plan informed by behaviour support assessment including FBA.",
+    description: "The final plan, superseding any Interim BSP.",
   },
 ];
 
@@ -151,48 +151,69 @@ export function SupportTemplatesHub() {
   }
 
   return (
-    <section
-      aria-labelledby="support-templates-heading"
-      className="card no-print"
-      style={{ marginBottom: "2rem" }}
-    >
-      <h2 id="support-templates-heading" style={{ marginTop: 0, fontSize: "1rem" }}>
-        Support Templates
-      </h2>
-      <p style={{ margin: "0 0 1rem" }}>
-        One general Behaviour Support Plan template, plus the formal Interim and Comprehensive NDIS BSP templates.
-        Content stays in this browser&apos;s session storage and is not sent to WHATBIT servers.
-      </p>
-      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.75rem" }}>
+    <div className="no-print">
+      <ul
+        aria-labelledby="support-templates-heading"
+        style={{
+          listStyle: "none",
+          padding: 0,
+          margin: 0,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: "16px",
+        }}
+      >
         {SUPPORT_TEMPLATES.map((template) => (
-          <li
-            key={template.id}
-            className="card card-recessed"
-            style={{ padding: "0.75rem" }}
-          >
-            <strong style={{ display: "block" }}>{template.title}</strong>
-            <span style={{ display: "block", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+          <li key={template.id} className="card" style={{ position: "relative" }}>
+            {!canUseTemplates && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  right: "16px",
+                  fontSize: "0.6875rem",
+                  fontWeight: 700,
+                  color: "var(--muted-2)",
+                  background: "var(--surface-recessed)",
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                }}
+              >
+                PAID
+              </span>
+            )}
+            <p className="wizard-eyebrow" style={{ marginBottom: "10px" }}>
+              {template.eyebrow}
+            </p>
+            <strong style={{ display: "block", fontFamily: "var(--heading-font)", fontSize: "1.0625rem", marginBottom: "8px" }}>
+              {template.title}
+            </strong>
+            <span style={{ display: "block", fontSize: "0.84375rem", color: "var(--muted)", lineHeight: 1.55, marginBottom: "16px" }}>
               {template.description}
             </span>
             {canUseTemplates ? (
-              <button type="button" style={{ marginTop: "0.5rem" }} onClick={() => openTemplate(template.id)}>
-                Open template
+              <button
+                type="button"
+                onClick={() => openTemplate(template.id)}
+                style={{ minHeight: "auto", minWidth: "auto", padding: 0, border: "none", background: "none", color: "var(--purple)", fontSize: "0.8125rem", fontWeight: 700 }}
+              >
+                Start →
               </button>
             ) : (
-              <button type="button" style={{ marginTop: "0.5rem" }} onClick={() => requestUpgrade("support_templates")}>
-                Upgrade to unlock Support Templates
+              <button
+                type="button"
+                onClick={() => requestUpgrade("support_templates")}
+                style={{ minHeight: "auto", minWidth: "auto", padding: 0, border: "none", background: "none", color: "var(--muted)", fontSize: "0.8125rem", fontWeight: 700 }}
+              >
+                Upgrade →
               </button>
             )}
           </li>
         ))}
       </ul>
-      {canUseTemplates ? (
-        <p style={{ marginTop: "1rem", fontSize: "0.875rem" }}>
-          <a href={SUPPORT_TEMPLATE_ROUTES.hub}>View all Support Templates</a>
-        </p>
-      ) : null}
+
       <ArcCrossSell />
-    </section>
+    </div>
   );
 }
 
@@ -202,11 +223,13 @@ export function SupportTemplatesHubPage() {
       <ShellHeader activeId="support-hub" />
       <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
         <div id="top" />
-        <header style={{ marginBottom: "1.5rem" }}>
-          <h1 style={{ margin: "0 0 0.5rem" }}>Support Templates</h1>
-          <p style={{ margin: 0 }}>
-            Paid behaviour support plan templates for Vector. All template content stays on this device in session
-            storage.
+        <header style={{ marginBottom: "1.75rem" }}>
+          <p className="wizard-eyebrow" style={{ marginBottom: "8px" }}>
+            Support Templates
+          </p>
+          <h1 style={{ margin: "0 0 6px" }}>Behaviour support plan templates</h1>
+          <p style={{ margin: 0, maxWidth: "640px", color: "var(--muted)" }}>
+            Structured plan wizards with fixed section order, carried-forward fields and DOCX export.
           </p>
         </header>
         <SupportTemplatesHub />
