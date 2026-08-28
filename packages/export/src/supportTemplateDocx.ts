@@ -1,4 +1,4 @@
-import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
+import { Document, HeadingLevel, ImageRun, Packer, Paragraph, TextRun } from "docx";
 import type { Brand } from "./brand.js";
 
 const BLANK = "____________________________";
@@ -19,8 +19,24 @@ function line(value: string | undefined): string {
   return trimmed ? trimmed : BLANK;
 }
 
+function brandLogoParagraphs(brand: Brand): Paragraph[] {
+  if (!brand.logo) return [];
+  return [
+    new Paragraph({
+      children: [
+        new ImageRun({
+          type: brand.logo.type,
+          data: brand.logo.data,
+          transformation: { width: brand.logo.width, height: brand.logo.height },
+        }),
+      ],
+    }),
+  ];
+}
+
 export function buildSupportTemplateDocx(input: SupportTemplateDocxInput): Document {
   const children: Paragraph[] = [
+    ...brandLogoParagraphs(input.brand),
     new Paragraph({
       children: [new TextRun({ text: input.brand.name, bold: true, color: input.brand.accent, size: 20 })],
     }),
@@ -47,6 +63,7 @@ export async function renderSupportTemplateBlankDocxBlob(eyebrow: string, brand:
     sections: [
       {
         children: [
+          ...brandLogoParagraphs(brand),
           new Paragraph({
             children: [new TextRun({ text: brand.name, bold: true, color: brand.accent, size: 20 })],
           }),

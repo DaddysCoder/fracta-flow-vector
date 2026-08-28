@@ -1,5 +1,5 @@
 export { FRACTA_FLOW_BRAND, VECTOR_BRAND, providerBrand } from "./brand.js";
-export type { Brand, BrandMode } from "./brand.js";
+export type { Brand, BrandLogo, BrandMode } from "./brand.js";
 export {
   buildDocxDocument,
   renderBlankDocx,

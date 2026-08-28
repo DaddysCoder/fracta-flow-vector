@@ -1,8 +1,13 @@
 import { registry } from "@pbs/registry";
 import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
-import { FRACTA_FLOW_BRAND } from "../src/brand.js";
+import { FRACTA_FLOW_BRAND, providerBrand } from "../src/brand.js";
 import { renderBlankDocx, renderCompletedDocx } from "../src/docx.js";
+
+// A minimal valid 1x1 transparent PNG, decoded to bytes for logo-embedding tests.
+const ONE_PIXEL_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+const ONE_PIXEL_PNG = new Uint8Array(Buffer.from(ONE_PIXEL_PNG_BASE64, "base64"));
 
 async function documentXml(buffer: Buffer): Promise<string> {
   const zip = await JSZip.loadAsync(buffer);
@@ -56,5 +61,28 @@ describe("renderCompletedDocx", () => {
     const buffer = await renderCompletedDocx(SOURCE_REGISTER, "03", SOURCE_FIELDS, FRACTA_FLOW_BRAND, {});
     const xml = await documentXml(buffer);
     expect(xml).toContain("_".repeat(28));
+  });
+
+  it("embeds a paid organisation's uploaded logo as an image, not just text", async () => {
+    const brandWithLogo = providerBrand({
+      name: "Test Practice",
+      logo: { data: ONE_PIXEL_PNG, type: "png", width: 40, height: 40 },
+    });
+    const buffer = await renderBlankDocx(REFERRAL, "01", REFERRAL_FIELDS, brandWithLogo);
+    expect(isDocxZip(buffer)).toBe(true);
+
+    const zip = await JSZip.loadAsync(buffer);
+    const mediaFiles = Object.keys(zip.files).filter((name) => name.startsWith("word/media/"));
+    expect(mediaFiles.length).toBeGreaterThan(0);
+
+    const xml = await documentXml(buffer);
+    expect(xml).toContain("<w:drawing");
+  });
+
+  it("omits the image entirely when the brand has no logo", async () => {
+    const buffer = await renderBlankDocx(REFERRAL, "01", REFERRAL_FIELDS, FRACTA_FLOW_BRAND);
+    const zip = await JSZip.loadAsync(buffer);
+    const mediaFiles = Object.keys(zip.files).filter((name) => name.startsWith("word/media/"));
+    expect(mediaFiles.length).toBe(0);
   });
 });

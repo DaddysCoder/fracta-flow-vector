@@ -1,5 +1,5 @@
 import type { DocumentDef, FieldDef } from "@pbs/registry";
-import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
+import { AlignmentType, Document, HeadingLevel, ImageRun, Packer, Paragraph, TextRun } from "docx";
 import type { Brand } from "./brand.js";
 
 const BLANK_LINE = "_".repeat(28);
@@ -33,6 +33,19 @@ export function buildDocxDocument(input: RenderDocxInput): Document {
   const { document, documentId, fields, brand, values } = input;
 
   const children: Paragraph[] = [
+    ...(brand.logo
+      ? [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                type: brand.logo.type,
+                data: brand.logo.data,
+                transformation: { width: brand.logo.width, height: brand.logo.height },
+              }),
+            ],
+          }),
+        ]
+      : []),
     new Paragraph({
       children: [new TextRun({ text: brand.name, bold: true, color: brand.accent, size: 20 })],
     }),

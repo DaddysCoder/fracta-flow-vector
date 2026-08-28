@@ -1,5 +1,17 @@
 export type BrandMode = "vector_product_brand" | "provider_brand_profile";
 
+/** An organisation's uploaded logo, decoded and ready to embed. `type` is
+ * restricted to what `docx`'s ImageRun can actually render — keep in sync
+ * with the Worker's ALLOWED_LOGO_CONTENT_TYPES. `width`/`height` are the
+ * display size in pixels (already scaled to fit a reasonable letterhead
+ * footprint), not the source image's native dimensions. */
+export interface BrandLogo {
+  data: Uint8Array;
+  type: "png" | "jpg";
+  width: number;
+  height: number;
+}
+
 export interface Brand {
   mode: BrandMode;
   name: string;
@@ -10,6 +22,8 @@ export interface Brand {
   /** Heading font family for exported titles/section headings. Undefined
    * lets docx/print fall back to the default document font. */
   headingFont?: string;
+  /** Present only for a paid provider brand that has uploaded a logo. */
+  logo?: BrandLogo;
 }
 
 /** Vector's default brand for standalone exports. */
@@ -31,6 +45,7 @@ export function providerBrand(provider: {
   paper?: string;
   accent?: string;
   headingFont?: string;
+  logo?: BrandLogo;
 }): Brand {
   return {
     mode: "provider_brand_profile",
@@ -39,5 +54,6 @@ export function providerBrand(provider: {
     paper: provider.paper ?? VECTOR_BRAND.paper,
     accent: provider.accent ?? VECTOR_BRAND.accent,
     headingFont: provider.headingFont,
+    logo: provider.logo,
   };
 }
