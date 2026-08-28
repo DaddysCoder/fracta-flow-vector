@@ -6,6 +6,7 @@ import { canUseFeature } from "./commercial/entitlements.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { CardSectionsForm, flattenValuesForExport, type FormValues } from "./FormRenderer.js";
+import { PrintLetterhead } from "./print/PrintLetterhead.js";
 import { toTargetDocument } from "./registryAdapter.js";
 import { SUPPORT_LETTER_ALWAYS_REQUIRED_FIELD_IDS, SUPPORT_LETTER_DOCUMENT_ID, SUPPORT_LETTER_VISIBILITY_RULES } from "./supportLetter.js";
 import { computeQuoteTotals, formatAud, SUPPORT_LETTER_LINE_ITEMS } from "./support-letter/quote.js";
@@ -181,15 +182,18 @@ export function SupportLetterForm({ priorFields = [], onSubmitted, now = () => n
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="wizard-eyebrow-row">
-        <span className="wizard-eyebrow">SUPPORT LETTER · PAID</span>
+    <form onSubmit={handleSubmit} className="print-report">
+      <PrintLetterhead docTitle="Support Letter" />
+      <div className="no-print">
+        <div className="wizard-eyebrow-row">
+          <span className="wizard-eyebrow">SUPPORT LETTER · PAID</span>
+        </div>
+        <h1 style={{ margin: "0 0 0.375rem" }}>Support Letter</h1>
+        <p style={{ margin: "0 0 1.5rem", maxWidth: "680px", color: "var(--muted)" }}>
+          A funding recommendation letter for the participant&apos;s NDIS plan — functional impact,
+          behaviours of concern, recommended supports and an itemised quote for behaviour support.
+        </p>
       </div>
-      <h1 style={{ margin: "0 0 0.375rem" }}>Support Letter</h1>
-      <p style={{ margin: "0 0 1.5rem", maxWidth: "680px", color: "var(--muted)" }}>
-        A funding recommendation letter for the participant&apos;s NDIS plan — functional impact,
-        behaviours of concern, recommended supports and an itemised quote for behaviour support.
-      </p>
 
       <ExportControls
         renderBlank={(brand) => renderBlankDocxBlob(SUPPORT_LETTER_DOCUMENT, SUPPORT_LETTER_DOCUMENT_ID, SUPPORT_LETTER_FIELDS, brand)}

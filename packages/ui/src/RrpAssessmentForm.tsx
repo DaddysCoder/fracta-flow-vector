@@ -6,6 +6,7 @@ import { canUseFeature } from "./commercial/entitlements.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { CardSectionsForm, flattenValuesForExport, type FormValues } from "./FormRenderer.js";
+import { PrintLetterhead } from "./print/PrintLetterhead.js";
 import { RRP_ASSESSMENT_ALWAYS_REQUIRED_FIELD_IDS, RRP_ASSESSMENT_DOCUMENT_ID, RRP_ASSESSMENT_VISIBILITY_RULES } from "./rrpAssessment.js";
 import { requiredFieldIds } from "./visibility.js";
 
@@ -113,15 +114,18 @@ export function RrpAssessmentForm({ priorFields = [], onSubmitted, now = () => n
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="wizard-eyebrow-row">
-        <span className="wizard-eyebrow">RRP ASSESSMENT · PAID</span>
+    <form onSubmit={handleSubmit} className="print-report">
+      <PrintLetterhead docTitle="RRP Assessment" />
+      <div className="no-print">
+        <div className="wizard-eyebrow-row">
+          <span className="wizard-eyebrow">RRP ASSESSMENT · PAID</span>
+        </div>
+        <h1 style={{ margin: "0 0 0.375rem" }}>RRP Assessment</h1>
+        <p style={{ margin: "0 0 1.5rem", maxWidth: "640px", color: "var(--muted)" }}>
+          Required before an Interim BSP for any participant flagged with a possible or confirmed
+          restrictive practice. Fact-gathering is kept separate from the reduction plan.
+        </p>
       </div>
-      <h1 style={{ margin: "0 0 0.375rem" }}>RRP Assessment</h1>
-      <p style={{ margin: "0 0 1.5rem", maxWidth: "640px", color: "var(--muted)" }}>
-        Required before an Interim BSP for any participant flagged with a possible or confirmed
-        restrictive practice. Fact-gathering is kept separate from the reduction plan.
-      </p>
 
       <ExportControls
         renderBlank={(brand) => renderBlankDocxBlob(RRP_ASSESSMENT_DOCUMENT, RRP_ASSESSMENT_DOCUMENT_ID, RRP_ASSESSMENT_FIELDS, brand)}

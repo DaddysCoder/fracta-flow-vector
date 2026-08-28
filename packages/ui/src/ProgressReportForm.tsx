@@ -6,6 +6,7 @@ import { canUseFeature } from "./commercial/entitlements.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { CardSectionsForm, flattenValuesForExport, type FormValues } from "./FormRenderer.js";
+import { PrintLetterhead } from "./print/PrintLetterhead.js";
 import { PROGRESS_REPORT_ALWAYS_REQUIRED_FIELD_IDS, PROGRESS_REPORT_DOCUMENT_ID, PROGRESS_REPORT_VISIBILITY_RULES } from "./progressReport.js";
 import { requiredFieldIds } from "./visibility.js";
 
@@ -113,14 +114,17 @@ export function ProgressReportForm({ priorFields = [], onSubmitted, now = () => 
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="wizard-eyebrow-row">
-        <span className="wizard-eyebrow">PROGRESS REPORT · PAID</span>
+    <form onSubmit={handleSubmit} className="print-report">
+      <PrintLetterhead docTitle="Progress Report" />
+      <div className="no-print">
+        <div className="wizard-eyebrow-row">
+          <span className="wizard-eyebrow">PROGRESS REPORT · PAID</span>
+        </div>
+        <h1 style={{ margin: "0 0 0.375rem" }}>Progress Report</h1>
+        <p style={{ margin: "0 0 1.5rem", maxWidth: "640px", color: "var(--muted)" }}>
+          Summarises plan progress for an NDIS plan review.
+        </p>
       </div>
-      <h1 style={{ margin: "0 0 0.375rem" }}>Progress Report</h1>
-      <p style={{ margin: "0 0 1.5rem", maxWidth: "640px", color: "var(--muted)" }}>
-        Summarises plan progress for an NDIS plan review.
-      </p>
 
       <ExportControls
         renderBlank={(brand) => renderBlankDocxBlob(PROGRESS_REPORT_DOCUMENT, PROGRESS_REPORT_DOCUMENT_ID, PROGRESS_REPORT_FIELDS, brand)}
