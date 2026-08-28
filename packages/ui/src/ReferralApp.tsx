@@ -4,9 +4,12 @@ import "./print.css";
 import { BrandProfilePanel } from "./commercial/BrandProfilePanel.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { SupportTemplatesHubPage } from "./commercial/SupportTemplatesHub.js";
+import { ProgressReportForm } from "./ProgressReportForm.js";
 import { ReferralForm } from "./ReferralForm.js";
+import { RrpAssessmentForm } from "./RrpAssessmentForm.js";
 import { ShellHeader } from "./ShellHeader.js";
 import { SourceForm } from "./SourceForm.js";
+import { SupportLetterForm } from "./SupportLetterForm.js";
 import { TriageForm } from "./TriageForm.js";
 import {
   isBlockedLegacyDocumentRoute,
@@ -72,6 +75,20 @@ export function ReferralApp() {
         <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
           <div id="top" />
           <SupportTemplateWizard config={config} />
+        </main>
+      </>
+    );
+  }
+
+  if (activeView.kind === "paid-document") {
+    return (
+      <>
+        <ShellHeader activeId="support-hub" />
+        <main style={{ maxWidth: "1180px", margin: "0 auto", padding: "2rem 24px 4rem" }}>
+          <div id="top" />
+          {activeView.documentId === "rrp-assessment" && <RrpAssessmentForm />}
+          {activeView.documentId === "support-letter" && <SupportLetterForm />}
+          {activeView.documentId === "progress-report" && <ProgressReportForm />}
         </main>
       </>
     );

@@ -1,7 +1,7 @@
-import { canUseFeature } from "./entitlements.js";
+import { canUseFeature, type PaidFeature } from "./entitlements.js";
 import { useVectorCommercial } from "./CommercialContext.js";
 import { ShellHeader } from "../ShellHeader.js";
-import { pathForSupportTemplate, type SupportTemplateId } from "../routing.js";
+import { pathForPaidDocument, pathForSupportTemplate, type PaidDocumentId, type SupportTemplateId } from "../routing.js";
 
 const SUPPORT_TEMPLATES: Array<{
   id: SupportTemplateId;
@@ -26,6 +26,42 @@ const SUPPORT_TEMPLATES: Array<{
     eyebrow: "Comprehensive BSP",
     title: "Comprehensive Behaviour Support Plan",
     description: "The final plan, superseding any Interim BSP.",
+  },
+];
+
+/** Documents 10-12 — net-new, paid, standalone. The design handoff's
+ * prototype has no nav or hub-card wiring for these at all (its top nav
+ * and hub cards are frozen at the original 5/3-item lists); listing them
+ * here, gated the same way as the BSP cards above, is this build's own
+ * reasonable choice for making them reachable and discoverable rather
+ * than dead routes only reachable by typing a URL. */
+const PAID_DOCUMENTS: Array<{
+  id: PaidDocumentId;
+  feature: PaidFeature;
+  eyebrow: string;
+  title: string;
+  description: string;
+}> = [
+  {
+    id: "rrp-assessment",
+    feature: "rrp_assessment",
+    eyebrow: "RRP Assessment",
+    title: "RRP Assessment",
+    description: "Required before an Interim BSP for any participant flagged with a possible or confirmed restrictive practice.",
+  },
+  {
+    id: "support-letter",
+    feature: "support_letter",
+    eyebrow: "Support Letter",
+    title: "Support Letter",
+    description: "A funding recommendation letter with functional impact, recommended supports and an itemised quote.",
+  },
+  {
+    id: "progress-report",
+    feature: "progress_report",
+    eyebrow: "Progress Report",
+    title: "Progress Report",
+    description: "Summarises plan progress for an NDIS plan review.",
   },
 ];
 
@@ -134,6 +170,13 @@ function ArcCrossSell() {
   );
 }
 
+function navigateTo(nextPath: string) {
+  if (window.location.pathname !== nextPath) {
+    window.history.pushState({}, "", nextPath);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+}
+
 export function SupportTemplatesHub() {
   const { entitlements, requestUpgrade } = useVectorCommercial();
   const canUseTemplates = canUseFeature(entitlements, "support_templates");
@@ -143,11 +186,15 @@ export function SupportTemplatesHub() {
       requestUpgrade("support_templates");
       return;
     }
-    const nextPath = pathForSupportTemplate(templateId);
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, "", nextPath);
-      window.dispatchEvent(new PopStateEvent("popstate"));
+    navigateTo(pathForSupportTemplate(templateId));
+  }
+
+  function openDocument(doc: (typeof PAID_DOCUMENTS)[number]) {
+    if (!canUseFeature(entitlements, doc.feature)) {
+      requestUpgrade(doc.feature);
+      return;
     }
+    navigateTo(pathForPaidDocument(doc.id));
   }
 
   return (
@@ -211,6 +258,72 @@ export function SupportTemplatesHub() {
           </li>
         ))}
       </ul>
+
+      <section aria-labelledby="paid-documents-heading" style={{ marginTop: "2rem" }}>
+        <h2 id="paid-documents-heading" style={{ fontSize: "1rem", marginBottom: "1rem" }}>
+          Documents
+        </h2>
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            margin: 0,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {PAID_DOCUMENTS.map((doc) => {
+            const canUse = canUseFeature(entitlements, doc.feature);
+            return (
+              <li key={doc.id} className="card" style={{ position: "relative" }}>
+                {!canUse && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      right: "16px",
+                      fontSize: "0.6875rem",
+                      fontWeight: 700,
+                      color: "var(--muted-2)",
+                      background: "var(--surface-recessed)",
+                      padding: "4px 8px",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    PAID
+                  </span>
+                )}
+                <p className="wizard-eyebrow" style={{ marginBottom: "10px" }}>
+                  {doc.eyebrow}
+                </p>
+                <strong style={{ display: "block", fontFamily: "var(--heading-font)", fontSize: "1.0625rem", marginBottom: "8px" }}>
+                  {doc.title}
+                </strong>
+                <span style={{ display: "block", fontSize: "0.84375rem", color: "var(--muted)", lineHeight: 1.55, marginBottom: "16px" }}>
+                  {doc.description}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => openDocument(doc)}
+                  style={{
+                    minHeight: "auto",
+                    minWidth: "auto",
+                    padding: 0,
+                    border: "none",
+                    background: "none",
+                    color: canUse ? "var(--purple)" : "var(--muted)",
+                    fontSize: "0.8125rem",
+                    fontWeight: 700,
+                  }}
+                >
+                  {canUse ? "Start →" : "Upgrade →"}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <ArcCrossSell />
     </div>

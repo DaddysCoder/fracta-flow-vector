@@ -5,10 +5,16 @@ export type SupportTemplateId =
   | "interim-behaviour-support-plan"
   | "comprehensive-behaviour-support-plan";
 
+/** Documents 10-12 — net-new, paid, standalone single-page documents. Not
+ * part of the Support Templates hub/wizard system (SupportTemplateId
+ * above), which is a deliberately separate, non-registry build. */
+export type PaidDocumentId = "rrp-assessment" | "support-letter" | "progress-report";
+
 export type AppView =
   | { kind: "public"; form: PublicForm }
   | { kind: "support-hub" }
   | { kind: "support-template"; templateId: SupportTemplateId }
+  | { kind: "paid-document"; documentId: PaidDocumentId }
   | { kind: "brand" };
 
 export const PUBLIC_FORM_ROUTES = {
@@ -18,6 +24,12 @@ export const PUBLIC_FORM_ROUTES = {
 } as const satisfies Record<PublicForm, string>;
 
 export const BRAND_PROFILE_ROUTE = "/brand-profile";
+
+export const PAID_DOCUMENT_ROUTES = {
+  "rrp-assessment": "/rrp-assessment",
+  "support-letter": "/support-letter",
+  "progress-report": "/progress-report",
+} as const satisfies Record<PaidDocumentId, string>;
 
 export const SUPPORT_TEMPLATE_ROUTES = {
   hub: "/support-templates",
@@ -69,15 +81,29 @@ export function isBrandProfileRoute(pathname: string): boolean {
   return path === BRAND_PROFILE_ROUTE;
 }
 
+export function paidDocumentFromPath(pathname: string): PaidDocumentId | null {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  for (const [id, route] of Object.entries(PAID_DOCUMENT_ROUTES)) {
+    if (path === route || path.startsWith(`${route}/`)) return id as PaidDocumentId;
+  }
+  return null;
+}
+
 export function resolveAppView(pathname: string): AppView {
   const path = pathname.replace(/\/+$/, "") || "/";
   const templateId = supportTemplateFromPath(path);
   if (templateId) return { kind: "support-template", templateId };
   if (isSupportTemplatesHub(path)) return { kind: "support-hub" };
+  const documentId = paidDocumentFromPath(path);
+  if (documentId) return { kind: "paid-document", documentId };
   if (isBrandProfileRoute(path)) return { kind: "brand" };
   return { kind: "public", form: publicFormFromPath(path) };
 }
 
 export function pathForSupportTemplate(templateId: SupportTemplateId): string {
   return SUPPORT_TEMPLATE_ROUTES[templateId];
+}
+
+export function pathForPaidDocument(documentId: PaidDocumentId): string {
+  return PAID_DOCUMENT_ROUTES[documentId];
 }
