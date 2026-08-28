@@ -1,6 +1,6 @@
 import { createTriageTask, type FieldEntry, type TriageTask } from "@pbs/core";
 import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
-import { registry, type DocumentDef } from "@pbs/registry";
+import { registry, type DocumentDef, type FieldDef } from "@pbs/registry";
 import { useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
@@ -17,9 +17,18 @@ const maybeReferralDocument = registry.documents[REFERRAL_DOCUMENT_ID];
 if (!maybeReferralDocument) throw new Error(`registry is missing document "${REFERRAL_DOCUMENT_ID}"`);
 const REFERRAL_DOCUMENT: DocumentDef = maybeReferralDocument;
 
-const REFERRAL_FIELDS = registry.fields.filter((f) =>
-  REFERRAL_DOCUMENT.sections.some((s) => s.id === f.askedIn),
-);
+const REFERRAL_SECTION_IDS = new Set(REFERRAL_DOCUMENT.sections.map((section) => section.id));
+
+/**
+ * Public Referral is independently completable. Include fields rendered into
+ * this document even when the connected workflow normally supplies them from
+ * system/context, so standalone Vector never depends on hidden prior data.
+ */
+const REFERRAL_STANDALONE_FIELDS: FieldDef[] = registry.fields.flatMap((field) => {
+  if (REFERRAL_SECTION_IDS.has(field.askedIn)) return [field];
+  const standaloneSection = field.rendersIn.find((sectionId) => REFERRAL_SECTION_IDS.has(sectionId));
+  return standaloneSection ? [{ ...field, askedIn: standaloneSection } as FieldDef] : [];
+});
 
 const EMPTY_VALUES: FormValues = { scalar: {}, groups: {} };
 
@@ -68,12 +77,12 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
 
   const exportControls = (
     <ExportControls
-      renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, brand)}
+      renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_STANDALONE_FIELDS, brand)}
       renderCompleted={(brand) =>
         renderCompletedDocxBlob(
           REFERRAL_DOCUMENT,
           REFERRAL_DOCUMENT_ID,
-          REFERRAL_FIELDS,
+          REFERRAL_STANDALONE_FIELDS,
           brand,
           flattenValuesForExport(values),
         )
@@ -103,7 +112,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
   return (
     <FormWizard
       document={REFERRAL_DOCUMENT}
-      fields={REFERRAL_FIELDS}
+      fields={REFERRAL_STANDALONE_FIELDS}
       values={values}
       onChange={setValues}
       visibilityRules={REFERRAL_VISIBILITY_RULES}
