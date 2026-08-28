@@ -7,5 +7,10 @@
       "command": "pnpm --filter @pbs/ui run dev"
     }
   ],
-  "ports": [43123]
+  "ports": [
+    {
+      "name": "ui-dev",
+      "port": 43123
+    }
+  ]
 }
