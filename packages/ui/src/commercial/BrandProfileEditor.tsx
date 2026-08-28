@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { fetchVectorBrandProfile, saveVectorBrandProfile } from "./billing.js";
+import {
+  fetchVectorBrandProfile,
+  saveVectorBrandProfile,
+  uploadVectorBrandLogo,
+  VECTOR_BRAND_LOGO_PATH,
+} from "./billing.js";
 import { BRAND_ACCENT_SWATCHES, BRAND_HEADING_FONTS, DEFAULT_HEADING_FONT, type BrandProfileInput } from "./brandProfile.js";
 
 const EMPTY_PROFILE: BrandProfileInput = {
@@ -12,11 +17,37 @@ const EMPTY_PROFILE: BrandProfileInput = {
   headingFont: DEFAULT_HEADING_FONT,
 };
 
+// Mirrors the Worker's validation (worker/brandLogo.mjs) so a bad file is
+// rejected instantly client-side — the Worker remains the source of truth
+// and re-validates on upload regardless.
+const ALLOWED_LOGO_TYPES = new Set(["image/png", "image/jpeg"]);
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+
+function describeSaveError(error: unknown): string {
+  const code = error instanceof Error ? error.message : "";
+  switch (code) {
+    case "unsupported_logo_type":
+      return "Logo must be a PNG or JPEG image.";
+    case "logo_too_large":
+      return "Logo must be smaller than 2 MB.";
+    case "logo_storage_not_configured":
+      return "Logo storage isn't set up yet — organisation name, font and colour were still saved.";
+    case "organisation_name_required":
+      return "Organisation name is required.";
+    default:
+      return "Could not save organisation branding.";
+  }
+}
+
 export function BrandProfileEditor() {
   const [profile, setProfile] = useState<BrandProfileInput>(EMPTY_PROFILE);
+  const [hasPersistedLogo, setHasPersistedLogo] = useState(false);
+  const [logoVersion, setLogoVersion] = useState(0);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "saved" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,7 +55,10 @@ export function BrandProfileEditor() {
       try {
         const saved = await fetchVectorBrandProfile();
         if (cancelled) return;
-        if (saved) setProfile({ ...EMPTY_PROFILE, ...saved });
+        if (saved) {
+          setProfile({ ...EMPTY_PROFILE, ...saved });
+          setHasPersistedLogo(saved.hasLogo);
+        }
         setStatus("ready");
       } catch {
         if (!cancelled) {
@@ -38,15 +72,38 @@ export function BrandProfileEditor() {
     };
   }, []);
 
-  function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) {
-      setLogoPreview(null);
+  // The pending file's preview is a local blob URL, revoked whenever a
+  // different file is chosen or the component unmounts.
+  useEffect(() => {
+    if (!logoFile) {
+      setLogoPreviewUrl(null);
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setLogoPreview(typeof reader.result === "string" ? reader.result : null);
-    reader.readAsDataURL(file);
+    const url = URL.createObjectURL(logoFile);
+    setLogoPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [logoFile]);
+
+  function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setLogoError(null);
+    if (!file) {
+      setLogoFile(null);
+      return;
+    }
+    if (!ALLOWED_LOGO_TYPES.has(file.type)) {
+      setLogoError("Logo must be a PNG or JPEG image.");
+      event.target.value = "";
+      setLogoFile(null);
+      return;
+    }
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError("Logo must be smaller than 2 MB.");
+      event.target.value = "";
+      setLogoFile(null);
+      return;
+    }
+    setLogoFile(file);
   }
 
   async function handleSave(event: React.FormEvent) {
@@ -54,13 +111,19 @@ export function BrandProfileEditor() {
     setStatus("loading");
     setError(null);
     try {
+      if (logoFile) {
+        await uploadVectorBrandLogo(logoFile);
+      }
       const saved = await saveVectorBrandProfile(profile);
       setProfile({ ...EMPTY_PROFILE, ...saved });
+      setHasPersistedLogo(saved.hasLogo || !!logoFile);
+      setLogoFile(null);
+      setLogoVersion((version) => version + 1);
       setStatus("saved");
       window.dispatchEvent(new CustomEvent("vector:brand-profile-saved"));
-    } catch {
+    } catch (err) {
       setStatus("error");
-      setError("Could not save organisation branding.");
+      setError(describeSaveError(err));
     }
   }
 
@@ -70,6 +133,7 @@ export function BrandProfileEditor() {
   }
 
   const activeAccentHex = (profile.accentHex || BRAND_ACCENT_SWATCHES[0].hex).toUpperCase().replace(/^#/, "");
+  const logoDisplayUrl = logoPreviewUrl ?? (hasPersistedLogo ? `${VECTOR_BRAND_LOGO_PATH}?v=${logoVersion}` : null);
 
   return (
     <form onSubmit={(event) => void handleSave(event)}>
@@ -92,16 +156,31 @@ export function BrandProfileEditor() {
           <label className="field-label" htmlFor="brand-logo">
             Logo
           </label>
-          <input id="brand-logo" type="file" accept="image/*" onChange={handleLogoChange} />
-          {logoPreview ? (
+          <input id="brand-logo" type="file" accept="image/png,image/jpeg" onChange={handleLogoChange} />
+          <p className="field-note" style={{ marginTop: "0.375rem" }}>
+            PNG or JPEG, up to 2 MB.
+          </p>
+          {logoError && (
+            <p role="alert" className="field-note" style={{ color: "#8a4b13" }}>
+              {logoError}
+            </p>
+          )}
+          {logoDisplayUrl ? (
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.75rem" }}>
               <img
-                src={logoPreview}
-                alt="Logo preview"
-                style={{ width: "48px", height: "48px", objectFit: "contain", border: "1px solid var(--border-hairline)", borderRadius: "8px", background: "#fff" }}
+                src={logoDisplayUrl}
+                alt="Organisation logo"
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  objectFit: "contain",
+                  border: "1px solid var(--border-hairline)",
+                  borderRadius: "8px",
+                  background: "#fff",
+                }}
               />
               <p className="field-note" style={{ margin: 0 }}>
-                Preview only — logo storage is coming soon.
+                {logoPreviewUrl ? "New logo — saved when you click Save brand profile." : "Current logo."}
               </p>
             </div>
           ) : null}

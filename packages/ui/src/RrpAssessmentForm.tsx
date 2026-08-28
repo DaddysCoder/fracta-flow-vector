@@ -45,7 +45,7 @@ export function RrpAssessmentForm({ priorFields = [], onSubmitted, now = () => n
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const { entitlements, requestUpgrade } = useVectorCommercial();
+  const { entitlements, requestUpgrade, logoUrl } = useVectorCommercial();
   const canUse = canUseFeature(entitlements, "rrp_assessment");
 
   const required = useMemo(
@@ -115,7 +115,7 @@ export function RrpAssessmentForm({ priorFields = [], onSubmitted, now = () => n
 
   return (
     <form onSubmit={handleSubmit} className="print-report">
-      <PrintLetterhead docTitle="RRP Assessment" />
+      <PrintLetterhead docTitle="RRP Assessment" logoUrl={logoUrl} />
       <div className="no-print">
         <div className="wizard-eyebrow-row">
           <span className="wizard-eyebrow">RRP ASSESSMENT · PAID</span>

@@ -5,6 +5,7 @@ import {
   fetchVectorBrandProfile,
   fetchVectorEntitlements,
   startVectorCheckout,
+  VECTOR_BRAND_LOGO_PATH,
   type VectorPurchase,
 } from "./billing.js";
 import {
@@ -17,6 +18,11 @@ import { UpgradeModal } from "./UpgradeModal.js";
 export interface VectorCommercialState {
   entitlements: VectorEntitlements;
   exportBrand: Brand;
+  /** Same-origin, cookie-authenticated URL for the persisted organisation
+   * logo (cache-busted on every brand-profile save), or null when there's
+   * no logo to show — for the print letterhead's `<img>`. DOCX export
+   * embeds the logo separately via `exportBrand.logo` bytes. */
+  logoUrl: string | null;
   requestUpgrade: (feature: PaidFeature) => void;
 }
 
@@ -33,6 +39,7 @@ function defaultUpgrade(feature: PaidFeature) {
 const defaultCommercialState: VectorCommercialState = {
   entitlements: FREE_ENTITLEMENTS,
   exportBrand: VECTOR_BRAND,
+  logoUrl: null,
   requestUpgrade: defaultUpgrade,
 };
 
@@ -62,6 +69,7 @@ export function VectorCommercialProvider({
     entitlements ?? defaultCommercialState.entitlements,
   );
   const [exportBrand, setExportBrand] = useState<Brand>(exportBrandOverride ?? VECTOR_BRAND);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [billingAttempt, setBillingAttempt] = useState<BillingAttempt>({ status: "idle" });
 
   function requestUpgrade(feature: PaidFeature) {
@@ -158,6 +166,7 @@ export function VectorCommercialProvider({
       if (!resolvedEntitlements.companyBranding) {
         root.removeProperty("--purple");
         root.removeProperty("--heading-font");
+        setLogoUrl(null);
         return;
       }
       try {
@@ -170,10 +179,15 @@ export function VectorCommercialProvider({
           "--heading-font",
           `"${font}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
         );
+        // Cache-bust on every resolve (triggered by the brand-profile-saved
+        // event) so a replaced logo shows up immediately instead of the
+        // browser reusing a cached image at the same URL.
+        setLogoUrl(profile?.hasLogo ? `${VECTOR_BRAND_LOGO_PATH}?v=${Date.now()}` : null);
       } catch {
         if (!cancelled) {
           root.removeProperty("--purple");
           root.removeProperty("--heading-font");
+          setLogoUrl(null);
         }
       }
     }
@@ -188,7 +202,7 @@ export function VectorCommercialProvider({
 
   return (
     <VectorCommercialContext.Provider
-      value={{ entitlements: resolvedEntitlements, exportBrand, requestUpgrade }}
+      value={{ entitlements: resolvedEntitlements, exportBrand, logoUrl, requestUpgrade }}
     >
       {children}
       {!requestUpgradeOverride && billingAttempt.status !== "idle" ? (

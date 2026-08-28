@@ -99,7 +99,7 @@ export function SupportLetterForm({ priorFields = [], onSubmitted, now = () => n
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const { entitlements, requestUpgrade } = useVectorCommercial();
+  const { entitlements, requestUpgrade, logoUrl } = useVectorCommercial();
   const canUse = canUseFeature(entitlements, "support_letter");
 
   const required = useMemo(
@@ -183,7 +183,7 @@ export function SupportLetterForm({ priorFields = [], onSubmitted, now = () => n
 
   return (
     <form onSubmit={handleSubmit} className="print-report">
-      <PrintLetterhead docTitle="Support Letter" />
+      <PrintLetterhead docTitle="Support Letter" logoUrl={logoUrl} />
       <div className="no-print">
         <div className="wizard-eyebrow-row">
           <span className="wizard-eyebrow">SUPPORT LETTER · PAID</span>

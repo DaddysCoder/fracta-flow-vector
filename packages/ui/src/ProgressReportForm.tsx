@@ -45,7 +45,7 @@ export function ProgressReportForm({ priorFields = [], onSubmitted, now = () => 
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [submitted, setSubmitted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const { entitlements, requestUpgrade } = useVectorCommercial();
+  const { entitlements, requestUpgrade, logoUrl } = useVectorCommercial();
   const canUse = canUseFeature(entitlements, "progress_report");
 
   const required = useMemo(
@@ -115,7 +115,7 @@ export function ProgressReportForm({ priorFields = [], onSubmitted, now = () => 
 
   return (
     <form onSubmit={handleSubmit} className="print-report">
-      <PrintLetterhead docTitle="Progress Report" />
+      <PrintLetterhead docTitle="Progress Report" logoUrl={logoUrl} />
       <div className="no-print">
         <div className="wizard-eyebrow-row">
           <span className="wizard-eyebrow">PROGRESS REPORT · PAID</span>

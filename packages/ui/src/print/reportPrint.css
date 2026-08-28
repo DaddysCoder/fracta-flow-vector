@@ -68,6 +68,12 @@
     color: #9b9b9b !important;
   }
 
+  .print-report .print-logo-img {
+    max-width: 120px;
+    max-height: 44px;
+    object-fit: contain;
+  }
+
   .print-report .print-doctitle {
     font-weight: 700;
     font-size: 22px;
