@@ -1,36 +1,39 @@
 import {
-  CAPABILITIES,
-  resolve,
   resolvePathway,
-  type CaseRecord,
   type FieldEntry,
   type ResolvedPathway,
   type RrpClassification,
   type TriageTask,
 } from "@pbs/core";
 import { renderBlankDocxBlob, renderCompletedDocxBlob } from "@pbs/export";
-import { registry, type DocumentDef } from "@pbs/registry";
-import { useMemo, useState } from "react";
+import { registry, type DocumentDef, type FieldDef } from "@pbs/registry";
+import { useState } from "react";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { FormWizard } from "./FormWizard.js";
-import { toPathwayPermissions, toTargetDocument } from "./registryAdapter.js";
+import { toPathwayPermissions } from "./registryAdapter.js";
 import { TRIAGE_ALWAYS_REQUIRED_FIELD_IDS, TRIAGE_DOCUMENT_ID, TRIAGE_VISIBILITY_RULES } from "./triage.js";
 
 const maybeTriageDocument = registry.documents[TRIAGE_DOCUMENT_ID];
 if (!maybeTriageDocument) throw new Error(`registry is missing document "${TRIAGE_DOCUMENT_ID}"`);
 const TRIAGE_DOCUMENT: DocumentDef = maybeTriageDocument;
 
-const TRIAGE_FIELDS = registry.fields.filter((f) =>
-  TRIAGE_DOCUMENT.sections.some((s) => s.id === f.askedIn),
-);
+const TRIAGE_SECTION_IDS = new Set(TRIAGE_DOCUMENT.sections.map((section) => section.id));
 
-const TRIAGE_QUOTED_FIELDS = registry.fields.filter(
-  (f) =>
-    !TRIAGE_DOCUMENT.sections.some((s) => s.id === f.askedIn) &&
-    f.rendersIn.some((section) => TRIAGE_DOCUMENT.sections.some((s) => s.id === section)),
-);
+/**
+ * Vector's public Practitioner Triage is a standalone form. Fields that the
+ * connected clinical workflow would normally quote from Referral are cloned
+ * into the section where they render so the practitioner enters them here as
+ * fresh editable information. Registry order is preserved so 02.A reads like
+ * the intended referral-review screen, but there are no "Not yet available"
+ * placeholders or hidden dependency on Document 01.
+ */
+const TRIAGE_STANDALONE_FIELDS: FieldDef[] = registry.fields.flatMap((field) => {
+  if (TRIAGE_SECTION_IDS.has(field.askedIn)) return [field];
+  const standaloneSection = field.rendersIn.find((sectionId) => TRIAGE_SECTION_IDS.has(sectionId));
+  return standaloneSection ? [{ ...field, askedIn: standaloneSection } as FieldDef] : [];
+});
 
 const EMPTY_VALUES: FormValues = { scalar: {}, groups: {} };
 
@@ -76,17 +79,6 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
 
   const triageId = "triage-draft";
 
-  const quotedValues = useMemo(() => {
-    const caseRecord: CaseRecord = { fields: task.fields };
-    const targetDocument = toTargetDocument(TRIAGE_DOCUMENT_ID, triageId);
-    const resolved = resolve(caseRecord, targetDocument, CAPABILITIES.standalone, now());
-    const merged: Record<string, unknown> = {};
-    for (const entry of [...resolved.tier0, ...resolved.tier1, ...resolved.tier2]) {
-      merged[entry.fieldId] = entry.value;
-    }
-    return merged;
-  }, [task]);
-
   function handleSubmit() {
     const timestamp = now().toISOString();
     const scalarEntries: FieldEntry[] = Object.entries(values.scalar).map(([fieldId, value]) => ({
@@ -111,12 +103,12 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
 
   const exportControls = (
     <ExportControls
-      renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_FIELDS, brand)}
+      renderBlank={(brand) => renderBlankDocxBlob(TRIAGE_DOCUMENT, TRIAGE_DOCUMENT_ID, TRIAGE_STANDALONE_FIELDS, brand)}
       renderCompleted={(brand) =>
         renderCompletedDocxBlob(
           TRIAGE_DOCUMENT,
           TRIAGE_DOCUMENT_ID,
-          TRIAGE_FIELDS,
+          TRIAGE_STANDALONE_FIELDS,
           brand,
           flattenValuesForExport(values),
         )
@@ -143,14 +135,12 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
   return (
     <FormWizard
       document={TRIAGE_DOCUMENT}
-      fields={TRIAGE_FIELDS}
+      fields={TRIAGE_STANDALONE_FIELDS}
       values={values}
       onChange={setValues}
       visibilityRules={TRIAGE_VISIBILITY_RULES}
       alwaysRequiredFieldIds={TRIAGE_ALWAYS_REQUIRED_FIELD_IDS}
       newRowId={newRowId}
-      quotedFields={TRIAGE_QUOTED_FIELDS}
-      quotedValues={quotedValues}
       documentEyebrow={`Document ${TRIAGE_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
       onComplete={handleSubmit}
       completeLabel="Complete triage"
