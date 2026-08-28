@@ -28,10 +28,7 @@ function newRowId(): string {
 }
 
 export interface ReferralFormProps {
-  /** Called once submission succeeds — this is the ONLY thing submission
-   * does. It never decides acceptance or a clinical pathway. */
   onSubmitted: (task: TriageTask) => void;
-  /** Injected for testability; defaults to real wall-clock time in the app. */
   now?: () => Date;
 }
 
@@ -40,7 +37,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
   const [submitted, setSubmitted] = useState(false);
   const { entitlements } = useVectorCommercial();
 
-  const referralId = "referral-draft"; // one draft per session in this standalone build
+  const referralId = "referral-draft";
 
   function handleSubmit() {
     const timestamp = now().toISOString();
@@ -64,15 +61,41 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
     onSubmitted(task);
   }
 
+  function reset() {
+    setValues(EMPTY_VALUES);
+    setSubmitted(false);
+  }
+
+  const exportControls = (
+    <ExportControls
+      renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, brand)}
+      renderCompleted={(brand) =>
+        renderCompletedDocxBlob(
+          REFERRAL_DOCUMENT,
+          REFERRAL_DOCUMENT_ID,
+          REFERRAL_FIELDS,
+          brand,
+          flattenValuesForExport(values),
+        )
+      }
+      blankFilename="vector-referral-blank.docx"
+      completedFilename="vector-referral-completed.docx"
+      showBlank={false}
+    />
+  );
+
   if (submitted) {
     return (
-      <div role="status">
+      <div role="status" className="vector-complete-state">
+        <div className="vector-complete-mark" aria-hidden="true">✓</div>
         <h1>Referral complete</h1>
         <p>
-          Your referral answers remain in this browser session only. Nothing was uploaded,
-          transmitted, or stored on WHATBIT servers. Use export or print if you want a copy
-          outside this device.
+          Your referral remains in this browser session only. Use export or print if you want a copy outside this device.
         </p>
+        {exportControls}
+        <button type="button" onClick={reset}>
+          Start another referral
+        </button>
       </div>
     );
   }
@@ -88,23 +111,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
       newRowId={newRowId}
       documentEyebrow={`Document ${REFERRAL_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
       onComplete={handleSubmit}
-      completeLabel="Complete referral"
-      header={
-        <ExportControls
-          renderBlank={(brand) => renderBlankDocxBlob(REFERRAL_DOCUMENT, REFERRAL_DOCUMENT_ID, REFERRAL_FIELDS, brand)}
-          renderCompleted={(brand) =>
-            renderCompletedDocxBlob(
-              REFERRAL_DOCUMENT,
-              REFERRAL_DOCUMENT_ID,
-              REFERRAL_FIELDS,
-              brand,
-              flattenValuesForExport(values),
-            )
-          }
-          blankFilename="vector-referral-blank.docx"
-          completedFilename="vector-referral-completed.docx"
-        />
-      }
+      completeLabel="Send referral"
     />
   );
 }
