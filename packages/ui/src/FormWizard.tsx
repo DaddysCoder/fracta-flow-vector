@@ -1,5 +1,5 @@
 import type { DocumentDef, FieldDef } from "@pbs/registry";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { formatReadOnlyValue } from "./fields/Field.js";
 import { FormRenderer, type FormValues } from "./FormRenderer.js";
 import { isFieldVisible, requiredFieldIds, type VisibilityRule } from "./visibility.js";
@@ -14,11 +14,68 @@ export interface FormWizardProps {
   newRowId: () => string;
   quotedFields?: FieldDef[];
   quotedValues?: Record<string, unknown>;
-  /** Optional actions shown on the review screen, not above every form step. */
   header?: React.ReactNode;
   documentEyebrow: string;
   onComplete: () => void;
   completeLabel: string;
+}
+
+const MAX_FIELDS_PER_STEP = 4;
+
+interface WizardStep {
+  key: string;
+  section: DocumentDef["sections"][number];
+  fields: FieldDef[];
+  quotedFields: FieldDef[];
+}
+
+function buildSteps(document: DocumentDef, fields: FieldDef[], quotedFields: FieldDef[]): WizardStep[] {
+  const steps: WizardStep[] = [];
+
+  for (const section of document.sections) {
+    const sectionFields = fields.filter((field) => field.askedIn === section.id);
+    const sectionQuoted = quotedFields.filter((field) => field.rendersIn.includes(section.id));
+    if (sectionFields.length === 0 && sectionQuoted.length === 0) continue;
+
+    // Keep repeatable groups together, but split ordinary fields into short,
+    // comfortable screens. The approved Vector prototype is deliberately a
+    // "few questions, then Next" flow rather than one registry section per
+    // long page.
+    const units: FieldDef[][] = [];
+    const handledGroups = new Set<string>();
+    for (const field of sectionFields) {
+      if (!field.group) {
+        units.push([field]);
+        continue;
+      }
+      if (handledGroups.has(field.group)) continue;
+      handledGroups.add(field.group);
+      units.push(sectionFields.filter((candidate) => candidate.group === field.group));
+    }
+
+    let chunk: FieldDef[] = [];
+    let part = 1;
+    function flush() {
+      if (chunk.length === 0 && !(part === 1 && sectionQuoted.length > 0)) return;
+      steps.push({
+        key: `${section.id}-${part}`,
+        section,
+        fields: chunk,
+        quotedFields: part === 1 ? sectionQuoted : [],
+      });
+      chunk = [];
+      part += 1;
+    }
+
+    for (const unit of units) {
+      if (chunk.length > 0 && chunk.length + unit.length > MAX_FIELDS_PER_STEP) flush();
+      chunk.push(...unit);
+      if (chunk.length >= MAX_FIELDS_PER_STEP) flush();
+    }
+    flush();
+  }
+
+  return steps;
 }
 
 export function FormWizard({
@@ -36,27 +93,24 @@ export function FormWizard({
   onComplete,
   completeLabel,
 }: FormWizardProps) {
-  const steps = document.sections.filter(
-    (section) =>
-      fields.some((f) => f.askedIn === section.id) || quotedFields.some((f) => f.rendersIn.includes(section.id)),
-  );
+  const steps = useMemo(() => buildSteps(document, fields, quotedFields), [document, fields, quotedFields]);
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<"form" | "review">("form");
   const [missingFields, setMissingFields] = useState<string[]>([]);
 
   const required = requiredFieldIds(visibilityRules, values.scalar, alwaysRequiredFieldIds);
-  const maybeCurrentSection = steps[stepIndex];
-  if (!maybeCurrentSection) return null;
-  const currentSection = maybeCurrentSection;
+  const maybeCurrentStep = steps[stepIndex];
+  if (!maybeCurrentStep) return null;
+  const currentStep = maybeCurrentStep;
 
-  function fieldsMissingIn(sectionId: string): string[] {
-    return fields
-      .filter((f) => f.askedIn === sectionId && required.has(f.id) && isFieldVisible(f.id, visibilityRules, values.scalar))
-      .filter((f) => {
-        const v = values.scalar[f.id];
-        return v === undefined || v === null || v === "";
+  function fieldsMissingInStep(step: WizardStep): string[] {
+    return step.fields
+      .filter((field) => required.has(field.id) && isFieldVisible(field.id, visibilityRules, values.scalar))
+      .filter((field) => {
+        const value = values.scalar[field.id];
+        return value === undefined || value === null || value === "";
       })
-      .map((f) => f.label);
+      .map((field) => field.label);
   }
 
   function goToStep(index: number) {
@@ -66,17 +120,14 @@ export function FormWizard({
   }
 
   function handleNext() {
-    const missing = fieldsMissingIn(currentSection.id);
+    const missing = fieldsMissingInStep(currentStep);
     if (missing.length > 0) {
       setMissingFields(missing);
       return;
     }
     setMissingFields([]);
-    if (stepIndex < steps.length - 1) {
-      setStepIndex(stepIndex + 1);
-    } else {
-      setPhase("review");
-    }
+    if (stepIndex < steps.length - 1) setStepIndex(stepIndex + 1);
+    else setPhase("review");
   }
 
   function handleBack() {
@@ -90,25 +141,24 @@ export function FormWizard({
         <p className="vector-review-intro">Review your answers before finishing. Use Change to edit a section.</p>
 
         <div className="vector-review-list">
-          {steps.map((section, index) => {
+          {document.sections.map((section) => {
             const sectionFields = fields.filter(
-              (f) => f.askedIn === section.id && isFieldVisible(f.id, visibilityRules, values.scalar),
+              (field) => field.askedIn === section.id && isFieldVisible(field.id, visibilityRules, values.scalar),
             );
             if (sectionFields.length === 0) return null;
+            const firstStepIndex = Math.max(0, steps.findIndex((step) => step.section.id === section.id));
             return (
               <section key={section.id} className="vector-review-section">
                 <div className="vector-review-section-header">
                   <h2 className="vector-review-section-title">{section.title}</h2>
-                  <button type="button" className="vector-review-change" onClick={() => goToStep(index)}>
+                  <button type="button" className="vector-review-change" onClick={() => goToStep(firstStepIndex)}>
                     Change
                   </button>
                 </div>
                 {sectionFields.map((field) => (
                   <div key={field.id} className="vector-review-row">
                     <span className="vector-review-label">{field.label}</span>
-                    <span className="vector-review-value">
-                      {formatReadOnlyValue(field, values.scalar[field.id])}
-                    </span>
+                    <span className="vector-review-value">{formatReadOnlyValue(field, values.scalar[field.id])}</span>
                   </div>
                 ))}
               </section>
@@ -133,21 +183,15 @@ export function FormWizard({
   return (
     <div className="vector-form-wizard">
       <div className="wizard-eyebrow-row">
-        <div className="wizard-eyebrow">
-          {documentEyebrow} · {currentSection.id}
-        </div>
-        <div className="wizard-step-label">
-          Step {stepIndex + 1} of {steps.length}
-        </div>
+        <div className="wizard-eyebrow">{documentEyebrow} · {currentStep.section.id}</div>
+        <div className="wizard-step-label">Step {stepIndex + 1} of {steps.length}</div>
       </div>
 
       <div className="vector-progress" aria-hidden="true">
-        {steps.map((section, index) => (
+        {steps.map((step, index) => (
           <span
-            key={section.id}
-            className={`vector-progress-segment${index < stepIndex ? " is-complete" : ""}${
-              index === stepIndex ? " is-current" : ""
-            }`}
+            key={step.key}
+            className={`vector-progress-segment${index < stepIndex ? " is-complete" : ""}${index === stepIndex ? " is-current" : ""}`}
           />
         ))}
       </div>
@@ -159,22 +203,20 @@ export function FormWizard({
       )}
 
       <FormRenderer
-        document={{ ...document, sections: [currentSection] }}
-        fields={fields}
+        document={{ ...document, sections: [currentStep.section] }}
+        fields={currentStep.fields}
         values={values}
         onChange={onChange}
         visibilityRules={visibilityRules}
         alwaysRequiredFieldIds={alwaysRequiredFieldIds}
         newRowId={newRowId}
-        quotedFields={quotedFields}
+        quotedFields={currentStep.quotedFields}
         quotedValues={quotedValues}
       />
 
       <div className="wizard-actions no-print">
         {stepIndex > 0 ? (
-          <button type="button" className="wizard-back" onClick={handleBack}>
-            Back
-          </button>
+          <button type="button" className="wizard-back" onClick={handleBack}>Back</button>
         ) : null}
         <button type="button" className="primary wizard-next" onClick={handleNext}>
           {stepIndex < steps.length - 1 ? "Next" : "Review"}
