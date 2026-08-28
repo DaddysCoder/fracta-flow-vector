@@ -12,6 +12,7 @@ import {
   type PaidFeature,
   type VectorEntitlements,
 } from "./entitlements.js";
+import { UpgradeModal } from "./UpgradeModal.js";
 
 export interface VectorCommercialState {
   entitlements: VectorEntitlements;
@@ -43,30 +44,12 @@ export interface VectorCommercialProviderProps extends Partial<VectorCommercialS
 
 type BillingAttempt =
   | { status: "idle" }
-  | { status: "choosing"; feature: PaidFeature }
+  | { status: "choosing"; feature: PaidFeature; purchase: VectorPurchase }
   | { status: "opening"; feature: PaidFeature; purchase: VectorPurchase }
   | { status: "error"; feature: PaidFeature; purchase: VectorPurchase; code: string };
 
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-function checkoutErrorMessage(code: string) {
-  if (code === "billing_not_configured") {
-    return "Checkout is temporarily unavailable. Please try again shortly.";
-  }
-  return "We couldn’t open secure checkout. Please try again.";
-}
-
-function purchaseLabel(purchase: VectorPurchase) {
-  switch (purchase) {
-    case "single_document":
-      return "A$5 · One document";
-    case "monthly":
-      return "A$19 · Monthly";
-    case "yearly":
-      return "A$180 · Yearly";
-  }
 }
 
 export function VectorCommercialProvider({
@@ -86,7 +69,13 @@ export function VectorCommercialProvider({
       requestUpgradeOverride(feature);
       return;
     }
-    setBillingAttempt({ status: "choosing", feature });
+    setBillingAttempt({ status: "choosing", feature, purchase: "monthly" });
+  }
+
+  function selectPurchase(purchase: VectorPurchase) {
+    setBillingAttempt((current) =>
+      current.status === "choosing" ? { ...current, purchase } : current,
+    );
   }
 
   function openCheckout(feature: PaidFeature, purchase: VectorPurchase) {
@@ -197,84 +186,21 @@ export function VectorCommercialProvider({
     };
   }, [resolvedEntitlements.companyBranding]);
 
-  const activeFeature = billingAttempt.status === "idle" ? null : billingAttempt.feature;
-
   return (
     <VectorCommercialContext.Provider
       value={{ entitlements: resolvedEntitlements, exportBrand, requestUpgrade }}
     >
       {children}
       {!requestUpgradeOverride && billingAttempt.status !== "idle" ? (
-        <div
-          className="no-print"
-          role={billingAttempt.status === "error" ? "alert" : "dialog"}
-          aria-live={billingAttempt.status === "error" ? "assertive" : "polite"}
-          aria-atomic="true"
-          style={{
-            position: "fixed",
-            left: "50%",
-            bottom: "1rem",
-            zIndex: 1000,
-            width: "min(440px, calc(100vw - 2rem))",
-            transform: "translateX(-50%)",
-            padding: "1rem",
-            border: "1px solid var(--border, #d8d8d8)",
-            borderRadius: "14px",
-            background: "var(--surface, #fff)",
-            boxShadow: "0 12px 36px rgba(0, 0, 0, 0.14)",
-          }}
-        >
-          {billingAttempt.status === "choosing" ? (
-            <>
-              <strong style={{ display: "block", marginBottom: "0.35rem" }}>
-                Choose your Vector access
-              </strong>
-              <div style={{ fontSize: "0.92rem", marginBottom: "0.8rem" }}>
-                {activeFeature === "export"
-                  ? "Pay once for this document, or unlock the full paid workspace."
-                  : "Unlock the full Vector paid workspace."}
-              </div>
-              <div style={{ display: "grid", gap: "0.5rem" }}>
-                {activeFeature === "export" ? (
-                  <button
-                    type="button"
-                    onClick={() => openCheckout(activeFeature, "single_document")}
-                  >
-                    A$5 · One document
-                  </button>
-                ) : null}
-                <button type="button" onClick={() => openCheckout(activeFeature!, "monthly")}>
-                  A$19 · Monthly
-                </button>
-                <button type="button" onClick={() => openCheckout(activeFeature!, "yearly")}>
-                  A$180 · Yearly
-                </button>
-                <button type="button" onClick={() => setBillingAttempt({ status: "idle" })}>
-                  Keep using Vector Free
-                </button>
-              </div>
-            </>
-          ) : billingAttempt.status === "opening" ? (
-            <strong>Opening secure checkout for {purchaseLabel(billingAttempt.purchase)}…</strong>
-          ) : (
-            <>
-              <strong style={{ display: "block" }}>
-                {checkoutErrorMessage(billingAttempt.code)}
-              </strong>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                <button
-                  type="button"
-                  onClick={() => openCheckout(billingAttempt.feature, billingAttempt.purchase)}
-                >
-                  Try again
-                </button>
-                <button type="button" onClick={() => setBillingAttempt({ status: "idle" })}>
-                  Dismiss
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <UpgradeModal
+          feature={billingAttempt.feature}
+          purchase={billingAttempt.purchase}
+          status={billingAttempt.status}
+          errorCode={billingAttempt.status === "error" ? billingAttempt.code : undefined}
+          onSelectPurchase={selectPurchase}
+          onConfirm={() => openCheckout(billingAttempt.feature, billingAttempt.purchase)}
+          onClose={() => setBillingAttempt({ status: "idle" })}
+        />
       ) : null}
     </VectorCommercialContext.Provider>
   );
