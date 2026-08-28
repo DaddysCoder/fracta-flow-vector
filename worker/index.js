@@ -1,3 +1,4 @@
+import { brandLogoObjectKey, validateLogoUpload } from "./brandLogo.mjs";
 import { entitlementsForSubscription, isVectorPaidSubscription } from "./entitlements.mjs";
 
 function json(body, init = {}) {
@@ -510,18 +511,74 @@ function brandRowToProfile(row) {
     contactLine: row.contact_line,
     footerText: row.footer_text,
     headingFont: row.heading_font,
+    hasLogo: !!row.logo_r2_key,
   };
 }
 
 async function getBrandProfile(env, accountId) {
   const row = await env.DB.prepare(
-    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text, heading_font
+    `SELECT organisation_name, accent_hex, ink_hex, paper_hex, contact_line, footer_text, heading_font, logo_r2_key
        FROM brand_profiles
       WHERE account_id = ?1`,
   )
     .bind(accountId)
     .first();
   return brandRowToProfile(row);
+}
+
+async function getBrandLogoObjectKey(env, accountId) {
+  const row = await env.DB.prepare(`SELECT logo_r2_key FROM brand_profiles WHERE account_id = ?1`)
+    .bind(accountId)
+    .first();
+  return row?.logo_r2_key ?? null;
+}
+
+async function saveBrandLogoObjectKey(env, accountId, objectKey) {
+  await env.DB.prepare(
+    `INSERT INTO brand_profiles (account_id, organisation_name, logo_r2_key, created_at, updated_at)
+       VALUES (?1, '', ?2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       ON CONFLICT(account_id) DO UPDATE SET
+         logo_r2_key = excluded.logo_r2_key,
+         updated_at = CURRENT_TIMESTAMP`,
+  )
+    .bind(accountId, objectKey)
+    .run();
+}
+
+async function handleBrandLogo(request, env) {
+  const auth = await requireVectorPaidAccount(request, env);
+  if (auth.response) return auth.response;
+
+  if (!env.VECTOR_LOGOS) {
+    return json({ error: "logo_storage_not_configured", missing: ["VECTOR_LOGOS"] }, { status: 503 });
+  }
+
+  if (request.method === "GET") {
+    const objectKey = await getBrandLogoObjectKey(env, auth.accountId);
+    if (!objectKey) return json({ error: "logo_not_found" }, { status: 404 });
+    const object = await env.VECTOR_LOGOS.get(objectKey);
+    if (!object) return json({ error: "logo_not_found" }, { status: 404 });
+    return new Response(object.body, {
+      headers: {
+        "content-type": object.httpMetadata?.contentType ?? "application/octet-stream",
+        "cache-control": "private, max-age=300",
+      },
+    });
+  }
+
+  if (request.method === "PUT") {
+    const contentType = (request.headers.get("content-type") || "").split(";")[0].trim();
+    const body = await request.arrayBuffer();
+    const validation = validateLogoUpload(contentType, body.byteLength);
+    if (!validation.ok) return json({ error: validation.error }, { status: validation.error === "logo_too_large" ? 413 : 400 });
+
+    const objectKey = brandLogoObjectKey(auth.accountId);
+    await env.VECTOR_LOGOS.put(objectKey, body, { httpMetadata: { contentType } });
+    await saveBrandLogoObjectKey(env, auth.accountId, objectKey);
+    return json({ ok: true });
+  }
+
+  return json({ error: "method_not_allowed" }, { status: 405 });
 }
 
 async function saveBrandProfile(env, accountId, body) {
@@ -649,6 +706,10 @@ export default {
 
       if (url.pathname === "/api/brand-profile") {
         return await handleBrandProfile(request, env);
+      }
+
+      if (url.pathname === "/api/brand-profile/logo") {
+        return await handleBrandLogo(request, env);
       }
 
       if (url.pathname.startsWith("/api/")) {

@@ -27,5 +27,11 @@
       "database_name": "vector-commercial",
       "database_id": "21b19052-3c3c-41d4-a80e-c669d81f231a"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "VECTOR_LOGOS",
+      "bucket_name": "vector-organisation-logos"
+    }
   ]
 }
