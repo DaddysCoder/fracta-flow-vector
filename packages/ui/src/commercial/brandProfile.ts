@@ -1,4 +1,4 @@
-import { providerBrand, VECTOR_BRAND, type Brand, type BrandLogo } from "@pbs/export";
+import { providerBrand, VECTOR_BRAND, type Brand, type BrandLogo } from "@pbs/export/brand";
 import { fetchVectorBrandLogo, fetchVectorBrandProfile } from "./billing.js";
 import { entitlementsForPlan, FREE_ENTITLEMENTS, type VectorEntitlements } from "./entitlements.js";
 
