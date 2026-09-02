@@ -1,4 +1,4 @@
-import { VECTOR_BRAND, type Brand } from "@pbs/export";
+import { VECTOR_BRAND, type Brand } from "@pbs/export/brand";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { DEFAULT_HEADING_FONT, resolveExportBrand } from "./brandProfile.js";
 import {
