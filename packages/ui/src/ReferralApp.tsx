@@ -37,6 +37,10 @@ function PageFallback() {
   return (
     <main className="vector-page">
       <div id="top" />
+      <div className="vector-page-loading" role="status" aria-live="polite">
+        <span className="vector-spinner" aria-hidden="true" />
+        <span>Loading…</span>
+      </div>
     </main>
   );
 }
