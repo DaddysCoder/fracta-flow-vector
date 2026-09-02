@@ -97,6 +97,52 @@ button.card:hover {
   border-color: var(--border-input);
 }
 
+/* Suspense fallback shown while a route chunk downloads — a lightweight
+ * centred spinner so slow connections don't see a blank page. */
+.vector-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 40vh;
+  padding: 3rem 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.vector-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-hairline);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: vector-spin 0.8s linear infinite;
+}
+
+.vector-spinner-inline {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: currentColor;
+  border-top-color: transparent;
+  opacity: 0.7;
+  margin-right: 0.5rem;
+  vertical-align: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vector-spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+@keyframes vector-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Header tab nav — pill buttons, matches the design handoff's navItems. */
 .pill-nav {
   display: flex;
