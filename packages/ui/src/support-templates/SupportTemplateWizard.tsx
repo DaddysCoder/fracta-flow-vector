@@ -6,6 +6,7 @@ import { RRP_FIELD_DEFS, RRP_TYPES } from "./constants.js";
 import { buildInitialStateFromInterim, DIFF_FIELD_DEFS } from "./configs.js";
 import { renderSupportTemplateBlankDocx, renderSupportTemplateDocx } from "./docxExport.js";
 import { buildTemplateContext } from "./prefill.js";
+import { ProfessionalToolDisclaimer } from "../ProfessionalToolDisclaimer.js";
 import { saveTemplateState, STORAGE_DISCLOSURE } from "./storage.js";
 import "./supportTemplates.css";
 import {
@@ -207,6 +208,7 @@ export function SupportTemplateWizard({ config, backHref = "/support-templates" 
         <p className="support-template-note">Saved to your device. Nothing here is stored on Vector&apos;s servers.</p>
         {config.completionNote ? <p className="support-template-note">{config.completionNote}</p> : null}
         <p className="field-note">{STORAGE_DISCLOSURE}</p>
+        <ProfessionalToolDisclaimer />
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "1rem" }}>
           <button
             type="button"
@@ -265,6 +267,7 @@ export function SupportTemplateWizard({ config, backHref = "/support-templates" 
       <h1 className="support-template-step-title">{step.title}</h1>
       {step.note ? <p className="support-template-note">{step.note}</p> : null}
       <p className="field-note no-print">{STORAGE_DISCLOSURE}</p>
+      <ProfessionalToolDisclaimer />
 
       {(step.text ?? []).map((field) => (
         <div key={field.key} className="support-template-field">

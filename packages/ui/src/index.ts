@@ -37,3 +37,4 @@ export { BSA_ALWAYS_REQUIRED_FIELD_IDS, BSA_DOCUMENT_ID, BSA_VISIBILITY_RULES } 
 export { BsaForm } from "./BsaForm.js";
 export type { BsaResult } from "./BsaForm.js";
 export { toFieldSchema, toPathwayPermissions, toTargetDocument, ALL_FIELD_SCHEMAS } from "./registryAdapter.js";
+export { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";

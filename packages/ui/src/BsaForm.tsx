@@ -12,6 +12,7 @@ import { registry, type DocumentDef } from "@pbs/registry";
 import { useMemo, useState } from "react";
 import { BSA_ALWAYS_REQUIRED_FIELD_IDS, BSA_DOCUMENT_ID, BSA_VISIBILITY_RULES } from "./bsa.js";
 import { flattenValuesForExport, FormRenderer, type FormValues } from "./FormRenderer.js";
+import { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";
 import { toTargetDocument } from "./registryAdapter.js";
 import { requiredFieldIds } from "./visibility.js";
 
@@ -227,6 +228,8 @@ export function BsaForm({ priorFields, pathway, onSubmitted, now = () => new Dat
         quotedFields={BSA_QUOTED_FIELDS}
         quotedValues={quotedValues}
       />
+
+      <ProfessionalToolDisclaimer />
 
       <button type="submit" className="primary no-print">
         Submit BSA/FBA

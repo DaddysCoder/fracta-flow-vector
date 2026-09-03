@@ -7,6 +7,7 @@ import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { CardSectionsForm, flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { PrintLetterhead } from "./print/PrintLetterhead.js";
+import { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";
 import { PROGRESS_REPORT_ALWAYS_REQUIRED_FIELD_IDS, PROGRESS_REPORT_DOCUMENT_ID, PROGRESS_REPORT_VISIBILITY_RULES } from "./progressReport.js";
 import { requiredFieldIds } from "./visibility.js";
 
@@ -156,6 +157,8 @@ export function ProgressReportForm({ priorFields = [], onSubmitted, now = () => 
         alwaysRequiredFieldIds={PROGRESS_REPORT_ALWAYS_REQUIRED_FIELD_IDS}
         newRowId={newRowId}
       />
+
+      <ProfessionalToolDisclaimer />
 
       <button type="submit" className="primary no-print" style={{ marginTop: "0.5rem" }}>
         Complete progress report

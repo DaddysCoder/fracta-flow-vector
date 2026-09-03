@@ -7,6 +7,7 @@ import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { CardSectionsForm, flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { PrintLetterhead } from "./print/PrintLetterhead.js";
+import { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";
 import { toTargetDocument } from "./registryAdapter.js";
 import { SUPPORT_LETTER_ALWAYS_REQUIRED_FIELD_IDS, SUPPORT_LETTER_DOCUMENT_ID, SUPPORT_LETTER_VISIBILITY_RULES } from "./supportLetter.js";
 import { computeQuoteTotals, formatAud, SUPPORT_LETTER_LINE_ITEMS } from "./support-letter/quote.js";
@@ -237,6 +238,8 @@ export function SupportLetterForm({ priorFields = [], onSubmitted, now = () => n
         </p>
         <QuoteSummary values={values} />
       </div>
+
+      <ProfessionalToolDisclaimer />
 
       <button type="submit" className="primary no-print" style={{ marginTop: "0.5rem" }}>
         Complete support letter

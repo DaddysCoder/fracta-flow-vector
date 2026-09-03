@@ -7,6 +7,7 @@ import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { FormWizard } from "./FormWizard.js";
 import { saveReferralHandoff } from "./localReferralHandoff.js";
+import { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";
 import {
   REFERRAL_ALWAYS_REQUIRED_FIELD_IDS,
   REFERRAL_DOCUMENT_ID,
@@ -119,6 +120,7 @@ export function ReferralForm({ onSubmitted, now = () => new Date() }: ReferralFo
       alwaysRequiredFieldIds={REFERRAL_ALWAYS_REQUIRED_FIELD_IDS}
       newRowId={newRowId}
       documentEyebrow={`Document ${REFERRAL_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
+      header={<ProfessionalToolDisclaimer />}
       onComplete={handleSubmit}
       completeLabel="Send referral"
     />
