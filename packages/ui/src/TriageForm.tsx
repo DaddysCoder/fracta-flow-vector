@@ -12,6 +12,7 @@ import { ExportControls } from "./commercial/ExportControls.js";
 import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { FormWizard } from "./FormWizard.js";
+import { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";
 import { toPathwayPermissions } from "./registryAdapter.js";
 import { TRIAGE_ALWAYS_REQUIRED_FIELD_IDS, TRIAGE_DOCUMENT_ID, TRIAGE_VISIBILITY_RULES } from "./triage.js";
 
@@ -142,6 +143,7 @@ export function TriageForm({ task = EMPTY_TRIAGE_TASK, onSubmitted, now = () => 
       alwaysRequiredFieldIds={TRIAGE_ALWAYS_REQUIRED_FIELD_IDS}
       newRowId={newRowId}
       documentEyebrow={`Document ${TRIAGE_DOCUMENT_ID} · ${entitlements.plan === "paid" ? "Paid" : "Free"}`}
+      header={<ProfessionalToolDisclaimer />}
       onComplete={handleSubmit}
       completeLabel="Complete triage"
     />

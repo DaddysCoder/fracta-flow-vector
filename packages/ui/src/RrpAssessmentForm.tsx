@@ -7,6 +7,7 @@ import { useVectorCommercial } from "./commercial/CommercialContext.js";
 import { ExportControls } from "./commercial/ExportControls.js";
 import { CardSectionsForm, flattenValuesForExport, type FormValues } from "./FormRenderer.js";
 import { PrintLetterhead } from "./print/PrintLetterhead.js";
+import { ProfessionalToolDisclaimer } from "./ProfessionalToolDisclaimer.js";
 import { RRP_ASSESSMENT_ALWAYS_REQUIRED_FIELD_IDS, RRP_ASSESSMENT_DOCUMENT_ID, RRP_ASSESSMENT_VISIBILITY_RULES } from "./rrpAssessment.js";
 import { requiredFieldIds } from "./visibility.js";
 
@@ -157,6 +158,8 @@ export function RrpAssessmentForm({ priorFields = [], onSubmitted, now = () => n
         alwaysRequiredFieldIds={RRP_ASSESSMENT_ALWAYS_REQUIRED_FIELD_IDS}
         newRowId={newRowId}
       />
+
+      <ProfessionalToolDisclaimer />
 
       <button type="submit" className="primary no-print" style={{ marginTop: "0.5rem" }}>
         Complete assessment
