@@ -1,0 +1,95 @@
+name: WHATBIT Product Health
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '29 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: product-health-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PRODUCT_URL: https://vector.whatbit.dev
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm run typecheck
+      - name: Test
+        run: pnpm run test
+      - name: Build
+        run: pnpm run build
+      - name: Audit production dependencies for critical vulnerabilities
+        run: pnpm audit --prod --audit-level=critical
+
+  live:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify production is reachable
+        run: |
+          STATUS=$(curl -L --connect-timeout 5 --max-time 20 -sS -o /tmp/product.html -w '%{http_code}' "$PRODUCT_URL")
+          echo "HTTP $STATUS from $PRODUCT_URL"
+          test "$STATUS" -ge 200
+          test "$STATUS" -lt 400
+          test -s /tmp/product.html
+      - name: Weekly Lighthouse snapshot
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          npx --yes lighthouse@12 "$PRODUCT_URL" --quiet --chrome-flags='--headless --no-sandbox' --output=json --output-path=/tmp/lighthouse.json
+          node <<'NODE'
+          const fs = require('fs')
+          const r = JSON.parse(fs.readFileSync('/tmp/lighthouse.json', 'utf8'))
+          const c = r.categories || {}
+          const score = (k) => Math.round((c[k]?.score ?? 0) * 100)
+          const line = `Performance ${score('performance')} · Accessibility ${score('accessibility')} · Best Practices ${score('best-practices')} · SEO ${score('seo')}`
+          console.log(line)
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Vector Lighthouse\n${line}\n`)
+          NODE
+
+  report:
+    needs: [quality, live]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName === 'pull_request') return
+            const title = '[Product Health] Vector automated checks'
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            const issues = await github.paginate(github.rest.issues.listForRepo, { ...context.repo, state: 'open', per_page: 100 })
+            const existing = issues.find(i => !i.pull_request && i.title === title)
+            const bad = (r) => !['success', 'skipped'].includes(r)
+            const failed = bad('${{ needs.quality.result }}') || bad('${{ needs.live.result }}')
+            if (failed) {
+              const body = `Automated product-health checks failed.\n\nRun: ${runUrl}\n\nThis issue is reused to avoid alert spam.`
+              if (existing) await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body })
+              else await github.rest.issues.create({ ...context.repo, title, body })
+            } else if (existing) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body: `Recovered: checks are green.\n\nRun: ${runUrl}` })
+              await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'closed', state_reason: 'completed' })
+            }
