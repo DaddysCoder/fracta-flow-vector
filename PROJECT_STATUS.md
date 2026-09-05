@@ -5,21 +5,27 @@ retired — this repo tracks build status by **Document 01–09** only, matching
 `packages/registry/src/documents.json`. For architecture/design rationale, see
 `ONBOARDING.md`; for open questions, see `CONTRADICTIONS.md`.
 
-_Last updated: 2026-08-18._
+_Last updated: 2026-09-06. Prior versions of this table (dated 2026-08-18) predated
+documents 10–12 and were stale — the registry and public routes had already moved
+past it. Don't treat an old copy of this file as current; check the dates._
 
 ## Document status
 
 | Doc | Title | Status |
 |---|---|---|
-| 01 | Referral | **Built** — reference implementation, signed off |
-| 02 | Practitioner Triage | **Built** — standalone-mode fixed (was hardcoded connected) |
-| 03 | Source & Consultation Register | **Built** — standalone-mode fixed (was hardcoded connected) |
-| 04 | Combined BSA/FBA | Defined in registry only — **not built**. See "Vector/Frame boundary" below before building this one. |
+| 01 | Referral | **Built** — public, free (`/referral`) |
+| 02 | Practitioner Triage | **Built** — public, free (`/practitioner-triage`) |
+| 03 | Source & Consultation Register | **Built** — public, free (`/source-consultation-register`) |
+| 04 | Combined BSA/FBA | **Component built** (`BsaForm.tsx`), not wired into the app's routing and no tests yet. See "Vector/Frame boundary" below — the registry entry was reframed as a review of Frame's assessment this pass, but the deeper handoff-contract question is still open. |
 | 05 | Behaviour Data Capture | Defined in registry only — not built |
 | 06 | Strategy Instance Worksheet | Defined in registry only — not built |
 | 07 | No-RP BSP | Defined in registry only — not built |
 | 08 | Interim RRP BSP | Defined in registry only — not built |
-| 09 | (final BSP variant) | Defined in registry only — not built |
+| 09 | Comprehensive RRP BSP | Defined in registry only — not built |
+| 10 | RRP Assessment | **Built** — in Support Templates hub (paid), not on the public free routes |
+| 11 | Support Letter | **Built** — in Support Templates hub (paid), not on the public free routes |
+| 12 | Progress Report | **Built** — in Support Templates hub (paid), not on the public free routes |
+| 13 | BSP Review / Change Addendum | **Built** (2026-09-06) — in Support Templates hub (paid), not on the public free routes. First of the practitioner-priority document batch (review/addendum before implementation/fidelity training record) — see the WHATBIT product evaluation, 6 Sep 2026. |
 
 ## Vector/Frame boundary — do not build a second FBA engine
 
@@ -27,13 +33,19 @@ _Last updated: 2026-08-18._
 and FBA analysis. Vector must not duplicate that inside Document 04. Document 04's
 job in Vector is to **receive and review Frame's FBA outcome**, not re-author it.
 
-The registry's current Document 04 entry (`packages/registry/src/documents.json`,
-sections `04.4`–`04.9`) still reads as a full from-scratch behaviour-assessment
-workflow, which conflicts with this boundary. Nothing has been built against it yet,
-so there is no code to unwind — but do not build Document 04 as currently specified
-without first resolving how it should model "review of Frame's handoff" instead.
-See `CONTRADICTIONS.md` #6 for the full note; it is intentionally left open pending
-an explicit decision on the Vector/Frame handoff contract.
+**2026-09-06 update:** the registry's Document 04 entry (`packages/registry/src/documents.json`)
+has been reframed at the copy level — section titles for `04.4`–`04.8` and the
+document's own `note` field now read as "recording Frame's assessment output," not
+"conducting a from-scratch assessment inside Vector," and `BsaForm`'s submission
+copy matches. This is a judgement call made without Pol's sign-off (flagged here
+per the standing "needs an explicit answer, not a guess" note), scoped deliberately
+narrow: no `fields.json` relationship (`askedIn`/`rendersIn`/`informs`), gating, or
+export-template changes were made, since those touch the same fields relied on by
+documents 06–09 and are the real "what does Frame hand off, in what shape, which
+fields become read-only vs. disappear" design decision — still open. See
+`CONTRADICTIONS.md` #6 for the full history; treat the schema/integration question
+as unresolved until Pol confirms the copy-level reframing or specifies the deeper
+handoff shape.
 
 ## Reconciliation note (2026-08-18)
 

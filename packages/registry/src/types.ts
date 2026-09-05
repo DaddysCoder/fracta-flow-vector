@@ -36,4 +36,6 @@ export interface DocumentDef {
   st: string;
   pathways: Pathway[];
   sections: SectionDef[];
+  /** Practitioner-facing framing note for the whole document, e.g. a boundary with another product. */
+  note?: string;
 }

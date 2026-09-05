@@ -14,6 +14,9 @@ import { getTemplateConfig } from "./support-templates/configs.js";
 const BrandProfilePanel = lazy(() =>
   import("./commercial/BrandProfilePanel.js").then((m) => ({ default: m.BrandProfilePanel })),
 );
+const BspReviewAddendumForm = lazy(() =>
+  import("./BspReviewAddendumForm.js").then((m) => ({ default: m.BspReviewAddendumForm })),
+);
 const SupportTemplatesHubPage = lazy(() =>
   import("./commercial/SupportTemplatesHub.js").then((m) => ({ default: m.SupportTemplatesHubPage })),
 );
@@ -100,6 +103,7 @@ export function ReferralApp() {
               {activeView.documentId === "rrp-assessment" && <RrpAssessmentForm />}
               {activeView.documentId === "support-letter" && <SupportLetterForm />}
               {activeView.documentId === "progress-report" && <ProgressReportForm />}
+              {activeView.documentId === "bsp-review-addendum" && <BspReviewAddendumForm />}
             </div>
           </main>
         </Suspense>

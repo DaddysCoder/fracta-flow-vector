@@ -180,8 +180,10 @@ export function BsaForm({ priorFields, pathway, onSubmitted, now = () => new Dat
       <div role="status">
         <h1>Combined BSA/FBA submitted</h1>
         <p>
-          The functional analysis and conclusion recorded above are the practitioner's own
-          interpretation — nothing here was inferred or scored automatically.
+          The assessment findings recorded above are Frame's, entered here for review — this
+          document does not conduct its own behaviour assessment. The conclusion and sign-off
+          are the practitioner's own interpretation, entered by hand, not inferred or scored
+          automatically.
         </p>
       </div>
     );

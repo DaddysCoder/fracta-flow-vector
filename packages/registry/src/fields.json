@@ -2396,7 +2396,8 @@
       "interim",
       "comprehensive"
     ],
-    "phraseBank": true
+    "phraseBank": true,
+    "note": "Recorded from Frame's assessment where available."
   },
   {
     "id": "analysis.evidence_reconciliation",
@@ -2426,7 +2427,8 @@
       "interim",
       "comprehensive"
     ],
-    "phraseBank": true
+    "phraseBank": true,
+    "note": "Recorded from Frame's assessment where available."
   },
   {
     "id": "analysis.pattern_interpretation",
@@ -2456,7 +2458,8 @@
       "interim",
       "comprehensive"
     ],
-    "phraseBank": true
+    "phraseBank": true,
+    "note": "Recorded from Frame's assessment where available."
   },
   {
     "id": "analysis.formulation",
@@ -2489,7 +2492,8 @@
       "interim",
       "comprehensive"
     ],
-    "phraseBank": true
+    "phraseBank": true,
+    "note": "Recorded from Frame's assessment where available."
   },
   {
     "id": "analysis.maintaining_variables",
@@ -2522,7 +2526,8 @@
       "interim",
       "comprehensive"
     ],
-    "phraseBank": true
+    "phraseBank": true,
+    "note": "Recorded from Frame's assessment where available."
   },
   {
     "id": "analysis.function",
@@ -2555,7 +2560,8 @@
       "interim",
       "comprehensive"
     ],
-    "phraseBank": true
+    "phraseBank": true,
+    "note": "Recorded from Frame's assessment where available."
   },
   {
     "id": "analysis.conclusion",
@@ -6484,6 +6490,458 @@
     "informs": [],
     "transition": {
       "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "bspReview.plan_reference",
+    "label": "Plan being reviewed (title and version)",
+    "tier": 1,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "13.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "bspReview.review_date",
+    "label": "Review date",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "13.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "bspReview.reviewer_name",
+    "label": "Reviewing practitioner",
+    "tier": 0,
+    "clinical": false,
+    "type": "short_text",
+    "repeatable": false,
+    "askedIn": "13.1",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": false
+  },
+  {
+    "id": "bspReview.trigger",
+    "label": "Reason this review was triggered",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.2",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.implementation_findings",
+    "label": "Implementation findings since last version",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.fidelity_notes",
+    "label": "Fidelity and training observations",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.3",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.participant_feedback",
+    "label": "Participant feedback",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.support_network_feedback",
+    "label": "Support network / provider feedback",
+    "tier": 2,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.4",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.strategies_added",
+    "label": "Strategies added",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.strategies_updated",
+    "label": "Strategies updated",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.strategies_retired",
+    "label": "Strategies retired",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.5",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.rrp_status_update",
+    "label": "Restrictive practice status update",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.6",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true,
+    "note": "Also used to flag a restrictive practice newly introduced since the last version, including under a No-RP plan."
+  },
+  {
+    "id": "bspReview.goal_progress",
+    "label": "Goal progress since last version",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.7",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true
+  },
+  {
+    "id": "bspReview.declaration",
+    "label": "Practitioner declaration",
+    "tier": 3,
+    "clinical": true,
+    "type": "long_text",
+    "repeatable": false,
+    "askedIn": "13.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "new",
+      "allowed": [
+        "carry",
+        "confirm",
+        "update",
+        "revise",
+        "new",
+        "retire"
+      ]
+    },
+    "stalenessDays": null,
+    "requires": [],
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "phraseBank": true,
+    "note": "Practitioner's own sign-off on this review's findings and changes."
+  },
+  {
+    "id": "bspReview.next_review_date",
+    "label": "Next review due",
+    "tier": 1,
+    "clinical": false,
+    "type": "date",
+    "repeatable": false,
+    "askedIn": "13.8",
+    "rendersIn": [],
+    "informs": [],
+    "transition": {
+      "default": "carry",
       "allowed": [
         "carry",
         "confirm",

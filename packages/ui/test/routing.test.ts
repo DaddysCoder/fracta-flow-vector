@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isBlockedLegacyDocumentRoute,
+  pathForPaidDocument,
   pathForPublicForm,
   publicFormFromPath,
   PUBLIC_FORM_ROUTES,
@@ -42,5 +43,13 @@ describe("Vector public routes", () => {
     expect(pathForPublicForm("referral")).toBe(PUBLIC_FORM_ROUTES.referral);
     expect(pathForPublicForm("triage")).toBe(PUBLIC_FORM_ROUTES.triage);
     expect(pathForPublicForm("source")).toBe(PUBLIC_FORM_ROUTES.source);
+  });
+
+  it("maps the BSP Review / Change Addendum route (document 13)", () => {
+    expect(resolveAppView("/bsp-review-addendum")).toEqual({
+      kind: "paid-document",
+      documentId: "bsp-review-addendum",
+    });
+    expect(pathForPaidDocument("bsp-review-addendum")).toBe("/bsp-review-addendum");
   });
 });
