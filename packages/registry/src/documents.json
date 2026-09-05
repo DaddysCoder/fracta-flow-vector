@@ -112,6 +112,7 @@
       "interim",
       "comprehensive"
     ],
+    "note": "Frame owns behaviour assessment, formulation, ABC data and FBA analysis. Document 04 is Vector's record of Frame's assessment output for this participant, reviewed and signed off by the practitioner here — not a second assessment conducted inside Vector. Sections 04.4–04.8 are framed as recording what Frame's assessment found; no automatic Frame connection exists yet, so these are entered manually pending that integration. See PROJECT_STATUS.md ‘Vector/Frame boundary’.",
     "sections": [
       {
         "id": "04.1",
@@ -127,27 +128,27 @@
       },
       {
         "id": "04.4",
-        "title": "Behaviour objects"
+        "title": "Behaviour objects (from Frame's assessment)"
       },
       {
         "id": "04.5",
-        "title": "Observation scaffold"
+        "title": "Observation summary (from Frame's assessment)"
       },
       {
         "id": "04.6",
-        "title": "Evidence reconciliation"
+        "title": "Evidence reconciliation (as assessed in Frame)"
       },
       {
         "id": "04.7",
-        "title": "Pattern analysis"
+        "title": "Pattern interpretation (as assessed in Frame)"
       },
       {
         "id": "04.8",
-        "title": "Competing hypotheses and formulation"
+        "title": "Hypotheses and formulation (as assessed in Frame)"
       },
       {
         "id": "04.9",
-        "title": "Practitioner conclusion"
+        "title": "Practitioner conclusion and sign-off"
       },
       {
         "id": "04.10",
@@ -552,6 +553,50 @@
       {
         "id": "PR.9",
         "title": "Summary and sign-off"
+      }
+    ]
+  },
+  "13": {
+    "title": "BSP Review / Change Addendum",
+    "st": "ST-15",
+    "pathways": [
+      "no_rp",
+      "interim",
+      "comprehensive"
+    ],
+    "note": "Records a scheduled or triggered review of an existing behaviour support plan (No-RP, Interim or Comprehensive) — implementation findings, participant/support-network feedback, what's changing, and practitioner sign-off. It amends an existing plan; it does not replace documents 07-09.",
+    "sections": [
+      {
+        "id": "13.1",
+        "title": "Plan and review details"
+      },
+      {
+        "id": "13.2",
+        "title": "Reason for this review"
+      },
+      {
+        "id": "13.3",
+        "title": "Implementation findings since last version"
+      },
+      {
+        "id": "13.4",
+        "title": "Participant and support network feedback"
+      },
+      {
+        "id": "13.5",
+        "title": "Strategy changes"
+      },
+      {
+        "id": "13.6",
+        "title": "Restrictive practice status update"
+      },
+      {
+        "id": "13.7",
+        "title": "Goal progress"
+      },
+      {
+        "id": "13.8",
+        "title": "Practitioner declaration and next review"
       }
     ]
   }
