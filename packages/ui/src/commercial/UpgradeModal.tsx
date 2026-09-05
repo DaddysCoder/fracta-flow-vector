@@ -78,6 +78,17 @@ const UPGRADE_COPY: Record<PaidFeature, UpgradeCopy> = {
     ],
     oneOffAvailable: false,
   },
+  bsp_review_addendum: {
+    headline: "Unlock BSP Review / Change Addendum",
+    body: "Record a scheduled or triggered review of an existing plan — implementation findings, feedback, strategy changes and sign-off.",
+    features: [
+      "Full review addendum with strategy-change tracking",
+      "DOCX export and Print / save as PDF",
+      "Your heading font and brand colour applied automatically",
+      "Included with Support Templates and every other Paid document",
+    ],
+    oneOffAvailable: false,
+  },
 };
 
 interface BillingTierDef {

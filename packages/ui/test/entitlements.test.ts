@@ -20,6 +20,11 @@ describe("Vector commercial entitlements", () => {
     expect(canUseFeature(PAID_ENTITLEMENTS, "support_templates")).toBe(true);
   });
 
+  it("gates the BSP Review / Change Addendum (document 13) the same as the other net-new paid documents", () => {
+    expect(canUseFeature(FREE_ENTITLEMENTS, "bsp_review_addendum")).toBe(false);
+    expect(canUseFeature(PAID_ENTITLEMENTS, "bsp_review_addendum")).toBe(true);
+  });
+
   it("maps the one-tier launch model deterministically", () => {
     expect(entitlementsForPlan("free")).toBe(FREE_ENTITLEMENTS);
     expect(entitlementsForPlan("paid")).toBe(PAID_ENTITLEMENTS);

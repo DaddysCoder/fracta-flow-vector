@@ -5,10 +5,10 @@ export type SupportTemplateId =
   | "interim-behaviour-support-plan"
   | "comprehensive-behaviour-support-plan";
 
-/** Documents 10-12 — net-new, paid, standalone single-page documents. Not
+/** Documents 10-13 — net-new, paid, standalone single-page documents. Not
  * part of the Support Templates hub/wizard system (SupportTemplateId
  * above), which is a deliberately separate, non-registry build. */
-export type PaidDocumentId = "rrp-assessment" | "support-letter" | "progress-report";
+export type PaidDocumentId = "rrp-assessment" | "support-letter" | "progress-report" | "bsp-review-addendum";
 
 export type AppView =
   | { kind: "public"; form: PublicForm }
@@ -29,6 +29,7 @@ export const PAID_DOCUMENT_ROUTES = {
   "rrp-assessment": "/rrp-assessment",
   "support-letter": "/support-letter",
   "progress-report": "/progress-report",
+  "bsp-review-addendum": "/bsp-review-addendum",
 } as const satisfies Record<PaidDocumentId, string>;
 
 export const SUPPORT_TEMPLATE_ROUTES = {

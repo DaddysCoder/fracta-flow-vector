@@ -63,6 +63,13 @@ const PAID_DOCUMENTS: Array<{
     title: "Progress Report",
     description: "Summarises plan progress for an NDIS plan review.",
   },
+  {
+    id: "bsp-review-addendum",
+    feature: "bsp_review_addendum",
+    eyebrow: "BSP Review / Change Addendum",
+    title: "BSP Review / Change Addendum",
+    description: "Records a scheduled or triggered review of an existing plan — findings, feedback, strategy changes and sign-off.",
+  },
 ];
 
 const ARC_FONT_STACK =
